@@ -89,10 +89,14 @@ async function readHelper(binDir) {
 }
 
 /**
- * O estado inteiro, montado campo por campo. As pastas entram por parâmetro (`home`, `manifestDir`,
- * `binDir`) e o PATH por `env`, para o teste rodar num HOME falso sem tocar na instalação de verdade.
+ * O estado inteiro, montado campo por campo.
+ *
+ * As pastas entram por parâmetro, para o teste rodar num HOME falso sem tocar na instalação de
+ * verdade: `home`, `manifestDir`, `binDir`, e `env`, `fallbackDirs` e `modelDirs` com o mesmo nome
+ * e o mesmo papel que têm no `ctx` do motor (`createEngine`, host/transcricao.mjs). Sem parâmetro,
+ * tudo sai da descoberta do helper.
  */
-export async function collectState({ env = process.env, home = os.homedir(), manifestDir = defaultManifestDir(), binDir = defaultBinDir() } = {}) {
+export async function collectState({ env = process.env, home = os.homedir(), manifestDir = defaultManifestDir(), binDir = defaultBinDir(), fallbackDirs, modelDirs: dirsParam } = {}) {
   const cfg = await readConfig()
   const tr = cfg.transcricao
   const arquivoConfig = configPath()
@@ -109,7 +113,7 @@ export async function collectState({ env = process.env, home = os.homedir(), man
     temConfig: existsSync(arquivoConfig),
   }
 
-  const pastas = modelDirs({ home, configDir })
+  const pastas = dirsParam ?? modelDirs({ home, configDir })
   const modeloAchado = await findModel({ configured: tr.modelo, dirs: pastas, idioma: tr.idioma })
   const bytes = modeloAchado.path ? ((await statOrNull(modeloAchado.path))?.size ?? null) : null
   const modelo = {
@@ -123,7 +127,7 @@ export async function collectState({ env = process.env, home = os.homedir(), man
   }
 
   const programa = async (names, configured, label) => {
-    const r = await findExecutable(names, { configured, env, label })
+    const r = await findExecutable(names, { configured, env, fallbackDirs, label })
     return { caminho: r.path ?? null, configurado: Boolean(configured), motivo: r.motivo ?? null }
   }
   const whisperCli = await programa(['whisper-cli', 'whisper-cpp'], tr.whisperCli, 'whisper-cli')

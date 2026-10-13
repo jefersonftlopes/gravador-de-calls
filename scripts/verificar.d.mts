@@ -50,11 +50,16 @@ export interface VerifyState {
 }
 
 export declare function gbLabel(bytes: number): string
-/** As pastas entram por parâmetro: o teste roda num HOME falso sem tocar na instalação de verdade. */
+/**
+ * As pastas entram por parâmetro: o teste roda num HOME falso sem tocar na instalação de verdade.
+ * `env`, `fallbackDirs` e `modelDirs` têm o mesmo papel que no `ctx` do motor (createEngine).
+ */
 export declare function collectState(opts?: {
   env?: NodeJS.ProcessEnv
   home?: string
   manifestDir?: string
   binDir?: string
+  fallbackDirs?: string[]
+  modelDirs?: string[]
 }): Promise<VerifyState>
 export declare function lines(state: VerifyState): string[]
