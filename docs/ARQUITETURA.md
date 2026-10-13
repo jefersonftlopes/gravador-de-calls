@@ -1350,3 +1350,63 @@ Atualizados: `tests/e2e/transcricao-api.spec.ts` (o `ligarMotorPelaTela` passou 
 - O passo a passo do motor local não tem um botão que instale nada: quem instala é o Claude Code (ou a pessoa, no terminal).
 
 O contrato que nenhuma parte muda sozinha passa a incluir `EnginePanel`, `engineSituation` (os oito `kind`), `INSTALL_STEPS`/`installPrompt` como a fonte única do passo a passo, de `docs/PROMPT-INSTALAR.md` e da seção do site, `currentMessageLocale()` e as chaves `trSit*`, `trSetup*`, `step*` e `prompt*`.
+
+## Emenda 23: o estado real da instalação, em frases (13/10/2026, 0.5.2)
+
+Pedido do usuário (13/10/2026): quem vai instalar isso é a esposa dele. Ela instala a extensão pela Chrome Web Store, abre as opções, escolhe "O seu computador", abre o acordeão da Emenda 22, copia o prompt e cola numa sessão limpa do Claude Code dela. O Claude Code instala tudo e, **no fim, precisa dizer para ela, em palavras de quem não é técnico, o que ficou pronto e onde as gravações vão cair**.
+
+O que faltava: nenhum comando mostrava o estado real da instalação. O último passo do prompt era `npm run teste:transcricao-real`, que prova que transcreve, mas não diz a pasta das gravações nem onde cada peça foi achada. Sem isso, o Claude Code dela teria que adivinhar olhando arquivo por arquivo, e adivinhação é o que dá errado na mão de quem não é técnico.
+
+Esta emenda **acrescenta**. O helper não mudou: `HOST_VERSION` fica em **0.5.0** e ninguém precisa rodar `npm run instalar` de novo. Só entraram `scripts/` (o comando e os tipos dele), `src/shared/instalar-local.ts` (um passo a mais), as mensagens das duas línguas, uma frase no acordeão e os testes.
+
+### A. `npm run verificar` (`scripts/verificar.mjs`)
+
+Node puro, sem dependência, no estilo dos outros `scripts/*.mjs`. **Ele só lê**: nunca escreve, nunca instala, nunca baixa nada. Não toca no `config.json`, na pasta das gravações nem no manifesto do Chrome, e um teste prova que nada aparece num HOME falso depois de rodar duas vezes.
+
+A descoberta é a **mesma do helper**, reusada em vez de reimplementada: `readConfig` e `configPath` (de `host/gravador-host.mjs`), `findExecutable`, `findModel` e `modelDirs` (de `host/transcricao.mjs`), `defaultManifestDir`, `defaultBinDir`, `HOST_FILES`, `HOST_FILE` e `HOST_NAME` (de `host/args.mjs`). Se a descoberta mudar, o comando acompanha sozinho, em vez de dizer uma coisa e o helper outra.
+
+**O que ele imprime**, uma frase por peça:
+- se o manifesto de native messaging está instalado e para quais IDs de extensão (os ids saem do `allowed_origins`, sem o `chrome-extension://`);
+- se a cópia do helper existe (todos os `HOST_FILES`) e em que versão, lida do próprio arquivo copiado, e se ela bate com a do projeto; não batendo, diz para rodar `npm run instalar` de novo;
+- **a pasta das gravações que vale de verdade**, dizendo qual das duas é: a escolhida no `config.json`, ou a padrão (`~/Documents/Gravações de calls`). A origem é `padrao` quando `cfg.root` é o `DEFAULT_ROOT`, o que cobre os dois casos em que a pasta é a padrão (sem `config.json`, ou com um que não escolheu outra) sem duplicar a leitura do `readConfig`. Quando a pasta ainda não existe, diz que ela é criada sozinha na primeira call;
+- o modelo: caminho achado e tamanho em GB (`1,6 GB`), ou, se não achou, o motivo do helper **e a lista das pastas onde procurou**;
+- `whisper-cli` e `ffmpeg`: o caminho achado, ou o motivo de não achar;
+- se a transcrição automática está ligada, com a frase de que é assim que ela já vem e que não há nada para digitar na extensão;
+- uma última linha de veredicto: "Tudo pronto: ... e as gravações vão cair em `<pasta>`", ou "Faltam N coisas: ...".
+
+Com `--json`, o mesmo estado como JSON (`versao: 1`), para quem quiser automatizar. **Saída do processo: 0** quando dá para transcrever, **1** quando falta alguma peça (manifesto, cópia do helper, versão diferente, whisper-cli, ffmpeg, modelo, ou a transcrição desligada): assim o Claude Code sabe se deu certo sem interpretar texto.
+
+**Nada de segredo na saída.** A chave da API (Emenda 21) mora no `chrome.storage` do perfil, fora do alcance deste comando, e o estado é montado **campo por campo**: o `readConfig` devolve o `config.json` inteiro (os campos que esta versão não conhece ficam como estão, Emenda 13), e espalhar esse objeto na saída vazaria o que uma versão nova tivesse gravado ali. O teste grava um valor falso de chave no `config.json` e exige que ele não apareça nem nas frases nem no `--json`.
+
+**Idioma: português.** Não há precedente de escolher idioma fora da extensão: todo script de `scripts/`, todo texto de `host/` e até os motivos que o helper grava no `info.json` são em português, e é a extensão que traduz o que aparece na tela (Emendas 15 e 19). Decisão declarada, com o comentário do porquê no alto do arquivo. O prompt em inglês avisa que a saída deste comando é em português, e pede ao Claude Code que a traduza.
+
+**Testável porque a descoberta recebe as pastas por parâmetro.** `collectState({ env, home, manifestDir, binDir, fallbackDirs, modelDirs })`; `env`, `fallbackDirs` e `modelDirs` têm o mesmo nome e o mesmo papel que no `ctx` do motor (`createEngine`, precedente de `host/transcricao.mjs`). Sem parâmetro, tudo sai da descoberta do helper. O `config.json` entra pelo `GRAVADOR_CONFIG`, como em todos os outros testes. Os tipos ficam em `scripts/verificar.d.mts` (precedente: `build-info.d.mts` e `extension-id.d.mts`, na mesma pasta): a forma do estado é o contrato do `--json`, e vale ter o `npx tsc --noEmit` conferindo-a em vez de calar com `@ts-expect-error`, como faz o teste que importa `publicar.mjs`. Precedentes contraditórios, escolha declarada.
+
+### B. O comando entra no prompt, e o acordeão diz que não há nada para digitar
+
+`INSTALL_STEPS` (`src/shared/instalar-local.ts`, a fonte única da Emenda 22) ganha um sétimo passo, `verificar`, **depois** da prova de transcrição real: ele só faz sentido com tudo já instalado. E o `PROMPT_END`, que listava o que ficava com a pessoa na extensão (escolher a pasta e deixar o motor local escolhido), virou o que o Claude Code **diz no fim**: `promptEndExplain` (traduzir a saída do comando em palavras simples), `promptEndFolder` (em que pasta as gravações vão cair) e `promptEndEngine` (que ela não precisa configurar nada na extensão: a transcrição local já fica ligada, e basta conferir que, com "O seu computador" escolhido, aparece "Pronto para transcrever").
+
+Isso é verdade porque o helper descobre o modelo e os programas sozinho: `TRANSCRIPTION_DEFAULTS` já nasce com `ativa: true`, `motor: 'whisper-cpp'` e `modelo`, `whisperCli` e `ffmpeg` vazios, e vazio significa "descobrir sozinho" (Emenda 13). Depois de instalar o helper e o modelo, a transcrição local já está ligada e configurada.
+
+`npm run prompt` regerou `docs/PROMPT-INSTALAR.md` e as duas páginas do site a partir dos passos, e `tests/unit/prompt-instalar.test.ts` continua sendo o portão da sincronia.
+
+O acordeão `passo-a-passo` ganha uma frase (`trSetupNothingToType`, `data-testid="passo-a-passo-nada-digitar"`), depois da lista dos passos: terminada a instalação, normalmente não há nada para digitar ali, basta deixar "O seu computador" escolhido. O acordeão não foi redesenhado.
+
+### Testes
+
+`tests/unit/verificar.test.ts` (novo), tudo num HOME falso numa pasta temporária, com os programas falsos de `tests/helpers/fake-transcricao.ts` e um `config.json` próprio: tudo instalado (saída 0, as frases e o veredicto com a pasta); sem modelo (saída 1 e a lista das pastas onde procurou); sem whisper-cli (saída 1, com o ffmpeg ainda achado: o comando diz peça por peça, não "deu erro"); sem manifesto (saída 1); sem a cópia do helper e com uma cópia de outra versão; transcrição desligada; `config.json` com raiz própria (a pasta dele aparece, e a frase da padrão não); sem `config.json` (diz que é a padrão); `--json` com as chaves e os valores esperados; a chave de API falsa que não aparece em nenhuma das duas saídas; e a prova de que, depois de rodar, nada apareceu no HOME falso.
+
+Mutações conferidas vermelhas: `pronto` sempre true (5 vermelhos), o estado espalhando o `config.json` inteiro (1, o do segredo), `origem` sempre `padrao` (1), não dizer onde procurou (1), a versão do helper não comparada (1), o id da extensão não extraído do `allowed_origins` (2) e o comando criando a pasta das gravações (3, inclusive o "só lê").
+
+`src/shared/instalar-local.test.ts`: os **sete** passos na ordem, e o prompt das duas línguas citando `npm run verificar`, o pedido de traduzir a saída e a frase de que não há nada para configurar na extensão.
+
+`tests/e2e/motor-passo-a-passo.spec.ts` e `tests/e2e/pacote-loja.spec.ts` passaram sem mudança: o número de passos da lista sai do próprio prompt (`PASSOS`), e o `npm run verificar` novo está dentro do mesmo acordeão, que continua sendo o único lugar da página da loja com `npm run`.
+
+### Não feito
+
+- O prompt continua não tendo sido rodado de ponta a ponta num Mac limpo (Emenda 22): o `npm run verificar` foi rodado nesta máquina, que tem tudo instalado, e num HOME falso sem o modelo.
+- O comando não conserta nada: ele diz o que falta, e quem instala é o `npm run instalar` ou o Claude Code.
+- Ele não confere a chave da API nem o motor por API: só a transcrição local. Quem usa a API não precisa instalar nada, e a tela já diz o estado dela (Emenda 22).
+- O site **não** foi publicado, e nada foi enviado à loja.
+
+O contrato que nenhuma parte muda sozinha passa a incluir a forma do `--json` de `npm run verificar` (`VerifyState`, `versao: 1`) e a saída do processo (0 ou 1), além das chaves `stepVerify*`, `promptEndExplain` e `trSetupNothingToType`.
