@@ -8,7 +8,7 @@ A interface fala português e inglês: por padrão segue o idioma do Chrome (por
 
 Na primeira instalação abre uma página de boas-vindas que diz o que é gravado e lembra que gravar pode exigir o consentimento de todos os participantes. **A gravação automática só começa depois do "Entendi"** dessa página (em cada perfil). Quem atualiza de uma versão anterior não precisa confirmar de novo.
 
-> Estado: as seis fatias estão integradas (Meet e Teams, as quatro fontes de captura, recuperação e destino Downloads, modo aba, popup e configurações, e o "sair sozinho"), a transcrição automática (0.2.0, Emenda 13), o volume por aba (0.2.1, Emenda 14) o preparo para a Chrome Web Store (0.3.0, Emenda 15: português e inglês, aviso na primeira execução, uso sem helper, pacote da loja) a escolha de quando sair da call escrita por extenso (0.3.1, Emenda 16) as correções de uso real da 0.3.1 (Emenda 17: Teams pelo proxy do Defender for Cloud Apps, captura presa por outra extensão, aviso de versão e recarga sozinha) quem disse o quê na transcrição (0.4.0, Emenda 18), o idioma escolhido nas configurações (0.4.1, Emenda 19) as correções da primeira daily real do Meet (0.4.2, Emenda 20) e a transcrição pela API de um provedor, dentro da extensão, para quem não tem o helper (0.5.0, Emenda 21). Os testes automáticos usam páginas que imitam o Meet e o Teams; falta a verificação numa call de verdade, com outra pessoa falando, que só o usuário consegue fazer.
+> Estado: as seis fatias estão integradas (Meet e Teams, as quatro fontes de captura, recuperação e destino Downloads, modo aba, popup e configurações, e o "sair sozinho"), a transcrição automática (0.2.0, Emenda 13), o volume por aba (0.2.1, Emenda 14) o preparo para a Chrome Web Store (0.3.0, Emenda 15: português e inglês, aviso na primeira execução, uso sem helper, pacote da loja) a escolha de quando sair da call escrita por extenso (0.3.1, Emenda 16) as correções de uso real da 0.3.1 (Emenda 17: Teams pelo proxy do Defender for Cloud Apps, captura presa por outra extensão, aviso de versão e recarga sozinha) quem disse o quê na transcrição (0.4.0, Emenda 18), o idioma escolhido nas configurações (0.4.1, Emenda 19) as correções da primeira daily real do Meet (0.4.2, Emenda 20) a transcrição pela API de um provedor, dentro da extensão, para quem não tem o helper (0.5.0, Emenda 21) e a escolha do motor que passou a responder ao clique, com o passo a passo e o prompt de instalação do motor local na própria tela (0.5.1, Emenda 22). Os testes automáticos usam páginas que imitam o Meet e o Teams; falta a verificação numa call de verdade, com outra pessoa falando, que só o usuário consegue fazer.
 
 ## Construir e publicar
 
@@ -116,6 +116,8 @@ Duas maneiras, e você escolhe em **Configurações > Transcrição**: no **seu 
 
 ### No seu computador (whisper.cpp)
 
+Em **Configurações > Transcrição**, a opção "O seu computador" tem um acordeão com o passo a passo do que precisa ser instalado e um **prompt para colar no Claude Code**, que faz tudo e liga a extensão ao programa que transcreve. O mesmo prompt, nas duas línguas, está em [docs/PROMPT-INSTALAR.md](./docs/PROMPT-INSTALAR.md) e no site; ele nasce de `src/shared/instalar-local.ts`, e `npm run prompt` regera o arquivo e o site quando um passo muda.
+
 Com o helper instalado e a transcrição ligada (padrão), cada call salva é transcrita logo depois, na própria máquina: aparecem `transcricao.md` e `transcricao.srt` na pasta da call, e o popup mostra "Transcrevendo..." e depois **Abrir transcrição** em cada uma das últimas gravações. Quem transcreve é um processo separado que o helper abre: ele continua com o Chrome fechado, faz uma gravação por vez com prioridade baixa e retoma o que ficou pela metade. O motivo de cada passo fica no log do helper (`~/Library/Logs/gravador-de-calls/helper.log`).
 
 Precisa do whisper.cpp, do ffmpeg e de um modelo (nada é baixado sozinho):
@@ -192,6 +194,7 @@ whisper-cli -m <modelo> -l pt -f audio.wav -osrt -oj
 npm test             # unidade (vitest): nomes, arbitragem, protocolo do helper, transcrição (local e por API), instalação, medição de tons
 npm run test:e2e -- --workers=1   # ponta a ponta (Playwright): constrói dist/ e grava calls falsas do Meet e do Teams
 npm run teste:transcricao-real   # fora do npm test: fala do say do macOS transcrita pelo whisper-cli de verdade
+npm run prompt       # regera docs/PROMPT-INSTALAR.md e a seção do site a partir dos passos do código
 ```
 
 Os testes da transcrição usam um ffmpeg e um whisper-cli falsos (scripts em pasta temporária); o teste real usa os desta máquina, numa pasta e num `config.json` temporários, e nunca baixa modelo.

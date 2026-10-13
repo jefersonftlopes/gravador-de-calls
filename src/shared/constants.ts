@@ -1,6 +1,8 @@
 // Constantes de runtime do protocolo, sem dependências (o MAIN world importa este arquivo).
 // Os tipos e os schemas zod ficam em ./protocol.ts.
-import type { DownType, EndReason, SeamId, UpType } from './protocol'
+// Com extensão por exceção declarada: este arquivo entra na cadeia que o manifest.config.ts carrega,
+// e o carregador nativo de configuração do Vite exige a extensão nela (ver api-transcription.ts).
+import type { DownType, EndReason, SeamId, UpType } from './protocol.ts'
 
 /** Marca das mensagens do aperto de mão MAIN <-> ISOLATED (window.postMessage). */
 export const BRIDGE_MARK = '__gravador__'

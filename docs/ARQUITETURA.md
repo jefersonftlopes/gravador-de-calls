@@ -1261,3 +1261,92 @@ Ponta a ponta, `tests/e2e/transcricao-api.spec.ts` (novo), no Chrome for Testing
 - O site **não** foi publicado de novo e nada foi enviado para a loja. A política de privacidade (seção 7-A nas duas línguas) e a divulgação de dados (`docs/loja/`) já estão escritas; publicar e reenviar fica com o usuário.
 
 O contrato que nenhuma parte muda sozinha passa a incluir `host/texto.mjs` (as funções acima, iguais nos dois lados), `Settings.apiTranscription` (`ApiTranscriptionConfig`), `API_KEY_STORAGE_KEY` e `API_TRANSCRIPTION_STATE_KEY`, `API_PROVIDERS` e `API_ENGINE_ID`, `API_RETENTION`, `classifyApiError`/`retriesAlone`, `ApiAudioRecord` e a loja `apiAudio` (`DB_VERSION` 2), a operação `transcription-write` e o `semTranscricao` do `finalize`, o pedido `offscreen:text-url`, `RecentTranscription.downloadId`, `TranscriptionUiState.motor`, `HOST_MIN_FOR_API` e as chaves `tr*` e `apiErr*` novas.
+
+## Emenda 22: escolher o motor que não se mexia, e o passo a passo do motor local (13/10/2026, 0.5.1)
+
+Pedido do usuário (13/10/2026): "também não to conseguindo selecionar o A API da OpenAI, com a sua chave" e, na mesma mensagem, mostrar na opção "O seu computador" um acordeão com todo o passo a passo do que precisa ser instalado e o prompt para colar no Claude Code, para ele instalar tudo e conectar com a extensão.
+
+Esta emenda **acrescenta e corrige a interface**. Nada do comportamento de envio muda: as quatro portas da Emenda 21 (motor desligado, sem chave, sem permissão de host, endereço fora de uma origem declarada) continuam exatamente como estavam, e os testes delas (`src/background/api-transcription.test.ts` e `tests/e2e/transcricao-api.spec.ts`) seguem passando sem mudança de comportamento. O helper não mudou, então `HOST_VERSION` fica em **0.5.0** e ninguém precisa rodar `npm run instalar` de novo.
+
+### A. O defeito: o rádio significava duas coisas
+
+Em `src/options/Options.tsx`, o rádio `data-testid="motor-api"` era `checked={cfg.ativa}` e o `onChange` chamava `enableApi()`, que na primeira linha fazia `if (!keyHint) return setMessage(trApiKeyMissing)`. Sem chave guardada, `cfg.ativa` nunca virava true, o React devolvia o rádio para "O seu computador" e a única pista era um parágrafo (`transcricao-api-mensagem`) no fim da seção, depois do acordeão do endereço. O usuário clicava, nada se movia perto do clique, e ele concluía que o rádio estava quebrado.
+
+A causa é o rádio carregar dois significados ao mesmo tempo: "o que eu quero configurar" e "o que está ativo".
+
+### B. A separação
+
+- **Painel escolhido** (`EnginePanel`, estado de tela em `TranscriptionSection`): o clique **sempre** o muda, na hora, sem depender de chave, de permissão nem do helper. Clicar nunca mais "não faz nada". Vai no DOM como `data-painel` do `transcricao-motor`.
+- **Motor realmente ativo**: continua sendo `Settings.apiTranscription.ativa`, e só vira true com a chave guardada **e** a permissão de host concedida. Continua no `data-motor`, com o mesmo significado de antes.
+- Ao abrir, o painel começa no motor ativo (`panelOfActiveEngine`).
+- Escolher o painel da API quando ela **não está pronta** não liga nada e não salva `ativa: true` (o teste confere o storage). Quando a chave já existe, o clique tenta ligar, como antes, porque o `chrome.permissions.request` precisa do gesto do usuário e este é o gesto.
+- Escolher o painel do computador **desliga** o motor por API, como antes: é uma escolha explícita de não mandar áudio para fora.
+
+### C. Situação visível junto da opção
+
+`src/shared/transcription-engine.ts`: `engineSituation(panel, api, local)` é pura e devolve `{ kind, tone, key, subs, action, actionKey, actionSubs }`. A tela a mostra **debaixo da opção escolhida**, dentro do `fieldset`, com o botão que resolve ao lado (`motor-situacao` e `motor-situacao-acao`). A ação, nos dois casos em que existe, é a mesma função `enableApi()`: pede a permissão (uma já concedida resolve na hora, sem diálogo) e salva `ativa: true`.
+
+| `kind` | Quando | Frase | Botão |
+|---|---|---|---|
+| `api-sem-chave` | sem chave guardada | `trApiKeyMissing` | nenhum (o campo da chave está logo abaixo) |
+| `api-sem-permissao` | com chave, `permissions.contains` false | `trSitApiNoPermission` | `trSitGrant` |
+| `api-ligado` | `ativa` com chave e permissão | `trApiReady` | nenhum |
+| `api-desligado` | pronto e desligado | `trApiOff` | `trSitTurnOn` |
+| `local-verificando` | helper ou `transcription-status` sem resposta | `helperChecking` | nenhum |
+| `local-sem-helper` | sem helper (ou instalado e sem abrir) | `trSitLocalNoHelper` | nenhum |
+| `local-pronto` | helper com o motor disponível | `trSitLocalReady` (o modelo achado) | nenhum |
+| `local-sem-motor` | helper sem whisper, ffmpeg ou modelo | `trSitLocalMissing` (o motivo do helper) | nenhum |
+
+Duas decisões dentro da regra, cada uma com teste:
+- a **permissão é conferida antes do `ativa`**: uma permissão revogada em `chrome://extensions` deixa `ativa: true` no storage, o SW não envia nada (porta da Emenda 21) e a tela não pode dizer que está ligado;
+- `temPermissao`/`disponivel` em `null` significa "ainda não sei" e **não acusa nada**, para a tela não piscar um aviso errado.
+
+Nenhum tom é âmbar nem vermelho (`EngineTone` é `ok`, `acao` ou `neutro`): o que falta instalar é o uso normal de quem baixou da loja, não um erro (Emenda 15). O único alerta da seção continua sendo o aviso de privacidade do motor por API, e `tests/e2e/interface.spec.ts` cobra que não haja outro.
+
+### D. Cada painel mostra só o que é dele
+
+Antes, a chave, o custo, o aviso de privacidade, o idioma e o endereço apareciam mesmo com o computador escolhido, e a seção do helper aparecia mesmo com a API escolhida. Agora o painel da API (`painel-api`) leva o aviso de privacidade, o custo, o limite, a chave, o idioma e o endereço, e o painel do computador (`painel-local`) leva o acordeão do passo a passo e o formulário do motor local. O aviso de privacidade continua aparecendo **antes de ligar**, dentro do painel da API: ele é a razão de a escolha existir.
+
+A leitura do `ui:transcription` subiu para `TranscriptionSection`, porque a linha da situação precisa do que o helper achou; `LocalTranscriptionSection` recebe `state`, `loadError` e `onReload` e refaz o formulário quando a leitura muda. A página continua sem falar com o SW em laço: uma leitura ao abrir e uma por ação.
+
+### E. O passo a passo e o prompt, de uma fonte só
+
+`src/shared/instalar-local.ts` é a fonte única. `INSTALL_STEPS` é um array de seis passos com `labelKey` (o rótulo em linguagem de quem não é técnico, o mesmo na tela e no prompt), `checkKey` (o que conferir antes do passo seguinte, só no prompt) e `commands` (dados, iguais nas duas línguas). Precedente da constante com `labelKey`: `TRANSCRIPTION_LANGUAGES` e `UI_LANGUAGE_OPTIONS` em `src/options/form.ts`.
+
+`installPrompt(locale)` é pura e monta o texto com `tIn`, então o prompt sai no idioma da interface (Emenda 19) nas duas línguas; `currentMessageLocale()` (novo em `i18n.ts`) traduz o `auto` para a pasta de `public/_locales` que vale. O prompt é texto puro, **sem cerca de código** (os três acentos graves do markdown), porque o documento e o site o embrulham num bloco e um bloco dentro do outro não fecha; os comandos vão indentados, um por linha.
+
+Quatro destinos, a mesma fonte:
+- a tela, no acordeão `passo-a-passo` (um `<details>` fechado por padrão, precedente dos acordeões "Avançado" e "Endereço da API" no mesmo arquivo), com a lista dos passos, o aviso de que o instalador existe só para macOS (`chrome.runtime.getPlatformInfo().os !== 'mac'`, nunca string de navegador), o prompt num `<pre>` selecionável com o botão **Copiar** (`navigator.clipboard.writeText` em try/catch; falhando, o texto do bloco é selecionado e a tela diz para copiar com o atalho) e o link do repositório público;
+- `docs/PROMPT-INSTALAR.md`, com os dois idiomas (português primeiro), gerado por `npm run prompt`;
+- a seção "Transcrever no seu computador" do site, nas duas línguas (`site/index.html` e `site/en/index.html`), entre as marcas `<!--prompt-instalar:inicio-->` e `<!--prompt-instalar:fim-->`, escapada para HTML;
+- `tests/unit/prompt-instalar.test.ts` é o portão: mudar um passo no código e esquecer o documento ou o site deixa a suíte vermelha. Ele também é o gerador (`ATUALIZAR_PROMPT=1`, que é o que `npm run prompt` faz), porque o Node não importa o `src/` em TypeScript com o import de JSON das mensagens, e o `vitest` já importa.
+
+**Os fatos do prompt**, conferidos em 13/10/2026 e escritos como constantes: o instalador existe só para macOS; Node 22 ou mais novo (`brew install node`), `whisper-cli` (`brew install whisper-cpp`, a fórmula que entrega `/opt/homebrew/bin/whisper-cli`) e `ffmpeg` (`brew install ffmpeg`); `git clone https://github.com/jefersonftlopes/gravador-de-calls.git ~/Documents/gravador-de-calls`; **não rodar `npm install`** (o helper, o worker e `scripts/teste-transcricao-real.mjs` importam só `node:*` e caminhos relativos, e `npm run` funciona sem `node_modules`: poupa centenas de MB); o modelo `ggml-large-v3-turbo.bin` (1.624.555.275 bytes, cerca de 1,6 GB) em `~/Library/Application Support/gravador-de-calls/modelos/`, com o tamanho conferido no fim, porque um arquivo cortado faz o whisper falhar sem explicar a causa; `npm run instalar -- --id kpbjnbedejcbakdjacjmhaofidooddjp` (o ID da extensão da loja; sem ele a cópia da loja não acha o helper); e a prova final `npm run teste:transcricao-real`. O prompt pede ao Claude Code: conferir cada passo antes do seguinte, avisar antes do download grande, parar e explicar em linguagem simples quando falhar, nunca apagar arquivo do usuário nem mexer nas gravações, e parar e dizer o comando quando precisar da senha em vez de pedir a senha. No fim ele diz os dois passos que ficam com a pessoa, na própria extensão: escolher a pasta das gravações e deixar "O seu computador" escolhido.
+
+**O passo a passo aparece também no pacote da loja**, de propósito: quem instala pela loja é justamente quem precisa dele, e o prompt começa clonando o projeto. `tests/e2e/pacote-loja.spec.ts` passou a cobrar que esse acordeão é o **único** lugar da página com `npm run` no build da loja (o `HelperInstall`, que supõe a pasta do projeto, continua de fora).
+
+### F. Aviso do Vite sobre import sem extensão
+
+`manifest.config.ts` importa `src/shared/api-transcription.ts`, que importa `./constants`, que importa `./protocol`. O carregador nativo de configuração do Vite exige a extensão no caminho que ele mesmo carrega, e avisava nos dois. Medido no repositório: dentro de `src/` não há **nenhum** import com extensão (são 492 sem), e os únicos arquivos que já usavam `.ts` eram `manifest.config.ts` e `vite.config.ts`, pela mesma razão. Decisão declarada: a extensão entra **só nesses dois imports**, com o comentário do porquê em cada um, e nada de troca em massa que o padrão do repositório não sustenta. Conferido: o aviso sai do `npm run build:only` e volta quando a extensão é removida.
+
+### Testes
+
+Unidade (cada um conferido vermelho com a mutação indicada e verde de volta):
+- `src/shared/transcription-engine.test.ts` (novo): o painel de abertura; os quatro estados da API, incluindo "sem chave vale mesmo com `ativa` guardado" e "permissão revogada vale mais que o `ativa`"; os quatro do local; `null` não acusando nada; nenhum tom âmbar ou vermelho; e o mesmo estado dando situações diferentes nos dois painéis. Mutações: sem a conferência da chave (2 vermelhos), permissão conferida depois do `ativa` (1 vermelho).
+- `src/shared/instalar-local.test.ts` (novo): toda chave de rótulo e de conferência existe nas duas línguas; a ordem e os comandos dos seis passos; nenhum `$n` sobrando; o tamanho do modelo no formato de cada idioma e num idioma que o Intl não conhece; `installerAvailableOn`; e o prompt, nas duas línguas, com o id da loja, o endereço do repositório, o `git clone`, o endereço e o tamanho exato do modelo, a proibição do `npm install`, a prova final, os três `brew install`, a pasta dos modelos e o tamanho em linguagem humana, além de cada comando numa linha indentada e sem cerca de código. Mutações: `installerAvailableOn` sempre true, `brew install whisper-cpp` trocado.
+- `tests/unit/prompt-instalar.test.ts` (novo): `docs/PROMPT-INSTALAR.md` é exatamente o que os passos geram, com um bloco por língua na ordem que a spec de ponta a ponta lê; cada página do site traz o prompt da língua dela escapado para HTML; e o do site é o mesmo do documento. Mutação: um comando mudado sem regerar (5 vermelhos no documento e no site, mais 2 no prompt).
+
+Ponta a ponta, `tests/e2e/motor-passo-a-passo.spec.ts` (novo), **sem helper** (o cenário da loja) e sem requisição de rede nenhuma: o defeito relatado (escolher a API sem chave marca o rádio, troca o painel, mostra "Cole a chave da API antes de ligar" dentro do `fieldset` e não salva `ativa: true` no storage); cada painel mostrando só o que é dele; o acordeão fechado por padrão, com um item por passo, o tamanho do download, o prompt igual ao de `docs/PROMPT-INSTALAR.md` letra por letra e o link do repositório; o botão Copiar confirmando (e, quando o Chrome deixa ler a área de transferência, o texto copiado sendo o prompt); o aviso de macOS ausente neste Mac e presente com `getPlatformInfo` respondendo `win` (por `addInitScript`); o prompt trocando de idioma na hora com English e voltando no Automático; a situação sem helper mandando para o passo a passo sem nada âmbar ou vermelho na página; e escolher o computador desligando o motor por API no storage, além da chave apagada voltando a situação para "sem chave". Mutações conferidas vermelhas: o rádio de volta a `checked={cfg.ativa}` com o `onChange` da 0.5.0 (3 vermelhos, inclusive o do defeito relatado), escolher o computador sem desligar a API, o acordeão com `open`, os dois painéis sempre na tela e `currentMessageLocale` ignorando o idioma escolhido.
+
+O texto esperado do prompt na spec de ponta a ponta sai de `docs/PROMPT-INSTALAR.md`, e não de um literal: quem amarra o arquivo ao código é o teste de unidade, e o loader do Playwright não lê o import de JSON das mensagens.
+
+Atualizados: `tests/e2e/transcricao-api.spec.ts` (o `ligarMotorPelaTela` passou a escolher o painel antes de ver o aviso de privacidade, o custo, o limite, a chave e o endereço, que agora moram dentro dele, e a ligar pelo botão da linha da situação; o teste do motor desligado escolhe o painel para os campos aparecerem, e escolher o painel não liga nada) e `tests/e2e/pacote-loja.spec.ts` (o `npm run` do passo a passo).
+
+### Não feito
+
+- O usuário continua sem ter transcrito uma call de verdade pela API com a chave dele (Emenda 21): o formato da resposta segue vindo da documentação.
+- O prompt nunca foi rodado de ponta a ponta num Mac limpo: ele é a soma de fatos conferidos aqui, não uma instalação medida do zero.
+- O site **não** foi publicado, e nada foi enviado à loja.
+- O passo a passo do motor local não tem um botão que instale nada: quem instala é o Claude Code (ou a pessoa, no terminal).
+
+O contrato que nenhuma parte muda sozinha passa a incluir `EnginePanel`, `engineSituation` (os oito `kind`), `INSTALL_STEPS`/`installPrompt` como a fonte única do passo a passo, de `docs/PROMPT-INSTALAR.md` e da seção do site, `currentMessageLocale()` e as chaves `trSit*`, `trSetup*`, `step*` e `prompt*`.

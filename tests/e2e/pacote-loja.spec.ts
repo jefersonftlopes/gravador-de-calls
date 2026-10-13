@@ -61,5 +61,17 @@ test('pacote da loja: sem o gancho de teste no SW, boas-vindas na instalação e
   await expect(advanced).toContainText(/not yet distributed through the store|ainda não distribuído pela loja/)
   await expect(advanced.getByTestId('helper-status')).toHaveCount(1)
   await expect(advanced).not.toContainText('npm run')
-  await expect(options.locator('body')).not.toContainText('npm run')
+
+  // Emenda 22: o passo a passo do motor local é o ÚNICO lugar do pacote da loja com `npm run`, e ele
+  // começa clonando o projeto, então serve justamente a quem instalou pela loja e não tem a pasta.
+  // Fora desse acordeão, a página continua sem mandar rodar nada no terminal.
+  const prompt = options.getByTestId('passo-a-passo-prompt')
+  await expect(prompt).toContainText('git clone')
+  await expect(prompt).toContainText('npm run instalar')
+  const fora = await options.evaluate(() => {
+    const body = document.body.cloneNode(true) as HTMLElement
+    body.querySelector('[data-testid="passo-a-passo"]')?.remove()
+    return body.innerText
+  })
+  expect(fora, 'fora do passo a passo do motor local').not.toContain('npm run')
 })

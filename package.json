@@ -1,6 +1,6 @@
 {
   "name": "gravador-de-calls",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "description": "Extensão do Chrome que grava, aba por aba, o áudio dos outros participantes das calls do Google Meet e do Microsoft Teams.",
   "type": "module",
@@ -15,6 +15,7 @@
     "test:e2e": "npm run build:only && playwright test",
     "publicar": "npm run build && node scripts/publicar.mjs",
     "empacotar": "tsc --noEmit && node scripts/empacotar.mjs",
+    "prompt": "ATUALIZAR_PROMPT=1 vitest run tests/unit/prompt-instalar.test.ts",
     "teste:transcricao-real": "node scripts/teste-transcricao-real.mjs",
     "transcrever": "node scripts/transcrever-de-novo.mjs",
     "instalar": "node host/instalar.mjs",

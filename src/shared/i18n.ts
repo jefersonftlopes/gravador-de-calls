@@ -254,6 +254,17 @@ export function messageLocale(): string {
   return tag === 'localeTag' ? 'en' : tag
 }
 
+/**
+ * A pasta de public/_locales que corresponde ao idioma que vale agora: a escolhida, ou, no
+ * Automático, a que o Chrome escolheu (pelo `localeTag` que o próprio messages.json traz). Quem
+ * precisa é o texto que é formatado por idioma e não por chave, como o prompt da instalação
+ * (Emenda 22): `tIn` pede uma pasta, e `uiLanguage()` pode estar em `auto`.
+ */
+export function currentMessageLocale(): MessageLocale {
+  if (language !== 'auto') return language
+  return messageLocale().toLowerCase().startsWith('pt') ? 'pt_BR' : 'en'
+}
+
 /** Plural pela regra do idioma das mensagens: `n` vai como $1, os outros valores depois. */
 export function tp(base: PluralKey, n: number, ...subs: Substitution[]): string {
   let one = n === 1

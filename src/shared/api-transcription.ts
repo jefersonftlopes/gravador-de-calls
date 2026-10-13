@@ -14,7 +14,11 @@
 //   nasce DESLIGADA;
 // - o endereço do provedor é dado, não código: trocar de provedor é uma linha em API_PROVIDERS. A
 //   extensão só aceita uma origem declarada aqui, que é a mesma lista do optional_host_permissions.
-import { API_KEY_STORAGE_KEY } from './constants'
+// A extensão dentro de `src/` importa sem extensão (é o padrão do repositório, em centenas de
+// imports). Estes dois arquivos são a exceção declarada: o manifest.config.ts os importa, e o
+// carregador nativo de configuração do Vite exige a extensão no caminho que ele mesmo carrega
+// (precedente: manifest.config.ts e vite.config.ts já importam com `.ts` pela mesma razão).
+import { API_KEY_STORAGE_KEY } from './constants.ts'
 
 export { API_KEY_STORAGE_KEY }
 

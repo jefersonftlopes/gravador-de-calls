@@ -815,6 +815,135 @@
   "trApiOff": {
     "message": "Off: no call in this profile is sent to the API."
   },
+  "trSitApiNoPermission": {
+    "message": "Access to $1 still needs your permission. Without it, nothing is sent."
+  },
+  "trSitGrant": {
+    "message": "Allow access to $1 and turn it on"
+  },
+  "trSitTurnOn": {
+    "message": "Turn on API transcription"
+  },
+  "trSitLocalReady": {
+    "message": "Ready to transcribe on this computer, with the model $1."
+  },
+  "trSitLocalMissing": {
+    "message": "Still missing: $1. The step by step is right below."
+  },
+  "trSitLocalNoHelper": {
+    "message": "The program that transcribes is not installed yet. The step by step is right below, with the prompt for Claude Code to do all of it."
+  },
+  "trSetupSummary": {
+    "message": "How to install it on this computer (step by step and a prompt for Claude Code)"
+  },
+  "trSetupIntro": {
+    "message": "What gets installed, in this order:"
+  },
+  "trSetupMacOnly": {
+    "message": "The installer only exists for macOS, and this computer runs $1. Here, the API is what transcribes."
+  },
+  "trSetupPromptLabel": {
+    "message": "Prompt to paste into Claude Code"
+  },
+  "trSetupPromptHint": {
+    "message": "Open Claude Code and paste this text. It installs everything and connects the extension to the program that transcribes."
+  },
+  "trSetupCopy": {
+    "message": "Copy"
+  },
+  "trSetupCopied": {
+    "message": "Copied."
+  },
+  "trSetupCopyFailed": {
+    "message": "Couldn't copy it for you. The text is already selected: copy it with the keyboard shortcut."
+  },
+  "trSetupRepo": {
+    "message": "See the project on GitHub"
+  },
+  "stepMacLabel": {
+    "message": "Check that this is a Mac: the program that transcribes only has a macOS installer."
+  },
+  "stepMacCheck": {
+    "message": "`uname -s` answers Darwin. On any other system, stop and tell me the installer only exists for macOS."
+  },
+  "stepDepsLabel": {
+    "message": "Node 22, whisper.cpp and ffmpeg, installed with Homebrew."
+  },
+  "stepDepsCheck": {
+    "message": "`node --version` is 22 or newer, `whisper-cli --help` answers (it lives in /opt/homebrew/bin/whisper-cli) and `ffmpeg -version` answers."
+  },
+  "stepProjectLabel": {
+    "message": "The extension project, downloaded from GitHub into $1."
+  },
+  "stepProjectCheck": {
+    "message": "the file package.json exists in $1."
+  },
+  "stepModelLabel": {
+    "message": "The speech recognition model: a $1 download, the longest step."
+  },
+  "stepModelCheck": {
+    "message": "the downloaded file is exactly $1 bytes. A truncated file makes whisper fail without explaining why."
+  },
+  "stepHelperLabel": {
+    "message": "The link between the Chrome extension and the program that transcribes."
+  },
+  "stepHelperCheck": {
+    "message": "the command finished without errors and the id $1 appears in the host manifest it wrote."
+  },
+  "stepProofLabel": {
+    "message": "A test call, spoken by the Mac itself, to prove transcription works end to end."
+  },
+  "stepProofCheck": {
+    "message": "the test finished saying it passed. It runs in a temporary folder and never touches my recordings."
+  },
+  "promptTitle": {
+    "message": "Install local transcription for the Gravador de Calls extension"
+  },
+  "promptIntro": {
+    "message": "I am on macOS and I want my calls transcribed on my own computer, without sending the audio anywhere. The Gravador de Calls extension is already installed in Chrome. What is missing is the program that transcribes and the link between the two. Please do it for me."
+  },
+  "promptRulesTitle": {
+    "message": "Rules"
+  },
+  "promptRuleStepByStep": {
+    "message": "Check each step before starting the next one, and tell me what you found."
+  },
+  "promptRuleBigDownload": {
+    "message": "Warn me before the big download (the speech model, $1) and wait for me to confirm."
+  },
+  "promptRuleNoNpmInstall": {
+    "message": "Do NOT run npm install in this project. The program that transcribes, the worker and the test import only Node modules and relative paths, and npm run works without the node_modules folder. This saves hundreds of MB."
+  },
+  "promptRuleExplain": {
+    "message": "If a step fails, stop and explain in plain language what went wrong and what I can do."
+  },
+  "promptRuleNoDelete": {
+    "message": "Never delete a file of mine and never touch my recordings."
+  },
+  "promptRuleNoPassword": {
+    "message": "If you need my password, stop and tell me the command to run. Do not ask for the password."
+  },
+  "promptStepsTitle": {
+    "message": "Steps"
+  },
+  "promptCommands": {
+    "message": "Commands:"
+  },
+  "promptCheck": {
+    "message": "Check:"
+  },
+  "promptRepo": {
+    "message": "Project:"
+  },
+  "promptEndTitle": {
+    "message": "What is left for me at the end"
+  },
+  "promptEndFolder": {
+    "message": "Choose the recordings folder in the extension settings."
+  },
+  "promptEndEngine": {
+    "message": "Leave the option \"Your computer\" selected under Transcription, in the extension settings."
+  },
   "apiErrKey": {
     "message": "the provider rejected the API key: check the key in the settings"
   },

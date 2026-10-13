@@ -39,7 +39,9 @@ import {
 import { WELCOME_PAGE } from '../shared/consent'
 import { downloadsPath, helperProblem } from '../shared/helper-status'
 import { helperReason } from '../shared/helper-reasons'
-import { downloadsFolderName, messageLocale, onLanguageChange, setLanguage, t, uiLanguage } from '../shared/i18n'
+import { currentMessageLocale, downloadsFolderName, messageLocale, onLanguageChange, setLanguage, t, uiLanguage } from '../shared/i18n'
+import { INSTALL_STEPS, REPO_URL, installPrompt, installerAvailableOn, stepLabelSubs } from '../shared/instalar-local'
+import { engineSituation, panelOfActiveEngine, type EnginePanel, type EngineTone } from '../shared/transcription-engine'
 import { useLanguage } from '../shared/page-language'
 import { profileFolder } from '../shared/naming'
 import { DEFAULT_SETTINGS, DEFAULT_VIGIA, loadSettings } from '../shared/settings'
@@ -242,41 +244,39 @@ function TranscriptionAvailability({ state }: { state: TranscriptionSettingsStat
   )
 }
 
-function LocalTranscriptionSection({ helper }: { helper: HelperStatus | null }) {
+function LocalTranscriptionSection({
+  helper,
+  state,
+  loadError,
+  onReload,
+}: {
+  helper: HelperStatus | null
+  state: TranscriptionSettingsState | null
+  loadError: string | null
+  onReload: () => Promise<void>
+}) {
   const transcriptionForm = useForm<TranscriptionConfig>({
     defaultValues: EMPTY_TRANSCRIPTION,
     resolver: transcriptionFormResolver,
   })
   const { register, handleSubmit, reset, setValue, watch, formState } = transcriptionForm
   useRetranslatedErrors(transcriptionForm)
-  const [state, setState] = useState<TranscriptionSettingsState | null>(null)
-  const [loadError, setLoadError] = useState<string | null>(null)
   const [message, setMessage] = useState<RootMessage>(null)
   const [choosing, setChoosing] = useState(false)
   const errors = formState.errors
   const idioma = watch('idioma')
 
-  const load = async () => {
-    const r = await uiCall({ t: 'ui:transcription' }).catch(asFailure)
-    if (!r.ok) {
-      setLoadError(r.error)
-      return
-    }
-    setLoadError(null)
-    setState(r.state)
-    reset(r.state.config)
-  }
-
+  // Emenda 22: quem lê o `ui:transcription` é a seção de cima, porque a linha da situação tem de
+  // ficar junto da opção escolhida. O formulário acompanha a leitura que chegou lá.
   useEffect(() => {
-    if (helper?.ok) void load()
-    // Uma leitura ao abrir e uma por ação (a página não fala com o SW em laço).
-  }, [helper?.ok])
+    if (state) reset(state.config)
+  }, [state, reset])
 
   const onSubmit = handleSubmit(async (values) => {
     const r = await uiCall({ t: 'ui:set-transcription', patch: cleanTranscriptionForm(values) }).catch(asFailure)
     if (!r.ok) return setMessage({ ok: false, text: () => t('trCannotSave', helperReason(r.error)) })
     setMessage({ ok: true, text: () => t('trSaved') })
-    await load()
+    await onReload()
   })
 
   const chooseModel = async () => {
@@ -376,15 +376,111 @@ function LocalTranscriptionSection({ helper }: { helper: HelperStatus | null }) 
   )
 }
 
+/** Classe da linha da situação por tom. Sem âmbar e sem vermelho (ver EngineTone). */
+const TONE_CLASS: Record<EngineTone, string> = {
+  ok: 'text-green-700 dark:text-green-400',
+  acao: 'rounded-md bg-blue-50 p-2 text-blue-950 dark:bg-blue-950 dark:text-blue-100',
+  neutro: 'text-neutral-600 dark:text-neutral-400',
+}
 
 /**
- * Transcrição (Emenda 21): a escolha do motor funciona com e sem o helper.
+ * Como instalar o motor local, no painel dele (Emenda 22): o que vai ser instalado, em linguagem de
+ * quem não é técnico, e o prompt para colar no Claude Code. Fechado por padrão (precedente: os
+ * acordeões "Avançado" e "Endereço da API", no mesmo arquivo).
+ *
+ * A lista e o prompt nascem do mesmo array (src/shared/instalar-local.ts), então não há dois textos
+ * para manter em sincronia.
+ */
+function LocalSetupDetails({ os }: { os: string | null }) {
+  const [copyMessage, setCopyMessage] = useState<RootMessage>(null)
+  const block = useRef<HTMLPreElement>(null)
+  const tag = messageLocale()
+  const prompt = installPrompt(currentMessageLocale())
+
+  /** O texto do bloco selecionado, para quem não tem a área de transferência disponível copiar à mão. */
+  const selectBlock = () => {
+    const node = block.current
+    const selection = window.getSelection()
+    if (!node || !selection) return
+    const range = document.createRange()
+    range.selectNodeContents(node)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(prompt)
+      setCopyMessage({ ok: true, text: () => t('trSetupCopied') })
+    } catch {
+      // Sem permissão, sem foco no documento, ou um navegador que recusa: o texto fica selecionado.
+      selectBlock()
+      setCopyMessage({ ok: false, text: () => t('trSetupCopyFailed') })
+    }
+  }
+
+  return (
+    <details data-testid="passo-a-passo" className="rounded-md border border-neutral-200 p-2 dark:border-neutral-700">
+      <summary className="cursor-pointer font-medium">{t('trSetupSummary')}</summary>
+      <div className="mt-3 space-y-3">
+        {/* O instalador existe só para macOS. Quem decide é o chrome.runtime.getPlatformInfo, não
+            o texto do navegador. */}
+        {!installerAvailableOn(os) && (
+          <p data-testid="passo-a-passo-so-mac" className="text-neutral-700 dark:text-neutral-300">
+            {t('trSetupMacOnly', os ?? '')}
+          </p>
+        )}
+        <p>{t('trSetupIntro')}</p>
+        <ol data-testid="passo-a-passo-lista" className="list-decimal space-y-1 pl-6">
+          {INSTALL_STEPS.map((step) => (
+            <li key={step.id}>{t(step.labelKey, ...stepLabelSubs(step, tag))}</li>
+          ))}
+        </ol>
+        <div className="space-y-1">
+          <span className="block font-medium">{t('trSetupPromptLabel')}</span>
+          <p className="text-neutral-600 dark:text-neutral-400">{t('trSetupPromptHint')}</p>
+          <pre
+            ref={block}
+            data-testid="passo-a-passo-prompt"
+            className="max-h-80 overflow-auto rounded-md bg-neutral-100 p-2 font-mono text-xs break-words whitespace-pre-wrap select-text dark:bg-neutral-800"
+          >
+            {prompt}
+          </pre>
+          <div className="flex flex-wrap items-center gap-3">
+            <button type="button" className={button} data-testid="passo-a-passo-copiar" onClick={() => void copy()}>
+              {t('trSetupCopy')}
+            </button>
+            {copyMessage && (
+              <span
+                data-testid="passo-a-passo-copiado"
+                className={copyMessage.ok ? 'text-green-700 dark:text-green-400' : 'text-neutral-700 dark:text-neutral-300'}
+              >
+                {copyMessage.text()}
+              </span>
+            )}
+          </div>
+        </div>
+        <p>
+          <a className="text-blue-700 underline hover:no-underline dark:text-blue-400" href={REPO_URL} target="_blank" rel="noreferrer">
+            {t('trSetupRepo')}
+          </a>
+        </p>
+      </div>
+    </details>
+  )
+}
+
+/**
+ * Transcrição (Emendas 21 e 22): a escolha do motor funciona com e sem o helper.
  *
  * - "O seu computador (whisper.cpp)" é o motor local, o padrão de sempre, e exige o helper.
  * - "A API da OpenAI, com a sua chave" roda dentro da extensão e funciona sem instalar nada.
  *
- * O aviso de privacidade aparece ANTES de ligar, e escolher a API só liga de verdade depois de a
- * chave estar guardada e de o Chrome conceder a permissão de acesso ao provedor.
+ * Emenda 22, a separação que corrige o defeito: o clique no rádio muda o PAINEL na hora, sempre, sem
+ * depender de chave, de permissão nem do helper (ver src/shared/transcription-engine.ts). O motor
+ * realmente ativo continua sendo `Settings.apiTranscription.ativa`, que só vira true com a chave
+ * guardada e a permissão concedida. Debaixo da opção escolhida fica a linha que diz em que pé está e
+ * o botão que resolve, junto do clique, e cada painel mostra só o que é dele.
  */
 function TranscriptionSection({ helper }: { helper: HelperStatus | null }) {
   const [cfg, setCfg] = useState<ApiTranscriptionConfig | null>(null)
@@ -392,14 +488,57 @@ function TranscriptionSection({ helper }: { helper: HelperStatus | null }) {
   const [keyField, setKeyField] = useState('')
   const [message, setMessage] = useState<RootMessage>(null)
   const [busy, setBusy] = useState(false)
+  // Emenda 22: o painel escolhido é estado de TELA, e começa no motor ativo.
+  const [panel, setPanel] = useState<EnginePanel | null>(null)
+  // chrome.permissions.contains da origem do endereço; null até a leitura responder.
+  const [granted, setGranted] = useState<boolean | null>(null)
+  // chrome.runtime.getPlatformInfo: o instalador do helper existe só para macOS.
+  const [os, setOs] = useState<string | null>(null)
+  // A leitura do motor local mora aqui, porque a linha da situação fica junto da opção.
+  const [local, setLocal] = useState<TranscriptionSettingsState | null>(null)
+  const [localError, setLocalError] = useState<string | null>(null)
   const provider = providerOf(cfg?.provedor ?? DEFAULT_API_TRANSCRIPTION.provedor)
 
   // Uma leitura ao abrir (a página não fala com o SW em laço). A chave é lida direto do storage
   // deste perfil, e só a dica (os quatro últimos caracteres) entra no estado da tela.
   useEffect(() => {
-    void loadSettings().then((s) => setCfg(s.apiTranscription))
+    void loadSettings().then((s) => {
+      setCfg(s.apiTranscription)
+      setPanel((p) => p ?? panelOfActiveEngine(s.apiTranscription.ativa))
+    })
     void loadApiKey().then((k) => setKeyHint(apiKeyHint(k)))
+    void chrome.runtime.getPlatformInfo().then((info) => setOs(info.os)).catch(() => setOs(null))
   }, [])
+
+  // A permissão é da ORIGEM do endereço que vale: trocar o endereço troca a permissão a conferir.
+  const origin = cfg ? originPatternOf(endpointOf(cfg)) : null
+  useEffect(() => {
+    if (!origin) return setGranted(null)
+    let live = true
+    void chrome.permissions
+      .contains({ origins: [origin] })
+      .then((has) => {
+        if (live) setGranted(has)
+      })
+      .catch(() => {
+        if (live) setGranted(null)
+      })
+    return () => {
+      live = false
+    }
+  }, [origin])
+
+  const loadLocal = async () => {
+    const r = await uiCall({ t: 'ui:transcription' }).catch(asFailure)
+    if (!r.ok) return setLocalError(r.error)
+    setLocalError(null)
+    setLocal(r.state)
+  }
+
+  useEffect(() => {
+    if (helper?.ok) void loadLocal()
+    // Uma leitura ao abrir e uma por ação (a página não fala com o SW em laço).
+  }, [helper?.ok])
 
   /** Troca a configuração do motor por API neste perfil (chrome.storage.local, como o idioma). */
   const save = async (next: ApiTranscriptionConfig): Promise<boolean> => {
@@ -436,7 +575,7 @@ function TranscriptionSection({ helper }: { helper: HelperStatus | null }) {
       await clearApiKey()
       setKeyHint('')
       setKeyField('')
-      // Sem chave nada é enviado; o motor volta para o local, para a tela não mentir.
+      // Sem chave nada é enviado; o motor é desligado, para a tela não mentir.
       if (cfg?.ativa) await save({ ...cfg, ativa: false })
       setMessage({ ok: true, text: () => t('trApiKeyCleared') })
     } finally {
@@ -444,17 +583,21 @@ function TranscriptionSection({ helper }: { helper: HelperStatus | null }) {
     }
   }
 
-  /** Liga o motor por API: precisa da chave e da permissão de host, nesta ordem. */
+  /**
+   * Liga o motor por API: precisa da chave e da permissão de host, nesta ordem. Chamada no clique do
+   * usuário (o Chrome só concede permissão de host num gesto), e sem nenhum `await` antes do
+   * `chrome.permissions.request`. Uma permissão já concedida resolve na hora, sem diálogo.
+   */
   const enableApi = async () => {
     if (!cfg) return
     if (!keyHint) return setMessage({ ok: false, text: () => t('trApiKeyMissing') })
-    const origin = originPatternOf(endpointOf(cfg))
-    if (!origin) return setMessage({ ok: false, text: () => t('apiErrEndpoint', endpointOf(cfg)) })
+    const wanted = originPatternOf(endpointOf(cfg))
+    if (!wanted) return setMessage({ ok: false, text: () => t('apiErrEndpoint', endpointOf(cfg)) })
     setBusy(true)
     try {
-      // Pedida no clique do usuário (o Chrome só aceita num gesto) e tratada quando ele recusa.
-      const granted = await chrome.permissions.request({ origins: [origin] }).catch(() => false)
-      if (!granted) return setMessage({ ok: false, text: () => t('trApiPermissionDenied', provider.rotulo) })
+      const ok = await chrome.permissions.request({ origins: [wanted] }).catch(() => false)
+      setGranted(ok)
+      if (!ok) return setMessage({ ok: false, text: () => t('trApiPermissionDenied', provider.rotulo) })
       if (await save({ ...cfg, ativa: true })) setMessage({ ok: true, text: () => t('trApiReady') })
     } finally {
       setBusy(false)
@@ -462,13 +605,26 @@ function TranscriptionSection({ helper }: { helper: HelperStatus | null }) {
   }
 
   const disableApi = async () => {
-    if (!cfg) return
+    if (!cfg || !cfg.ativa) return
     setBusy(true)
     try {
       if (await save({ ...cfg, ativa: false })) setMessage({ ok: true, text: () => t('trApiOff') })
     } finally {
       setBusy(false)
     }
+  }
+
+  /**
+   * O clique no rádio. Ele muda o painel SEMPRE, na hora: é esta linha que corrige o defeito de
+   * clicar e nada se mexer. Escolher o computador desliga o motor por API (escolha explícita de não
+   * mandar áudio para fora); escolher a API tenta ligar, e quando falta chave ou permissão nada é
+   * ligado e nada é salvo, e a linha da situação diz o que falta.
+   */
+  const choosePanel = (next: EnginePanel) => {
+    setPanel(next)
+    setMessage(null)
+    if (next === 'local') void disableApi()
+    else if (keyHint) void enableApi()
   }
 
   const changeLanguage = async (idioma: string) => {
@@ -483,113 +639,152 @@ function TranscriptionSection({ helper }: { helper: HelperStatus | null }) {
     if (await save({ ...cfg, endpoint: clean })) setMessage({ ok: true, text: () => t('trApiSaved') })
   }
 
-  if (!cfg) return <p className="text-neutral-600 dark:text-neutral-400">{t('trReading')}</p>
+  if (!cfg || !panel) return <p className="text-neutral-600 dark:text-neutral-400">{t('trReading')}</p>
   const known = TRANSCRIPTION_LANGUAGES.map((l) => ({ value: l.value, label: t(l.labelKey) }))
   const languages = known.some((l) => l.value === cfg.idioma) ? known : [...known, { value: cfg.idioma, label: cfg.idioma }]
+  const situation = engineSituation(
+    panel,
+    { ativa: cfg.ativa, temChave: !!keyHint, temPermissao: granted, provedor: provider.rotulo },
+    {
+      helper: !helper ? 'verificando' : helper.ok ? 'presente' : 'ausente',
+      disponivel: localError ? false : local ? local.disponivel : null,
+      motivo: localError ? helperReason(localError) : local?.motivo ? helperReason(local.motivo) : t('reasonUnknown'),
+      modelo: local?.detalhes.modelo ?? '',
+    },
+  )
+
+  /** A linha que diz em que pé está o motor escolhido, com o botão que resolve o que falta. */
+  const situationLine = (
+    <div className="space-y-2 pl-6" data-testid="motor-situacao-caixa">
+      <p data-testid="motor-situacao" data-situacao={situation.kind} className={TONE_CLASS[situation.tone]}>
+        {t(situation.key, ...situation.subs)}
+      </p>
+      {situation.action && situation.actionKey && (
+        <button type="button" className={button} data-testid="motor-situacao-acao" data-acao={situation.action} disabled={busy} onClick={() => void enableApi()}>
+          {t(situation.actionKey, ...situation.actionSubs)}
+        </button>
+      )}
+    </div>
+  )
 
   return (
-    <div className="space-y-4" data-testid="transcricao-motor" data-motor={cfg.ativa ? 'api' : 'local'}>
+    <div className="space-y-4" data-testid="transcricao-motor" data-motor={cfg.ativa ? 'api' : 'local'} data-painel={panel}>
       <fieldset className="space-y-2">
         <legend className="font-medium">{t('trEngineChoice')}</legend>
         <label className="flex items-start gap-2">
-          <input type="radio" className="mt-1" name="motor-transcricao" data-testid="motor-local" checked={!cfg.ativa} disabled={busy} onChange={() => void disableApi()} />
+          <input
+            type="radio"
+            className="mt-1"
+            name="motor-transcricao"
+            data-testid="motor-local"
+            checked={panel === 'local'}
+            onChange={() => choosePanel('local')}
+          />
           <span>
             {t('trEngineLocal')}
             <span className="block text-neutral-600 dark:text-neutral-400">{t('trEngineLocalHint')}</span>
           </span>
         </label>
+        {panel === 'local' && situationLine}
         <label className="flex items-start gap-2">
-          <input type="radio" className="mt-1" name="motor-transcricao" data-testid="motor-api" checked={cfg.ativa} disabled={busy} onChange={() => void enableApi()} />
+          <input type="radio" className="mt-1" name="motor-transcricao" data-testid="motor-api" checked={panel === 'api'} onChange={() => choosePanel('api')} />
           <span>
             {t('trEngineApi')}
             <span className="block text-neutral-600 dark:text-neutral-400">{t('trEngineApiHint')}</span>
           </span>
         </label>
+        {panel === 'api' && situationLine}
       </fieldset>
 
-      {/* O aviso aparece ANTES de ligar: ele é a razão de a escolha existir. */}
-      <p data-testid="transcricao-api-privacidade" className="rounded-md bg-amber-100 p-2 text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-        {t('trApiPrivacy')}
-      </p>
-      <p className="text-neutral-600 dark:text-neutral-400">
-        <span data-testid="transcricao-api-custo">{t('trApiCost', formatMoney(dollarsPerHour(cfg)))}</span>{' '}
-        <span data-testid="transcricao-api-limite">{t('trApiLimit', `${Math.round(maxBytesOf(cfg) / (1024 * 1024))} MB`)}</span>
-      </p>
-
-      <div className="space-y-1">
-        <span className="block font-medium">{t('trApiKeyLabel')}</span>
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="password"
-            aria-label={t('trApiKeyAria')}
-            autoComplete="off"
-            placeholder={keyHint || 'sk-...'}
-            className={`${input} min-w-64 flex-1 font-mono`}
-            value={keyField}
-            disabled={busy}
-            onChange={(e) => setKeyField(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') void saveKey()
-            }}
-          />
-          <button type="button" className={button} disabled={busy || !keyField.trim()} onClick={() => void saveKey()}>
-            {t('trApiKeySave')}
-          </button>
-          {keyHint && (
-            <button type="button" className={button} data-testid="transcricao-api-apagar-chave" disabled={busy} onClick={() => void clearKey()}>
-              {t('trApiKeyClear')}
-            </button>
-          )}
-        </div>
-        {keyHint && (
-          <p data-testid="transcricao-api-chave" className="text-neutral-600 dark:text-neutral-400">
-            {t('trApiKeySaved', keyHint)}
+      {panel === 'api' ? (
+        <div className="space-y-4" data-testid="painel-api">
+          {/* O aviso aparece ANTES de ligar: ele é a razão de a escolha existir. */}
+          <p data-testid="transcricao-api-privacidade" className="rounded-md bg-amber-100 p-2 text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            {t('trApiPrivacy')}
           </p>
-        )}
-        <p className="text-neutral-600 dark:text-neutral-400">{t('trApiKeyHint')}</p>
-        <p>
-          <a className="text-blue-700 underline hover:no-underline dark:text-blue-400" href={provider.chaveUrl} target="_blank" rel="noreferrer">
-            {t('trApiKeyLink')}
-          </a>
-        </p>
-      </div>
+          <p className="text-neutral-600 dark:text-neutral-400">
+            <span data-testid="transcricao-api-custo">{t('trApiCost', formatMoney(dollarsPerHour(cfg)))}</span>{' '}
+            <span data-testid="transcricao-api-limite">{t('trApiLimit', `${Math.round(maxBytesOf(cfg) / (1024 * 1024))} MB`)}</span>
+          </p>
 
-      <label className="block space-y-1">
-        <span className="block">{t('trLanguageLabel')}</span>
-        <select aria-label={t('trApiLanguageAria')} className={input} value={cfg.idioma} disabled={busy} onChange={(e) => void changeLanguage(e.target.value)}>
-          {languages.map((l) => (
-            <option key={l.value} value={l.value}>
-              {l.label}
-            </option>
-          ))}
-        </select>
-      </label>
+          <div className="space-y-1">
+            <span className="block font-medium">{t('trApiKeyLabel')}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="password"
+                aria-label={t('trApiKeyAria')}
+                autoComplete="off"
+                placeholder={keyHint || 'sk-...'}
+                className={`${input} min-w-64 flex-1 font-mono`}
+                value={keyField}
+                disabled={busy}
+                onChange={(e) => setKeyField(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') void saveKey()
+                }}
+              />
+              <button type="button" className={button} disabled={busy || !keyField.trim()} onClick={() => void saveKey()}>
+                {t('trApiKeySave')}
+              </button>
+              {keyHint && (
+                <button type="button" className={button} data-testid="transcricao-api-apagar-chave" disabled={busy} onClick={() => void clearKey()}>
+                  {t('trApiKeyClear')}
+                </button>
+              )}
+            </div>
+            {keyHint && (
+              <p data-testid="transcricao-api-chave" className="text-neutral-600 dark:text-neutral-400">
+                {t('trApiKeySaved', keyHint)}
+              </p>
+            )}
+            <p className="text-neutral-600 dark:text-neutral-400">{t('trApiKeyHint')}</p>
+            <p>
+              <a className="text-blue-700 underline hover:no-underline dark:text-blue-400" href={provider.chaveUrl} target="_blank" rel="noreferrer">
+                {t('trApiKeyLink')}
+              </a>
+            </p>
+          </div>
 
-      <details className="rounded-md border border-neutral-200 p-2 dark:border-neutral-700">
-        <summary className="cursor-pointer font-medium">{t('trApiEndpointLabel')}</summary>
-        <div className="mt-3 space-y-1">
-          <input
-            aria-label={t('trApiEndpointAria')}
-            className={`${input} w-full font-mono`}
-            defaultValue={cfg.endpoint}
-            placeholder={provider.endpoint}
-            disabled={busy}
-            onBlur={(e) => void changeEndpoint(e.target.value)}
-          />
-          <p className="text-neutral-600 dark:text-neutral-400">{t('trApiEndpointHint')}</p>
+          <label className="block space-y-1">
+            <span className="block">{t('trLanguageLabel')}</span>
+            <select aria-label={t('trApiLanguageAria')} className={input} value={cfg.idioma} disabled={busy} onChange={(e) => void changeLanguage(e.target.value)}>
+              {languages.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <details className="rounded-md border border-neutral-200 p-2 dark:border-neutral-700">
+            <summary className="cursor-pointer font-medium">{t('trApiEndpointLabel')}</summary>
+            <div className="mt-3 space-y-1">
+              <input
+                aria-label={t('trApiEndpointAria')}
+                className={`${input} w-full font-mono`}
+                defaultValue={cfg.endpoint}
+                placeholder={provider.endpoint}
+                disabled={busy}
+                onBlur={(e) => void changeEndpoint(e.target.value)}
+              />
+              <p className="text-neutral-600 dark:text-neutral-400">{t('trApiEndpointHint')}</p>
+            </div>
+          </details>
         </div>
-      </details>
+      ) : (
+        <div className="space-y-4" data-testid="painel-local">
+          <LocalSetupDetails os={os} />
+          <div data-testid="transcricao-local" className="space-y-2">
+            <LocalTranscriptionSection helper={helper} state={local} loadError={localError} onReload={loadLocal} />
+          </div>
+        </div>
+      )}
 
       {message && (
         <p data-testid="transcricao-api-mensagem" className={message.ok ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}>
           {message.text()}
         </p>
       )}
-
-      <div className="space-y-2 border-t border-neutral-200 pt-3 dark:border-neutral-700" data-testid="transcricao-local">
-        <h3 className="font-medium">{t('trEngineLocal')}</h3>
-        <LocalTranscriptionSection helper={helper} />
-      </div>
     </div>
   )
 }

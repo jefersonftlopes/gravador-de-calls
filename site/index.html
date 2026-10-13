@@ -70,6 +70,67 @@
         </div>
       </div>
 
+      <h2>Transcrever no seu computador</h2>
+      <p>Transcrever cada call na sua própria máquina, sem mandar áudio para fora, exige o whisper.cpp, o ffmpeg e um modelo de reconhecimento de fala. A extensão mostra este mesmo passo a passo em Configurações, na seção Transcrição. Se você usa o <a href="https://claude.com/claude-code">Claude Code</a>, copie o prompt abaixo e cole nele: ele instala tudo e liga a extensão ao programa que transcreve.</p>
+      <pre class="prompt"><!--prompt-instalar:inicio-->Instalar a transcrição local da extensão Gravador de Calls
+
+Estou no macOS e quero transcrever as minhas calls no meu próprio computador, sem mandar o áudio para fora. A extensão Gravador de Calls já está instalada no Chrome. Falta instalar o programa que transcreve e ligar os dois. Faça isso por mim.
+
+Projeto: https://github.com/jefersonftlopes/gravador-de-calls
+
+Regras
+
+1. Confira cada passo antes de começar o seguinte, e me diga o que achou.
+2. Avise antes do download grande (o modelo de fala, 1,6 GB) e espere eu confirmar.
+3. NÃO rode npm install neste projeto. O programa que transcreve, o worker e o teste importam só módulos do Node e caminhos relativos, e npm run funciona sem a pasta node_modules. Isso poupa centenas de MB.
+4. Se um passo falhar, pare e me explique em linguagem simples o que deu errado e o que eu posso fazer.
+5. Nunca apague arquivo meu e nunca mexa nas minhas gravações.
+6. Se precisar da minha senha, pare e me diga o comando para eu rodar. Não peça a senha.
+
+Passos
+
+1. Conferir que este é um Mac: o programa que transcreve só tem instalador para macOS.
+   Comandos:
+       uname -s
+   Confira: `uname -s` responde Darwin. Em qualquer outro sistema, pare e me diga que o instalador existe só para macOS.
+
+2. O Node 22, o whisper.cpp e o ffmpeg, instalados pelo Homebrew.
+   Comandos:
+       brew install node
+       brew install whisper-cpp
+       brew install ffmpeg
+   Confira: `node --version` é 22 ou mais novo, `whisper-cli --help` responde (ele fica em /opt/homebrew/bin/whisper-cli) e `ffmpeg -version` responde.
+
+3. O projeto da extensão, baixado do GitHub para ~/Documents/gravador-de-calls.
+   Comandos:
+       git clone https://github.com/jefersonftlopes/gravador-de-calls.git ~/Documents/gravador-de-calls
+   Confira: o arquivo package.json existe em ~/Documents/gravador-de-calls.
+
+4. O modelo de reconhecimento de fala: 1,6 GB de download, o passo mais demorado.
+   Comandos:
+       mkdir -p "$HOME/Library/Application Support/gravador-de-calls/modelos"
+       curl -L --fail -o "$HOME/Library/Application Support/gravador-de-calls/modelos/ggml-large-v3-turbo.bin" https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin
+       stat -f%z "$HOME/Library/Application Support/gravador-de-calls/modelos/ggml-large-v3-turbo.bin"
+   Confira: o arquivo baixado tem exatamente 1624555275 bytes. Um arquivo cortado faz o whisper falhar sem explicar a causa.
+
+5. A ligação entre a extensão do Chrome e o programa que transcreve.
+   Comandos:
+       cd ~/Documents/gravador-de-calls
+       npm run instalar -- --id kpbjnbedejcbakdjacjmhaofidooddjp
+   Confira: o comando terminou sem erro e o id kpbjnbedejcbakdjacjmhaofidooddjp aparece no manifesto do host que ele escreveu.
+
+6. Uma call de teste, falada pelo próprio Mac, para provar que a transcrição funciona de ponta a ponta.
+   Comandos:
+       cd ~/Documents/gravador-de-calls
+       npm run teste:transcricao-real
+   Confira: o teste terminou dizendo que passou. Ele roda numa pasta temporária e não toca nas minhas gravações.
+
+No fim, o que fica comigo
+
+1. Escolher a pasta das gravações nas configurações da extensão.
+2. Deixar a opção "O seu computador" escolhida em Transcrição, nas configurações da extensão.<!--prompt-instalar:fim--></pre>
+      <p class="muted">O instalador existe só para macOS. Em outros sistemas, a transcrição pela API do provedor, com a sua chave, funciona do mesmo jeito. Código em <a href="https://github.com/jefersonftlopes/gravador-de-calls">github.com/jefersonftlopes/gravador-de-calls</a>.</p>
+
       <h2>Tudo fica no seu computador</h2>
       <p>A extensão não tem servidor, não pede conta e não tem analytics. As gravações ficam na sua pasta Downloads (ou na pasta escolhida, com o helper local), e o áudio de uma call em andamento fica guardado no próprio navegador só até ser salvo. Nada é enviado para a Enkode nem para ninguém. Detalhes na <a href="/privacidade">política de privacidade</a>.</p>
 

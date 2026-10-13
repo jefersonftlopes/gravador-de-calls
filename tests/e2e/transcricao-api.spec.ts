@@ -154,23 +154,33 @@ async function launch(): Promise<void> {
 }
 
 /**
- * Liga o motor por API pela TELA de configurações, como o usuário faz: o endereço do servidor
- * falso, a chave, e o rádio do motor (que pede a permissão de host).
+ * Liga o motor por API pela TELA de configurações, como o usuário faz: escolher a opção da API, o
+ * endereço do servidor falso, a chave e o botão que pede a permissão de host e liga.
+ *
+ * Emenda 22: o clique no rádio troca o PAINEL na hora, mesmo sem chave, e não liga nada; o aviso de
+ * privacidade, o custo, o limite, a chave e o endereço ficam dentro do painel da API, então eles
+ * aparecem depois da escolha (antes, estavam sempre na tela). Quem liga de verdade é o botão da linha
+ * da situação, junto da opção.
  */
 async function ligarMotorPelaTela(): Promise<Page> {
   const options = await h!.context.newPage()
   await options.goto(OPTIONS)
   const section = options.getByTestId('secao-transcricao')
-  // O aviso de privacidade aparece ANTES de ligar.
+  // Ao abrir, o painel escolhido é o do motor ativo (o local, que é o padrão).
+  await expect(section.getByTestId('transcricao-motor')).toHaveAttribute('data-painel', 'local')
+  await expect(section.getByTestId('transcricao-motor')).toHaveAttribute('data-motor', 'local')
+
+  // Escolher a API sem a chave troca o painel na hora e diz o que falta JUNTO da opção, e não liga.
+  await section.getByTestId('motor-api').click()
+  await expect(section.getByTestId('motor-api')).toBeChecked()
+  await expect(section.getByTestId('transcricao-motor')).toHaveAttribute('data-painel', 'api')
+  await expect(section.getByTestId('motor-situacao')).toContainText('Cole a chave da API antes de ligar')
+  await expect(section.getByTestId('transcricao-motor')).toHaveAttribute('data-motor', 'local')
+
+  // O aviso de privacidade aparece ANTES de ligar, no painel da API.
   await expect(section.getByTestId('transcricao-api-privacidade')).toContainText('o áudio da call, com a voz dos participantes, é enviado')
   await expect(section.getByTestId('transcricao-api-custo')).toContainText('US$ 0,36 por hora de call')
   await expect(section.getByTestId('transcricao-api-limite')).toContainText('25 MB')
-  await expect(section.getByTestId('transcricao-motor')).toHaveAttribute('data-motor', 'local')
-
-  // Ligar sem a chave não liga, e diz por quê.
-  await section.getByTestId('motor-api').click()
-  await expect(section.getByTestId('transcricao-api-mensagem')).toContainText('Cole a chave da API antes de ligar')
-  await expect(section.getByTestId('transcricao-motor')).toHaveAttribute('data-motor', 'local')
 
   // Endereço do servidor falso (em "Endereço da API") e a chave.
   await section.getByText('Endereço da API', { exact: true }).click()
@@ -183,9 +193,13 @@ async function ligarMotorPelaTela(): Promise<Page> {
   await expect(section.getByTestId('transcricao-api-chave')).toContainText('••••0000')
   await expect(options.locator('body')).not.toContainText(CHAVE_FALSA)
 
-  await section.getByTestId('motor-api').click()
+  // Com a chave guardada e a permissão do loopback já concedida, só falta ligar: o botão fica na
+  // linha da situação, debaixo da opção escolhida.
+  await expect(section.getByTestId('motor-situacao')).toHaveAttribute('data-situacao', 'api-desligado')
+  await section.getByTestId('motor-situacao-acao').click()
   await expect(section.getByTestId('transcricao-api-mensagem')).toContainText('as próximas calls deste perfil são transcritas pela API')
   await expect(section.getByTestId('transcricao-motor')).toHaveAttribute('data-motor', 'api')
+  await expect(section.getByTestId('motor-situacao')).toHaveAttribute('data-situacao', 'api-ligado')
   return options
 }
 
@@ -367,8 +381,11 @@ test('com o motor desligado, nada é enviado e a pasta sai sem transcrição', a
   await launch()
   const options = await h!.context.newPage()
   await options.goto(OPTIONS)
-  // Só a chave e o endereço, sem ligar o motor.
+  // Só a chave e o endereço, sem ligar o motor. Emenda 22: o painel da API é escolhido para os
+  // campos aparecerem, e escolher o painel não liga nada (o rádio é estado de tela).
   const section = options.getByTestId('secao-transcricao')
+  await section.getByTestId('motor-api').click()
+  await expect(section.getByTestId('transcricao-motor')).toHaveAttribute('data-painel', 'api')
   await section.getByText('Endereço da API', { exact: true }).click()
   await section.getByLabel('Endereço da API de transcrição').fill(fake!.url)
   await section.getByLabel('Endereço da API de transcrição').blur()

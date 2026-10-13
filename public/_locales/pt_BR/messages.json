@@ -815,6 +815,135 @@
   "trApiOff": {
     "message": "Desligado: nenhuma call deste perfil é enviada para a API."
   },
+  "trSitApiNoPermission": {
+    "message": "Falta permitir o acesso a $1. Sem essa permissão, nada é enviado."
+  },
+  "trSitGrant": {
+    "message": "Permitir o acesso a $1 e ligar"
+  },
+  "trSitTurnOn": {
+    "message": "Ligar a transcrição por API"
+  },
+  "trSitLocalReady": {
+    "message": "Pronto para transcrever neste computador, com o modelo $1."
+  },
+  "trSitLocalMissing": {
+    "message": "Falta instalar: $1. O passo a passo está aqui embaixo."
+  },
+  "trSitLocalNoHelper": {
+    "message": "Falta instalar o programa que transcreve. O passo a passo está aqui embaixo, com o prompt para o Claude Code fazer tudo."
+  },
+  "trSetupSummary": {
+    "message": "Como instalar neste computador (passo a passo e prompt para o Claude Code)"
+  },
+  "trSetupIntro": {
+    "message": "O que vai ser instalado, nesta ordem:"
+  },
+  "trSetupMacOnly": {
+    "message": "O instalador existe só para macOS, e este computador é $1. Aqui, quem transcreve é a API."
+  },
+  "trSetupPromptLabel": {
+    "message": "Prompt para colar no Claude Code"
+  },
+  "trSetupPromptHint": {
+    "message": "Abra o Claude Code e cole este texto. Ele instala tudo e liga a extensão ao programa que transcreve."
+  },
+  "trSetupCopy": {
+    "message": "Copiar"
+  },
+  "trSetupCopied": {
+    "message": "Copiado."
+  },
+  "trSetupCopyFailed": {
+    "message": "Não deu para copiar sozinho. O texto já está selecionado: copie com o atalho do teclado."
+  },
+  "trSetupRepo": {
+    "message": "Ver o projeto no GitHub"
+  },
+  "stepMacLabel": {
+    "message": "Conferir que este é um Mac: o programa que transcreve só tem instalador para macOS."
+  },
+  "stepMacCheck": {
+    "message": "`uname -s` responde Darwin. Em qualquer outro sistema, pare e me diga que o instalador existe só para macOS."
+  },
+  "stepDepsLabel": {
+    "message": "O Node 22, o whisper.cpp e o ffmpeg, instalados pelo Homebrew."
+  },
+  "stepDepsCheck": {
+    "message": "`node --version` é 22 ou mais novo, `whisper-cli --help` responde (ele fica em /opt/homebrew/bin/whisper-cli) e `ffmpeg -version` responde."
+  },
+  "stepProjectLabel": {
+    "message": "O projeto da extensão, baixado do GitHub para $1."
+  },
+  "stepProjectCheck": {
+    "message": "o arquivo package.json existe em $1."
+  },
+  "stepModelLabel": {
+    "message": "O modelo de reconhecimento de fala: $1 de download, o passo mais demorado."
+  },
+  "stepModelCheck": {
+    "message": "o arquivo baixado tem exatamente $1 bytes. Um arquivo cortado faz o whisper falhar sem explicar a causa."
+  },
+  "stepHelperLabel": {
+    "message": "A ligação entre a extensão do Chrome e o programa que transcreve."
+  },
+  "stepHelperCheck": {
+    "message": "o comando terminou sem erro e o id $1 aparece no manifesto do host que ele escreveu."
+  },
+  "stepProofLabel": {
+    "message": "Uma call de teste, falada pelo próprio Mac, para provar que a transcrição funciona de ponta a ponta."
+  },
+  "stepProofCheck": {
+    "message": "o teste terminou dizendo que passou. Ele roda numa pasta temporária e não toca nas minhas gravações."
+  },
+  "promptTitle": {
+    "message": "Instalar a transcrição local da extensão Gravador de Calls"
+  },
+  "promptIntro": {
+    "message": "Estou no macOS e quero transcrever as minhas calls no meu próprio computador, sem mandar o áudio para fora. A extensão Gravador de Calls já está instalada no Chrome. Falta instalar o programa que transcreve e ligar os dois. Faça isso por mim."
+  },
+  "promptRulesTitle": {
+    "message": "Regras"
+  },
+  "promptRuleStepByStep": {
+    "message": "Confira cada passo antes de começar o seguinte, e me diga o que achou."
+  },
+  "promptRuleBigDownload": {
+    "message": "Avise antes do download grande (o modelo de fala, $1) e espere eu confirmar."
+  },
+  "promptRuleNoNpmInstall": {
+    "message": "NÃO rode npm install neste projeto. O programa que transcreve, o worker e o teste importam só módulos do Node e caminhos relativos, e npm run funciona sem a pasta node_modules. Isso poupa centenas de MB."
+  },
+  "promptRuleExplain": {
+    "message": "Se um passo falhar, pare e me explique em linguagem simples o que deu errado e o que eu posso fazer."
+  },
+  "promptRuleNoDelete": {
+    "message": "Nunca apague arquivo meu e nunca mexa nas minhas gravações."
+  },
+  "promptRuleNoPassword": {
+    "message": "Se precisar da minha senha, pare e me diga o comando para eu rodar. Não peça a senha."
+  },
+  "promptStepsTitle": {
+    "message": "Passos"
+  },
+  "promptCommands": {
+    "message": "Comandos:"
+  },
+  "promptCheck": {
+    "message": "Confira:"
+  },
+  "promptRepo": {
+    "message": "Projeto:"
+  },
+  "promptEndTitle": {
+    "message": "No fim, o que fica comigo"
+  },
+  "promptEndFolder": {
+    "message": "Escolher a pasta das gravações nas configurações da extensão."
+  },
+  "promptEndEngine": {
+    "message": "Deixar a opção \"O seu computador\" escolhida em Transcrição, nas configurações da extensão."
+  },
   "apiErrKey": {
     "message": "o provedor recusou a chave da API: confira a chave nas configurações"
   },

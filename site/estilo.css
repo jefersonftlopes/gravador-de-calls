@@ -63,5 +63,12 @@ td:first-child { white-space: nowrap; }
 .grade h3 { font-size: 16px; margin: 0 0 4px; }
 .grade p { margin: 0; color: var(--muted); font-size: 15px; }
 .rec { color: var(--rec); }
+/* Prompt da instalação do motor local: gerado por `npm run prompt` a partir de
+   src/shared/instalar-local.ts, igual ao que a extensão mostra. */
+pre.prompt {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; margin: 12px 0; max-height: 420px; overflow: auto;
+  font-size: 13px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: break-word;
+}
 footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
 footer p { margin: 4px 0; }
