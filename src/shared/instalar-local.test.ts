@@ -133,5 +133,16 @@ describe('prompt para o Claude Code', () => {
       expect(prompt).not.toContain('```')
       expect(prompt.endsWith('\n')).toBe(true)
     })
+
+    // O fim do prompt manda a pessoa procurar duas frases NA TELA, entre aspas. Quem reescrever o
+    // rótulo da opção ou a situação "pronto" sem olhar o prompt deixaria a instrução mentindo, e
+    // ela estaria lendo uma tela que não diz mais aquilo. Este teste é esse laço.
+    it(`${locale}: as frases que o prompt manda conferir na tela são as frases da tela`, () => {
+      const citadas = [...tIn(locale, 'promptEndEngine').matchAll(/"([^"]+)"/g)].map((m) => m[1])
+      expect(citadas, 'o fim do prompt cita a opção e a situação').toHaveLength(2)
+      const [opcao, situacao] = citadas
+      expect(tIn(locale, 'trEngineLocal'), 'rótulo da opção do computador').toContain(opcao)
+      expect(tIn(locale, 'trSitLocalReady'), 'situação de pronto para transcrever').toContain(situacao)
+    })
   }
 })
