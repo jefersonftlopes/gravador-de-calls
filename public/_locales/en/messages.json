@@ -839,6 +839,9 @@
   "trSetupIntro": {
     "message": "What gets installed, in this order:"
   },
+  "trSetupNothingToType": {
+    "message": "Once the installation is done there is usually nothing to type here: just leave \"Your computer\" selected. Transcription is already on, and the last command of the prompt says which folder the recordings will land in."
+  },
   "trSetupMacOnly": {
     "message": "The installer only exists for macOS, and this computer runs $1. Here, the API is what transcribes."
   },
@@ -896,6 +899,12 @@
   "stepProofCheck": {
     "message": "the test finished saying it passed. It runs in a temporary folder and never touches my recordings."
   },
+  "stepVerifyLabel": {
+    "message": "A final check, which shows what is ready and which folder my recordings will land in."
+  },
+  "stepVerifyCheck": {
+    "message": "the last line starts with \"Tudo pronto\" (this command speaks Portuguese). It only reads, never changes anything, and it ends with an error when a piece is missing."
+  },
   "promptTitle": {
     "message": "Install local transcription for the Gravador de Calls extension"
   },
@@ -936,13 +945,16 @@
     "message": "Project:"
   },
   "promptEndTitle": {
-    "message": "What is left for me at the end"
+    "message": "At the end, tell me"
+  },
+  "promptEndExplain": {
+    "message": "Translate the output of the last command for me, in plain language: what is ready and what is still missing."
   },
   "promptEndFolder": {
-    "message": "Choose the recordings folder in the extension settings."
+    "message": "Tell me which folder my recordings will land in, the one the command showed."
   },
   "promptEndEngine": {
-    "message": "Leave the option \"Your computer\" selected under Transcription, in the extension settings."
+    "message": "Tell me I do not need to configure anything in the extension: transcription on my computer is already on. I only have to open the settings, check that \"Your computer\" is selected under Transcription and see the words \"Ready to transcribe\"."
   },
   "apiErrKey": {
     "message": "the provider rejected the API key: check the key in the settings"

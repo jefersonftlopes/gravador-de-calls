@@ -436,6 +436,11 @@ function LocalSetupDetails({ os }: { os: string | null }) {
             <li key={step.id}>{t(step.labelKey, ...stepLabelSubs(step, tag))}</li>
           ))}
         </ol>
+        {/* Emenda 23: depois da instalação a transcrição local já fica ligada e configurada, então
+            não há nada para digitar aqui. Dizer isso evita que a pessoa procure o que configurar. */}
+        <p data-testid="passo-a-passo-nada-digitar" className="text-neutral-700 dark:text-neutral-300">
+          {t('trSetupNothingToType')}
+        </p>
         <div className="space-y-1">
           <span className="block font-medium">{t('trSetupPromptLabel')}</span>
           <p className="text-neutral-600 dark:text-neutral-400">{t('trSetupPromptHint')}</p>

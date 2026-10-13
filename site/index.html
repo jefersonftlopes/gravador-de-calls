@@ -125,10 +125,17 @@ Passos
        npm run teste:transcricao-real
    Confira: o teste terminou dizendo que passou. Ele roda numa pasta temporária e não toca nas minhas gravações.
 
-No fim, o que fica comigo
+7. Uma conferência final, que mostra o que ficou pronto e em que pasta as minhas gravações vão cair.
+   Comandos:
+       cd ~/Documents/gravador-de-calls
+       npm run verificar
+   Confira: o comando terminou dizendo "Tudo pronto". Ele só lê, nunca muda nada, e termina com erro quando falta alguma peça.
 
-1. Escolher a pasta das gravações nas configurações da extensão.
-2. Deixar a opção "O seu computador" escolhida em Transcrição, nas configurações da extensão.<!--prompt-instalar:fim--></pre>
+No fim, me diga
+
+1. Traduza para mim a saída do último comando, em palavras de quem não é técnico: o que ficou pronto e o que ainda falta.
+2. Diga em que pasta as minhas gravações vão cair, a que o comando mostrou.
+3. Diga que eu não preciso configurar nada na extensão: a transcrição no meu computador já fica ligada. É só abrir as configurações, conferir que "O seu computador" está escolhido em Transcrição e ver a frase "Pronto para transcrever".<!--prompt-instalar:fim--></pre>
       <p class="muted">O instalador existe só para macOS. Em outros sistemas, a transcrição pela API do provedor, com a sua chave, funciona do mesmo jeito. Código em <a href="https://github.com/jefersonftlopes/gravador-de-calls">github.com/jefersonftlopes/gravador-de-calls</a>.</p>
 
       <h2>Tudo fica no seu computador</h2>

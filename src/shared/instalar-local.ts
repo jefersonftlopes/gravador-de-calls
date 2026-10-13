@@ -110,6 +110,14 @@ export const INSTALL_STEPS: readonly InstallStep[] = Object.freeze([
     checkKey: 'stepProofCheck',
     commands: Object.freeze([`cd ${PROJECT_DIR}`, 'npm run teste:transcricao-real']),
   }),
+  // Emenda 23: a prova anterior diz que transcreve, mas não diz onde as gravações vão cair nem onde
+  // cada peça foi achada. Este é o passo que o Claude Code traduz para quem instalou.
+  Object.freeze({
+    id: 'verificar',
+    labelKey: 'stepVerifyLabel',
+    checkKey: 'stepVerifyCheck',
+    commands: Object.freeze([`cd ${PROJECT_DIR}`, 'npm run verificar']),
+  }),
 ])
 
 /** As regras que o prompt impõe ao Claude Code, na ordem. */
@@ -122,8 +130,13 @@ export const PROMPT_RULES: readonly MessageKey[] = Object.freeze([
   'promptRuleNoPassword',
 ])
 
-/** O que fica com a pessoa, na própria extensão, depois de o Claude Code terminar. */
-export const PROMPT_END: readonly MessageKey[] = Object.freeze(['promptEndFolder', 'promptEndEngine'])
+/**
+ * O que o Claude Code diz no fim (Emenda 23). Era o que ficava com a pessoa na extensão (escolher a
+ * pasta e deixar o motor local escolhido); como a transcrição local já fica ligada e configurada
+ * sozinha depois da instalação, o fim passou a ser uma tradução da saída do `npm run verificar`:
+ * em que pasta as gravações caem, e que não há nada para digitar na extensão.
+ */
+export const PROMPT_END: readonly MessageKey[] = Object.freeze(['promptEndExplain', 'promptEndFolder', 'promptEndEngine'])
 
 /**
  * "1,6 GB" (ou "1.6 GB"), no formato do idioma. Em GB decimal, que é como o download é anunciado;

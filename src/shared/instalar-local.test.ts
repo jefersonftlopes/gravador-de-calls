@@ -35,8 +35,9 @@ describe('passos da instalação', () => {
     expect(faltando).toEqual([])
   })
 
-  it('os seis passos estão na ordem em que a pessoa os executa, e cada um tem comando', () => {
-    expect(INSTALL_STEPS.map((s) => s.id)).toEqual(['mac', 'dependencias', 'projeto', 'modelo', 'helper', 'prova'])
+  it('os sete passos estão na ordem em que a pessoa os executa, e cada um tem comando', () => {
+    // A conferência final (Emenda 23) é o último: ela só faz sentido com tudo já instalado.
+    expect(INSTALL_STEPS.map((s) => s.id)).toEqual(['mac', 'dependencias', 'projeto', 'modelo', 'helper', 'prova', 'verificar'])
     for (const step of INSTALL_STEPS) expect(step.commands.length, step.id).toBeGreaterThan(0)
   })
 
@@ -86,6 +87,10 @@ describe('prompt para o Claude Code', () => {
     ['o tamanho exato do modelo', (p) => expect(p).toContain(String(MODEL_BYTES))],
     ['a proibição do npm install', (p) => expect(p).toMatch(/npm install/)],
     ['a prova final', (p) => expect(p).toContain('npm run teste:transcricao-real')],
+    // Emenda 23: sem este comando, quem instalou não sabe onde as gravações vão cair.
+    ['a conferência final', (p) => expect(p).toContain('npm run verificar')],
+    ['o pedido de traduzir a saída da conferência', (p, locale) => expect(p).toContain(tIn(locale, 'promptEndExplain'))],
+    ['a frase de que não há nada para configurar na extensão', (p, locale) => expect(p).toContain(tIn(locale, 'promptEndEngine'))],
     [
       'os três brew install',
       (p) => {
@@ -101,7 +106,7 @@ describe('prompt para o Claude Code', () => {
       it(`${locale}: traz ${nome}`, () => confere(installPrompt(locale), locale))
     }
 
-    it(`${locale}: traz as seis regras, os seis passos numerados e os dois passos que ficam com a pessoa`, () => {
+    it(`${locale}: traz as seis regras, os sete passos numerados e as três coisas que ele diz no fim`, () => {
       const prompt = installPrompt(locale)
       const tag = localeTagOf(locale)
       expect(prompt.startsWith(tIn(locale, 'promptTitle'))).toBe(true)

@@ -64,10 +64,17 @@ Passos
        npm run teste:transcricao-real
    Confira: o teste terminou dizendo que passou. Ele roda numa pasta temporária e não toca nas minhas gravações.
 
-No fim, o que fica comigo
+7. Uma conferência final, que mostra o que ficou pronto e em que pasta as minhas gravações vão cair.
+   Comandos:
+       cd ~/Documents/gravador-de-calls
+       npm run verificar
+   Confira: o comando terminou dizendo "Tudo pronto". Ele só lê, nunca muda nada, e termina com erro quando falta alguma peça.
 
-1. Escolher a pasta das gravações nas configurações da extensão.
-2. Deixar a opção "O seu computador" escolhida em Transcrição, nas configurações da extensão.
+No fim, me diga
+
+1. Traduza para mim a saída do último comando, em palavras de quem não é técnico: o que ficou pronto e o que ainda falta.
+2. Diga em que pasta as minhas gravações vão cair, a que o comando mostrou.
+3. Diga que eu não preciso configurar nada na extensão: a transcrição no meu computador já fica ligada. É só abrir as configurações, conferir que "O seu computador" está escolhido em Transcrição e ver a frase "Pronto para transcrever".
 ```
 
 ## English
@@ -126,8 +133,15 @@ Steps
        npm run teste:transcricao-real
    Check: the test finished saying it passed. It runs in a temporary folder and never touches my recordings.
 
-What is left for me at the end
+7. A final check, which shows what is ready and which folder my recordings will land in.
+   Commands:
+       cd ~/Documents/gravador-de-calls
+       npm run verificar
+   Check: the last line starts with "Tudo pronto" (this command speaks Portuguese). It only reads, never changes anything, and it ends with an error when a piece is missing.
 
-1. Choose the recordings folder in the extension settings.
-2. Leave the option "Your computer" selected under Transcription, in the extension settings.
+At the end, tell me
+
+1. Translate the output of the last command for me, in plain language: what is ready and what is still missing.
+2. Tell me which folder my recordings will land in, the one the command showed.
+3. Tell me I do not need to configure anything in the extension: transcription on my computer is already on. I only have to open the settings, check that "Your computer" is selected under Transcription and see the words "Ready to transcribe".
 ```

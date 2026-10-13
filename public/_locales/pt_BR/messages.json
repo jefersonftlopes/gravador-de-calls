@@ -839,6 +839,9 @@
   "trSetupIntro": {
     "message": "O que vai ser instalado, nesta ordem:"
   },
+  "trSetupNothingToType": {
+    "message": "Terminada a instalação, normalmente não há nada para digitar aqui: basta deixar \"O seu computador\" escolhido. A transcrição já vem ligada, e o último comando do prompt diz em que pasta as gravações vão cair."
+  },
   "trSetupMacOnly": {
     "message": "O instalador existe só para macOS, e este computador é $1. Aqui, quem transcreve é a API."
   },
@@ -896,6 +899,12 @@
   "stepProofCheck": {
     "message": "o teste terminou dizendo que passou. Ele roda numa pasta temporária e não toca nas minhas gravações."
   },
+  "stepVerifyLabel": {
+    "message": "Uma conferência final, que mostra o que ficou pronto e em que pasta as minhas gravações vão cair."
+  },
+  "stepVerifyCheck": {
+    "message": "o comando terminou dizendo \"Tudo pronto\". Ele só lê, nunca muda nada, e termina com erro quando falta alguma peça."
+  },
   "promptTitle": {
     "message": "Instalar a transcrição local da extensão Gravador de Calls"
   },
@@ -936,13 +945,16 @@
     "message": "Projeto:"
   },
   "promptEndTitle": {
-    "message": "No fim, o que fica comigo"
+    "message": "No fim, me diga"
+  },
+  "promptEndExplain": {
+    "message": "Traduza para mim a saída do último comando, em palavras de quem não é técnico: o que ficou pronto e o que ainda falta."
   },
   "promptEndFolder": {
-    "message": "Escolher a pasta das gravações nas configurações da extensão."
+    "message": "Diga em que pasta as minhas gravações vão cair, a que o comando mostrou."
   },
   "promptEndEngine": {
-    "message": "Deixar a opção \"O seu computador\" escolhida em Transcrição, nas configurações da extensão."
+    "message": "Diga que eu não preciso configurar nada na extensão: a transcrição no meu computador já fica ligada. É só abrir as configurações, conferir que \"O seu computador\" está escolhido em Transcrição e ver a frase \"Pronto para transcrever\"."
   },
   "apiErrKey": {
     "message": "o provedor recusou a chave da API: confira a chave nas configurações"
