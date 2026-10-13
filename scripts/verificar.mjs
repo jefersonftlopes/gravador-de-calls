@@ -180,7 +180,9 @@ export function lines(state) {
   if (modelo.caminho) {
     out.push(`O modelo de reconhecimento de fala está em ${modelo.caminho}, com ${modelo.gb}.`)
   } else {
-    out.push(`O modelo de reconhecimento de fala não foi encontrado: ${modelo.motivo}`)
+    // O motivo do helper começa repetindo o assunto ("modelo não encontrado: ..."), porque na tela
+    // da extensão ele aparece sozinho, sem frase em volta. Aqui o assunto já está na frase.
+    out.push(`O modelo de reconhecimento de fala não foi encontrado: ${modelo.motivo.replace(/^modelo não encontrado:\s*/i, '')}`)
     if (modelo.pastas.length) {
       out.push('  Procurei nestas pastas:')
       for (const dir of modelo.pastas) out.push(`  - ${dir}`)

@@ -169,7 +169,9 @@ describe('npm run verificar', () => {
 
     const { out, code } = rodar(c)
     expect(code).toBe(1)
-    expect(out).toContain('O modelo de reconhecimento de fala não foi encontrado')
+    expect(out).toContain('O modelo de reconhecimento de fala não foi encontrado: baixe um modelo do whisper.cpp')
+    // O assunto já está na frase: o motivo do helper não repete "modelo não encontrado" dentro dela.
+    expect(out).not.toContain('não foi encontrado: modelo não encontrado')
     expect(out).toContain('Procurei nestas pastas:')
     expect(out).toContain(`  - ${c.modelDir}`)
     expect(out).toContain('Falta 1 coisa: o modelo de reconhecimento de fala.')
