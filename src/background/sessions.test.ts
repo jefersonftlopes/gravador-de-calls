@@ -1035,8 +1035,12 @@ describe('registros com dados da call não ficam para sempre (Emenda 10)', () =>
     const recent = await longSession()
     end(recent.port, recent.sessionId, 41)
     await vi.waitFor(() => expect(statusOf(recent.sessionId)).toBe('salva'))
+    // As duas idades saem do relógio de verdade, porque a poda compara com Date.now(). Deixar a
+    // "recente" com a hora falsa da sessão (T0, 06/10/2026) fazia o teste virar uma bomba de
+    // tempo: ele passou até o dia em que T0 completou 7 dias, e aí a recente também era podada.
     const eightDays = 8 * 24 * 3600_000
     fake.sessions.set(old.sessionId, { ...recOf(old.sessionId), endedAt: Date.now() - eightDays, startedAt: Date.now() - eightDays - 60_000 })
+    fake.sessions.set(recent.sessionId, { ...recOf(recent.sessionId), endedAt: Date.now(), startedAt: Date.now() - 60_000 })
     const open = await longSession()
     const mod = await load()
     await mod.recoverSessions()
