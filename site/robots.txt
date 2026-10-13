@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gravador-de-calls.vercel.app/sitemap.xml

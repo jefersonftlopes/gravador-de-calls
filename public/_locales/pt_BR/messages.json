@@ -1,0 +1,1172 @@
+{
+  "extName": {
+    "message": "Gravador de Calls"
+  },
+  "extDescription": {
+    "message": "Grava, aba por aba, só o áudio dos outros participantes das calls do Google Meet e do Microsoft Teams, no seu computador."
+  },
+  "actionTitle": {
+    "message": "Gravador de Calls"
+  },
+  "commandTabMode": {
+    "message": "Gravar esta aba pela captura de aba do Chrome (modo aba)"
+  },
+  "localeTag": {
+    "message": "pt-BR"
+  },
+  "privacyUrl": {
+    "message": "https://gravador-de-calls.vercel.app/privacidade"
+  },
+  "downloadsFolderName": {
+    "message": "Gravações de calls"
+  },
+  "datePattern": {
+    "message": "dd/MM HH:mm"
+  },
+  "dateTimePattern": {
+    "message": "dd/MM/yyyy 'às' HH:mm"
+  },
+  "untitled": {
+    "message": "Sem título"
+  },
+  "errUnknown": {
+    "message": "erro desconhecido"
+  },
+  "reasonUnknown": {
+    "message": "motivo desconhecido"
+  },
+  "platformOther": {
+    "message": "Outro site"
+  },
+  "tabModeTag": {
+    "message": "modo aba"
+  },
+  "durationSeconds": {
+    "message": "$1 s"
+  },
+  "durationMinutes": {
+    "message": "$1 min"
+  },
+  "durationHours": {
+    "message": "$1 h $2 min"
+  },
+  "audioArriving": {
+    "message": "chegando áudio"
+  },
+  "audioSilentFor": {
+    "message": "sem áudio há $1"
+  },
+  "audioSilentNow": {
+    "message": "sem áudio agora"
+  },
+  "audioNoneTryTabMode": {
+    "message": "nenhum áudio desde o início: experimente o modo aba"
+  },
+  "audioNoneYet": {
+    "message": "nenhum áudio ainda"
+  },
+  "vigiaOutOfCall": {
+    "message": "fora da call"
+  },
+  "vigiaNoCount": {
+    "message": "sem contagem agora · pico $1"
+  },
+  "vigiaLine": {
+    "message": "$1 na call · pico $2 · sai com $3 ou menos"
+  },
+  "vigiaLineAlone": {
+    "message": "$1 na call · pico $2 · sai se você ficar sozinho"
+  },
+  "vigiaDisarmed": {
+    "message": "(espera alguém entrar)"
+  },
+  "vigiaDrop": {
+    "message": "confirmando $1/$2"
+  },
+  "vigiaVia": {
+    "message": "via $1"
+  },
+  "vigiaNoCountPage": {
+    "message": "NÃO achei a contagem ($1x): $2"
+  },
+  "vigiaHintMeet": {
+    "message": "o selo de pessoas está na tela?"
+  },
+  "vigiaHintTeams": {
+    "message": "o painel People está aberto?"
+  },
+  "vigiaPagePrefix": {
+    "message": "vigia: $1"
+  },
+  "vigiaWaitingCall": {
+    "message": "esperando a call começar..."
+  },
+  "vigiaCallGone": {
+    "message": "a call sumiu ($1/$2)"
+  },
+  "vigiaClosing": {
+    "message": "fechando..."
+  },
+  "vigiaCouldNotLeave": {
+    "message": "NÃO consegui sair sozinho: confirme na aba"
+  },
+  "vigiaSrcTeamsPanel": {
+    "message": "painel People"
+  },
+  "vigiaSrcPageText": {
+    "message": "texto da página"
+  },
+  "vigiaSrcPeopleButton": {
+    "message": "botão de pessoas"
+  },
+  "vigiaSrcPeoplePanel": {
+    "message": "painel de pessoas"
+  },
+  "vigiaSrcPeopleButtonOld": {
+    "message": "botão de pessoas (interface antiga)"
+  },
+  "trNoticeOldHelper": {
+    "message": "Sem transcrição: $1."
+  },
+  "trNoticeUnavailable": {
+    "message": "Transcrição indisponível: $1. As calls ficam na fila até isso ser resolvido."
+  },
+  "helperNoAnswer": {
+    "message": "o helper não respondeu"
+  },
+  "trOldHelper": {
+    "message": "o helper instalado é de uma versão sem transcrição: rode npm run instalar de novo"
+  },
+  "helperChecking": {
+    "message": "Conferindo o helper..."
+  },
+  "helperCurrentFolder": {
+    "message": "pasta atual"
+  },
+  "helperNoWrite": {
+    "message": "O helper não consegue gravar em $1: salvando em Downloads/$2. Escolha outra pasta nas configurações (no macOS, confira também Privacidade e Segurança > Arquivos e Pastas do Google Chrome)."
+  },
+  "helperAbsent": {
+    "message": "Salvando em Downloads/$1."
+  },
+  "helperNotOpening": {
+    "message": "O helper está instalado, mas não abriu ($1): salvando em Downloads/$2. Rode npm run instalar de novo (depois de atualizar o Node ou mover a pasta do projeto, por exemplo); o motivo fica em ~/Library/Logs/gravador-de-calls/helper.log."
+  },
+  "hrNoPermission": {
+    "message": "sem permissão para gravar aí; no macOS, confira Ajustes do Sistema > Privacidade e Segurança > Arquivos e Pastas (o pedido sai em nome do Google Chrome)"
+  },
+  "hrNotAFolder": {
+    "message": "o caminho passa por um arquivo, não por uma pasta"
+  },
+  "hrReadOnly": {
+    "message": "o disco é só de leitura"
+  },
+  "hrDiskFull": {
+    "message": "o disco está cheio"
+  },
+  "hrDiskNotConnected": {
+    "message": "o disco não está conectado"
+  },
+  "hrCannotCreate": {
+    "message": "a pasta não existe e não deu para criar"
+  },
+  "hrProgramNotFoundAt": {
+    "message": "$1 não encontrado em $2 (confira o caminho nas configurações)"
+  },
+  "hrProgramNotFoundInstall": {
+    "message": "$1 não encontrado (instale com: brew install $2, ou informe o caminho nas configurações)"
+  },
+  "hrProgramNotExecutable": {
+    "message": "$1 não encontrado ou sem permissão de execução: $2"
+  },
+  "hrModelMissing": {
+    "message": "modelo não encontrado: baixe um modelo do whisper.cpp (ggml-tiny, base, small, medium ou large, como ggml-small.bin) para ~/.cache/whisper-models ou informe o caminho nas configurações"
+  },
+  "hrModelNotFoundAt": {
+    "message": "modelo não encontrado: $1"
+  },
+  "hrFfmpegFailed": {
+    "message": "o ffmpeg não conseguiu converter o áudio"
+  },
+  "hrWhisperFailed": {
+    "message": "o whisper-cli falhou (código $1)"
+  },
+  "hrLeftQueue": {
+    "message": "a transcrição saiu da fila sem terminar (veja o log do helper)"
+  },
+  "hrAudioMissing": {
+    "message": "áudio não encontrado"
+  },
+  "hrAbsolutePath": {
+    "message": "$1: use um caminho absoluto ou começando com ~"
+  },
+  "hrFfmpegTimeout": {
+    "message": "o ffmpeg passou do tempo limite convertendo o áudio"
+  },
+  "hrWhisperTimeout": {
+    "message": "o whisper-cli passou do tempo limite"
+  },
+  "hrWhisperNoJson": {
+    "message": "o whisper-cli terminou sem escrever o resultado (JSON)"
+  },
+  "hrInterrupted": {
+    "message": "a transcrição foi interrompida $1 vezes no meio; o áudio continua na pasta"
+  },
+  "hrAudioMissingFile": {
+    "message": "áudio não encontrado: $1"
+  },
+  "hrEngineUnavailable": {
+    "message": "motor de transcrição indisponível"
+  },
+  "hrUnknownEngine": {
+    "message": "motor desconhecido: $1"
+  },
+  "errRecentNotFound": {
+    "message": "gravação não encontrada nas últimas gravações"
+  },
+  "errDownloadNoId": {
+    "message": "gravação em Downloads sem o ID do download"
+  },
+  "errRecordingNotFound": {
+    "message": "gravação não encontrada"
+  },
+  "errTranscriptNeedsHelper": {
+    "message": "a transcrição precisa do helper local"
+  },
+  "errNotInTabMode": {
+    "message": "esta aba não está no modo aba"
+  },
+  "errCaptureNoAnswer": {
+    "message": "o documento da captura não respondeu"
+  },
+  "errCaptureDenied": {
+    "message": "captura de aba negada: $1"
+  },
+  "errCaptureBusy": {
+    "message": "Outra extensão (por exemplo, o Volume Master) já está capturando o som desta aba. Desligue essa extensão em chrome://extensions, ou feche e reabra a aba, e tente de novo."
+  },
+  "errWorkerNoAnswer": {
+    "message": "o service worker da extensão não respondeu ao pedido \"$1\" (ele pode estar rodando uma versão anterior: recarregue a extensão)"
+  },
+  "uiUnexpectedError": {
+    "message": "Algo falhou: $1"
+  },
+  "versionSkew": {
+    "message": "Este perfil ainda está com a versão $1 da extensão rodando. Recarregue a extensão para usar a versão $2."
+  },
+  "versionSkewUnknown": {
+    "message": "Este perfil ainda está com uma versão anterior da extensão rodando. Recarregue a extensão para usar a versão $1."
+  },
+  "versionReloadNow": {
+    "message": "Recarregar agora"
+  },
+  "versionReloadBlocked": {
+    "message": "Há uma gravação em andamento, e recarregar agora a encerraria. O botão volta quando ela terminar."
+  },
+  "versionAutoWaiting": {
+    "message": "Ela recarrega sozinha quando nada estiver em uso (esperando: $1)."
+  },
+  "versionGaveUp": {
+    "message": "A recarga sozinha já foi tentada para esta versão e o código não mudou: confira a pasta publicada e recarregue em chrome://extensions."
+  },
+  "autoReloadWaitRecording": {
+    "message": "gravação em andamento"
+  },
+  "autoReloadWaitSaving": {
+    "message": "gravação sendo salva"
+  },
+  "autoReloadWaitCall": {
+    "message": "aba do Meet ou do Teams aberta"
+  },
+  "autoReloadWaitVolume": {
+    "message": "volume de uma aba fora de 100%"
+  },
+  "autoReloadWaitStarting": {
+    "message": "captura de aba começando"
+  },
+  "autoReloadWaitOptions": {
+    "message": "página de configurações aberta"
+  },
+  "errTabNotFound": {
+    "message": "aba não encontrada"
+  },
+  "errInvalidVolume": {
+    "message": "volume inválido"
+  },
+  "errTabAlreadyRecording": {
+    "message": "esta aba já está sendo gravada"
+  },
+  "errTabNoAudio": {
+    "message": "a captura da aba veio sem áudio"
+  },
+  "errTabNoCaptureToReuse": {
+    "message": "a aba não tem captura para reaproveitar"
+  },
+  "errTabGetUserMedia": {
+    "message": "getUserMedia da aba: $1"
+  },
+  "errBlobNoInfo": {
+    "message": "sessão $1 sem info.json pendente"
+  },
+  "errBlobNoChunks": {
+    "message": "sessão $1 sem chunks no IndexedDB"
+  },
+  "errOffscreenTabFailed": {
+    "message": "o offscreen não conseguiu gravar a aba"
+  },
+  "errHelperDisconnected": {
+    "message": "helper desconectou"
+  },
+  "errHelperTimeout": {
+    "message": "helper não respondeu a $1 em $2 ms"
+  },
+  "errNoWritePermissionAt": {
+    "message": "sem permissão para gravar em $1"
+  },
+  "errDownloadInterrupted": {
+    "message": "download interrompido: $1"
+  },
+  "errDownloadNoReason": {
+    "message": "sem motivo"
+  },
+  "errDownloadGone": {
+    "message": "download $1 sumiu do histórico"
+  },
+  "errDownloadTimeout": {
+    "message": "download $1 não terminou em $2 ms"
+  },
+  "errBlobUrl": {
+    "message": "offscreen não montou o arquivo ($1): $2"
+  },
+  "errNoAnswer": {
+    "message": "sem resposta"
+  },
+  "errNoFreeName": {
+    "message": "não achei um nome livre para $1"
+  },
+  "errInvalidVolumeRequest": {
+    "message": "pedido de volume inválido"
+  },
+  "errVigiaInactive": {
+    "message": "o vigia não está ativo nesta aba"
+  },
+  "promptChooseFolder": {
+    "message": "Escolha a pasta das gravações de calls"
+  },
+  "promptChooseModel": {
+    "message": "Escolha o modelo do whisper.cpp (arquivo ggml-*.bin)"
+  },
+  "badgeRecording": {
+    "message": "Gravador de Calls: gravando esta call"
+  },
+  "badgeNoAudio": {
+    "message": "Gravador de Calls: gravando, mas sem nenhum áudio até agora (experimente o modo aba)"
+  },
+  "badgeReload": {
+    "message": "Gravador de Calls: recarregue esta aba para gravar a call"
+  },
+  "badgePendingSaves_one": {
+    "message": "Gravador de Calls: $1 gravação ainda não salva; abra para tentar de novo"
+  },
+  "badgePendingSaves_other": {
+    "message": "Gravador de Calls: $1 gravações ainda não salvas; abra para tentar de novo"
+  },
+  "badgeConsent": {
+    "message": "Gravador de Calls: leia e confirme o aviso para a gravação automática começar"
+  },
+  "badgeUpdateWaiting": {
+    "message": "Gravador de Calls: a versão $1 foi publicada; a extensão recarrega sozinha quando nenhuma gravação nem call estiver aberta"
+  },
+  "notifSaveFailedTitle": {
+    "message": "Não consegui salvar a gravação"
+  },
+  "notifSaveFailedMessage": {
+    "message": "O áudio está guardado na extensão e eu tento de novo a cada minuto. Não remova a extensão até salvar; o popup mostra o motivo e tem \"Tentar agora\"."
+  },
+  "notifNoAudioTitle": {
+    "message": "Não está chegando áudio"
+  },
+  "notifNoAudioMessage": {
+    "message": "Faz 1 minuto que a gravação não recebe áudio de ninguém. Grave pela captura da aba: atalho $1 ou \"Gravar esta aba\" no popup."
+  },
+  "shortcutUnset": {
+    "message": "sem atalho definido (troque em chrome://extensions/shortcuts)"
+  },
+  "notifReloadTitle": {
+    "message": "Recarregue a aba da call"
+  },
+  "notifReloadMessage": {
+    "message": "Esta aba foi aberta antes de o Gravador de Calls ser instalado ou atualizado. Recarregue a aba para gravar a call (recarregar sai da call em andamento)."
+  },
+  "notifReloadButton": {
+    "message": "Recarregar a aba (sai da call)"
+  },
+  "notifVigiaMessage": {
+    "message": "Não consegui sair da call sozinho: confirme na aba."
+  },
+  "popupLoading": {
+    "message": "Carregando..."
+  },
+  "popupSettings": {
+    "message": "Configurações"
+  },
+  "popupThisTab": {
+    "message": "nesta aba"
+  },
+  "popupReplayOff": {
+    "message": "Ouvindo em dobro? Desligar o som repetido"
+  },
+  "popupReplayOn": {
+    "message": "Sem som da call? Ligar o som repetido"
+  },
+  "popupReplayError": {
+    "message": "Não deu para trocar o som: $1"
+  },
+  "popupReplayFailed": {
+    "message": "não deu para trocar"
+  },
+  "popupStopError": {
+    "message": "Não deu para parar: $1"
+  },
+  "popupStopRefused": {
+    "message": "o service worker recusou o pedido"
+  },
+  "popupStopping": {
+    "message": "Parando..."
+  },
+  "popupStop": {
+    "message": "Parar"
+  },
+  "popupFailed": {
+    "message": "Não deu: $1"
+  },
+  "vigiaHeading": {
+    "message": "Sair sozinho (vigia)"
+  },
+  "vigiaLeaving": {
+    "message": "Saindo da call..."
+  },
+  "vigiaReading": {
+    "message": "Lendo o vigia..."
+  },
+  "vigiaOffForCall": {
+    "message": "Desligado nesta call. Volta a valer na próxima call desta aba."
+  },
+  "vigiaNotActive": {
+    "message": "O vigia não está ativo nesta aba. Recarregue a aba da call."
+  },
+  "vigiaWaitingFirst": {
+    "message": "aguardando a primeira leitura"
+  },
+  "vigiaSource": {
+    "message": "contagem: $1 ($2)"
+  },
+  "vigiaLeavingAttempt": {
+    "message": "saindo da call (tentativa $1)"
+  },
+  "vigiaLeaveNow": {
+    "message": "Sair agora"
+  },
+  "vigiaTurnOffForCall": {
+    "message": "Desligar nesta call"
+  },
+  "tabModeError": {
+    "message": "Modo aba: $1"
+  },
+  "tabModeNotPossible": {
+    "message": "não foi possível"
+  },
+  "tabModeStop": {
+    "message": "Parar o modo aba nesta aba"
+  },
+  "tabModeStart": {
+    "message": "Gravar esta aba (modo aba)"
+  },
+  "volumeHeading": {
+    "message": "Volume desta aba"
+  },
+  "volumeError": {
+    "message": "Não deu para mudar o volume: $1"
+  },
+  "volumeDefaultOutput": {
+    "message": "Fora de 100%, o som desta aba sai pela saída padrão do computador (não pelo fone escolhido dentro do site)."
+  },
+  "volumeOutsideSite": {
+    "message": "O volume continua valendo nesta aba depois de sair do site. O botão 100% devolve o som original."
+  },
+  "trCouldNotOpen": {
+    "message": "Não deu para abrir: $1"
+  },
+  "trNeedsHelper": {
+    "message": "Sem transcrição: ela precisa do helper local."
+  },
+  "trWaiting": {
+    "message": "Na fila, esperando: $1"
+  },
+  "trQueued": {
+    "message": "Na fila para transcrever."
+  },
+  "trRunning": {
+    "message": "Transcrevendo..."
+  },
+  "trReady": {
+    "message": "Transcrição pronta."
+  },
+  "trOpen": {
+    "message": "Abrir transcrição"
+  },
+  "trFailed": {
+    "message": "Transcrição falhou: $1"
+  },
+  "recentReveal": {
+    "message": "Mostrar no Finder"
+  },
+  "recentInDownloads": {
+    "message": "em Downloads"
+  },
+  "recentInterrupted": {
+    "message": "interrompida"
+  },
+  "pendingSaved": {
+    "message": "Salvo."
+  },
+  "pendingNotYet": {
+    "message": "Ainda não deu. Tento de novo a cada minuto."
+  },
+  "pendingHeading": {
+    "message": "Ainda não salvas"
+  },
+  "pendingKeep": {
+    "message": "O áudio está guardado na extensão: não remova a extensão até salvar."
+  },
+  "pendingTrying": {
+    "message": "Tentando..."
+  },
+  "pendingRetry": {
+    "message": "Tentar agora"
+  },
+  "popupSavingIn": {
+    "message": "Salvando em"
+  },
+  "popupHelperVersion": {
+    "message": "(helper $1)"
+  },
+  "popupProfileReminderBefore": {
+    "message": "Este perfil ainda não tem nome. Dê um nome (ex.: Trabalho) nas"
+  },
+  "popupProfileReminderLink": {
+    "message": "configurações"
+  },
+  "popupProfileReminderAfter": {
+    "message": ": ele vira a primeira pasta das gravações deste perfil."
+  },
+  "popupReloadTab": {
+    "message": "Esta aba foi aberta antes de o Gravador de Calls ser instalado ou atualizado: ela não grava até ser recarregada. Recarregar sai da call em andamento."
+  },
+  "popupRecordingNow": {
+    "message": "Gravando agora"
+  },
+  "popupNoneActive": {
+    "message": "Nenhuma gravação em andamento."
+  },
+  "popupRecentHeading": {
+    "message": "Últimas gravações"
+  },
+  "popupNothingYet": {
+    "message": "Nada gravado ainda."
+  },
+  "popupConsentNeeded": {
+    "message": "A gravação automática ainda não começou: antes, leia o aviso sobre o que é gravado e confirme."
+  },
+  "popupConsentOpen": {
+    "message": "Ler o aviso"
+  },
+  "optHeaderHint": {
+    "message": "Configurações. A pasta vale para todos os perfis do Chrome; o resto é só deste perfil."
+  },
+  "optHeaderHintNoHelper": {
+    "message": "Configurações deste perfil do Chrome."
+  },
+  "optSectionLanguage": {
+    "message": "Idioma"
+  },
+  "optLanguageAuto": {
+    "message": "Automático (idioma do Chrome)"
+  },
+  "optLanguageHint": {
+    "message": "Vale na hora para este perfil: configurações, popup, boas-vindas, ícone, notificações novas, o indicador na página da call e os textos das próximas gravações. O nome da extensão em chrome://extensions e a pasta em Downloads seguem o idioma do Chrome."
+  },
+  "optLanguageSaved": {
+    "message": "Idioma salvo: vale para este perfil do Chrome."
+  },
+  "optLanguageCannotSave": {
+    "message": "Não foi possível salvar o idioma: $1"
+  },
+  "optSectionFolder": {
+    "message": "Pasta das gravações"
+  },
+  "optSectionProfile": {
+    "message": "Este perfil"
+  },
+  "optSectionAuto": {
+    "message": "Gravação automática"
+  },
+  "optSectionLeave": {
+    "message": "Sair e fechar a call sozinho"
+  },
+  "optSectionTranscription": {
+    "message": "Transcrição"
+  },
+  "optSectionTabMode": {
+    "message": "Modo aba (plano B)"
+  },
+  "optSectionHelper": {
+    "message": "Helper local"
+  },
+  "optSectionAdvanced": {
+    "message": "Avançado: helper local"
+  },
+  "optAdvancedIntro": {
+    "message": "Escolher outra pasta e o próprio helper são recursos opcionais: exigem o helper local, ainda não distribuído pela loja. Sem ele, a extensão funciona completa e salva em Downloads/$1, e a transcrição pela API do provedor funciona do mesmo jeito."
+  },
+  "optAdvancedFolder": {
+    "message": "Escolher a pasta das gravações (qualquer pasta do computador, a mesma para todos os perfis) exige o helper local, ainda não distribuído pela loja."
+  },
+  "optAdvancedTranscription": {
+    "message": "Transcrever sozinho ao fim de cada call, na própria máquina, exige o helper local, ainda não distribuído pela loja."
+  },
+  "optSavingToDownloads": {
+    "message": "Salvando em Downloads/$1."
+  },
+  "optSavingToDownloadsHint": {
+    "message": "Uma pasta por call, com o áudio (audio.webm) e os dados da call (info.json). Para escolher outra pasta, veja Avançado."
+  },
+  "rootTypePath": {
+    "message": "Digite o caminho de uma pasta."
+  },
+  "rootCannotWrite": {
+    "message": "Não dá para gravar nessa pasta: $1"
+  },
+  "rootCannotSave": {
+    "message": "Não foi possível salvar a pasta: $1"
+  },
+  "rootSaved": {
+    "message": "Pasta salva no helper: vale para todos os perfis do Chrome."
+  },
+  "pickerCannotOpen": {
+    "message": "Não foi possível abrir o seletor: $1"
+  },
+  "rootLabel": {
+    "message": "Pasta raiz (digite o caminho ou escolha no Finder)"
+  },
+  "rootUse": {
+    "message": "Usar esta pasta"
+  },
+  "rootChoose": {
+    "message": "Escolher..."
+  },
+  "rootNotWritable": {
+    "message": "O helper não consegue gravar na pasta atual. Escolha outra."
+  },
+  "trAvailNo": {
+    "message": "Não dá para transcrever agora: $1. As gravações continuam sendo salvas normalmente."
+  },
+  "trAvailYes": {
+    "message": "Pronto para transcrever. Modelo:"
+  },
+  "trSaved": {
+    "message": "Transcrição salva no helper: vale para todos os perfis do Chrome."
+  },
+  "trCannotSave": {
+    "message": "Não foi possível salvar a transcrição: $1"
+  },
+  "trLoadError": {
+    "message": "Não deu para ler a transcrição do helper: $1"
+  },
+  "trReading": {
+    "message": "Lendo a transcrição..."
+  },
+  "trAutoLabel": {
+    "message": "Transcrever sozinho ao fim de cada call"
+  },
+  "trAutoHint": {
+    "message": "No seu computador, depois de salvar: transcricao.md e transcricao.srt aparecem na pasta da call. Com este motor, nada sai do computador."
+  },
+  "trEngine": {
+    "message": "Motor"
+  },
+  "trEngineAria": {
+    "message": "Motor de transcrição"
+  },
+  "trModelLabel": {
+    "message": "Modelo (vazio: o helper procura o melhor em ~/.cache/whisper-models e nas pastas comuns)"
+  },
+  "trModelAria": {
+    "message": "Modelo do whisper"
+  },
+  "trModelPlaceholder": {
+    "message": "vazio: descobrir sozinho"
+  },
+  "trChooseModel": {
+    "message": "Escolher modelo..."
+  },
+  "trLanguageLabel": {
+    "message": "Idioma das calls"
+  },
+  "trLanguageAria": {
+    "message": "Idioma da transcrição"
+  },
+  "trAdvanced": {
+    "message": "Avançado (caminhos dos programas)"
+  },
+  "trWhisperLabel": {
+    "message": "whisper-cli (vazio: PATH, /opt/homebrew/bin, /usr/local/bin)"
+  },
+  "trWhisperAria": {
+    "message": "Caminho do whisper-cli"
+  },
+  "trFfmpegLabel": {
+    "message": "ffmpeg (vazio: PATH, /opt/homebrew/bin, /usr/local/bin)"
+  },
+  "trFfmpegAria": {
+    "message": "Caminho do ffmpeg"
+  },
+  "trSave": {
+    "message": "Salvar transcrição"
+  },
+  "trEngineChoice": {
+    "message": "Quem transcreve"
+  },
+  "trEngineLocal": {
+    "message": "O seu computador (whisper.cpp)"
+  },
+  "trEngineLocalHint": {
+    "message": "Transcreve na própria máquina. Nada sai do computador. Exige o helper local (whisper.cpp, ffmpeg e um modelo de alguns GB), que ainda não é distribuído pela loja."
+  },
+  "trEngineApi": {
+    "message": "A API da OpenAI, com a sua chave"
+  },
+  "trEngineApiHint": {
+    "message": "A extensão manda o áudio da call para o servidor da OpenAI e recebe o texto de volta. Funciona sem instalar nada: só a sua chave."
+  },
+  "trApiPrivacy": {
+    "message": "Atenção: com este motor ligado, o áudio da call, com a voz dos participantes, é enviado para o servidor da OpenAI para ser transcrito. A chave fica só nesta máquina, neste perfil do Chrome. Grave e transcreva uma call só com o consentimento de quem participa."
+  },
+  "trApiCost": {
+    "message": "Custa cerca de US$$ $1 por hora de call, cobrados pela OpenAI na sua conta."
+  },
+  "trApiLimit": {
+    "message": "Call acima de $1 não é enviada (é o limite da API por requisição, cerca de 1 h 49 no formato que gravamos): a gravação fica com o aviso e o motor local transcreve."
+  },
+  "trApiKeyLabel": {
+    "message": "Chave da API"
+  },
+  "trApiKeyAria": {
+    "message": "Chave da API de transcrição"
+  },
+  "trApiLanguageAria": {
+    "message": "Idioma da API de transcrição"
+  },
+  "trApiKeySave": {
+    "message": "Guardar a chave"
+  },
+  "trApiKeyHint": {
+    "message": "A chave fica guardada só nesta máquina, neste perfil, e é usada apenas no cabeçalho da requisição ao provedor. Ela não vai para o info.json, para o log nem para nenhuma mensagem de erro."
+  },
+  "trApiKeyLink": {
+    "message": "Criar uma chave na OpenAI"
+  },
+  "trApiKeySaved": {
+    "message": "Chave guardada ($1)."
+  },
+  "trApiKeyClear": {
+    "message": "Apagar a chave"
+  },
+  "trApiKeyCleared": {
+    "message": "Chave apagada."
+  },
+  "trApiKeyMissing": {
+    "message": "Cole a chave da API antes de ligar."
+  },
+  "trApiKeyCannotSave": {
+    "message": "Não foi possível guardar a chave: $1"
+  },
+  "trApiEndpointLabel": {
+    "message": "Endereço da API"
+  },
+  "trApiEndpointAria": {
+    "message": "Endereço da API de transcrição"
+  },
+  "trApiEndpointHint": {
+    "message": "Vazio usa o endereço do provedor. Só um endereço do provedor declarado é aceito."
+  },
+  "trApiSaved": {
+    "message": "Transcrição por API salva neste perfil."
+  },
+  "trApiCannotSave": {
+    "message": "Não foi possível salvar: $1"
+  },
+  "trApiPermissionDenied": {
+    "message": "Sem a permissão de acesso a $1 nada é enviado, e o motor por API fica desligado."
+  },
+  "trApiReady": {
+    "message": "Pronto: as próximas calls deste perfil são transcritas pela API."
+  },
+  "trApiOff": {
+    "message": "Desligado: nenhuma call deste perfil é enviada para a API."
+  },
+  "apiErrKey": {
+    "message": "o provedor recusou a chave da API: confira a chave nas configurações"
+  },
+  "apiErrRate": {
+    "message": "o provedor pediu para esperar (limite de uso); vamos tentar de novo"
+  },
+  "apiErrServer": {
+    "message": "o provedor respondeu com erro ($1); vamos tentar de novo"
+  },
+  "apiErrNetwork": {
+    "message": "não deu para falar com o provedor (sem rede, DNS ou VPN); vamos tentar de novo"
+  },
+  "apiErrRequest": {
+    "message": "o provedor recusou o pedido (código $1)"
+  },
+  "apiErrTooLarge": {
+    "message": "a call é longa demais para a API ($1, acima do limite de $2): o motor local transcreve esta gravação"
+  },
+  "apiErrAttempts": {
+    "message": "a transcrição por API falhou $1 vezes; o áudio guardado foi apagado"
+  },
+  "apiErrAttemptsWhy": {
+    "message": "a transcrição por API falhou $1 vezes e o áudio guardado foi apagado; o último motivo foi: $2"
+  },
+  "apiErrAge": {
+    "message": "o áudio guardado passou de $1 h esperando a transcrição e foi apagado"
+  },
+  "apiErrSpace": {
+    "message": "o áudio guardado passou do limite de $1 e foi apagado para não encher o disco"
+  },
+  "apiErrNoKey": {
+    "message": "sem a chave da API: cole a chave nas configurações"
+  },
+  "apiErrNoPermission": {
+    "message": "sem a permissão de acesso a $1: ligue o motor por API de novo nas configurações"
+  },
+  "apiErrEndpoint": {
+    "message": "endereço da API não permitido: $1"
+  },
+  "apiErrOff": {
+    "message": "a transcrição por API está desligada neste perfil"
+  },
+  "apiErrWrite": {
+    "message": "a transcrição ficou pronta, mas não deu para escrever na pasta da call: $1"
+  },
+  "apiErrHelperOld": {
+    "message": "o helper instalado é de uma versão anterior à $1 e transcreveria a mesma call no motor local: rode npm run instalar de novo"
+  },
+  "langAuto": {
+    "message": "Detectar sozinho"
+  },
+  "langPt": {
+    "message": "Português"
+  },
+  "langEn": {
+    "message": "Inglês"
+  },
+  "langEs": {
+    "message": "Espanhol"
+  },
+  "langFr": {
+    "message": "Francês"
+  },
+  "langDe": {
+    "message": "Alemão"
+  },
+  "langIt": {
+    "message": "Italiano"
+  },
+  "shortcutIntro": {
+    "message": "Quando a gravação automática não pega o áudio (o badge fica âmbar), grave pela captura da aba do Chrome: pelo atalho ou pelo botão \"Gravar esta aba\" no popup. Você continua ouvindo a call normalmente."
+  },
+  "shortcutLabel": {
+    "message": "Atalho:"
+  },
+  "shortcutNone": {
+    "message": "nenhum"
+  },
+  "shortcutChange": {
+    "message": "Trocar o atalho"
+  },
+  "pinHint": {
+    "message": "Fixe o ícone do Gravador de Calls na barra (o quebra-cabeça ao lado da barra de endereço, depois o alfinete), em cada perfil. É nele que aparecem o REC, o aviso de \"sem áudio\" e o de \"recarregue a aba\"."
+  },
+  "optLabelSaved": {
+    "message": "Nome do perfil salvo: vale para as próximas gravações deste perfil."
+  },
+  "optLabelCannotSave": {
+    "message": "Não foi possível salvar o nome: $1"
+  },
+  "optSaved": {
+    "message": "Configurações deste perfil salvas."
+  },
+  "optCannotSave": {
+    "message": "Não foi possível salvar: $1"
+  },
+  "optProfileName": {
+    "message": "Nome deste perfil (ex.: Trabalho)"
+  },
+  "optProfileHint": {
+    "message": "Vai no info.json e vira a primeira pasta das gravações deste perfil. Vazio: sem esse nível. O Chrome não informa o nome do perfil para extensões, por isso ele é digitado aqui."
+  },
+  "optPreviewPattern": {
+    "message": "AAAA-MM/AAAA-MM-DD HHhMM - título (Meet|Teams)/"
+  },
+  "optAutoMeet": {
+    "message": "Gravar sozinho as calls do Google Meet"
+  },
+  "optAutoTeams": {
+    "message": "Gravar sozinho as calls do Microsoft Teams"
+  },
+  "optMinSeconds": {
+    "message": "Descartar gravações com menos de (segundos)"
+  },
+  "optMinSecondsHint": {
+    "message": "Evita guardar a call em que você entrou e saiu sem querer."
+  },
+  "optAutoLeave": {
+    "message": "Sair e fechar a aba quando a call esvaziar"
+  },
+  "optAutoLeaveHint": {
+    "message": "Desligado por padrão: sair de uma call não tem volta. A aba só fecha depois de a gravação ser salva."
+  },
+  "optLeaveWhen": {
+    "message": "Quando sair"
+  },
+  "optModeAlone": {
+    "message": "Quando eu ficar sozinho na call"
+  },
+  "optModeProportionName": {
+    "message": "Quando sair boa parte das pessoas"
+  },
+  "optModeProportionLead": {
+    "message": "Quando sair boa parte das pessoas:"
+  },
+  "optModeProportionBefore": {
+    "message": "restar"
+  },
+  "optModeProportionAfter": {
+    "message": "ou menos do maior número de pessoas que a call teve"
+  },
+  "optFractionAria": {
+    "message": "Quanto do maior número de pessoas pode restar"
+  },
+  "fraction75": {
+    "message": "três quartos (75%)"
+  },
+  "fraction50": {
+    "message": "metade (50%)"
+  },
+  "fraction30": {
+    "message": "30% (o padrão)"
+  },
+  "fraction25": {
+    "message": "um quarto (25%)"
+  },
+  "fractionOther": {
+    "message": "$1%"
+  },
+  "optModeCountName": {
+    "message": "Quando restarem poucas pessoas"
+  },
+  "optModeCountBefore": {
+    "message": "Quando restarem"
+  },
+  "optModeCountAfter": {
+    "message": "pessoas ou menos, contando você"
+  },
+  "optCountAria": {
+    "message": "Número de pessoas, contando você"
+  },
+  "optConfirmLabel": {
+    "message": "Confirmar antes de sair"
+  },
+  "optConfirmHint": {
+    "message": "O vigia confere a contagem de novo durante esse tempo, para não sair por um número errado de um instante. Se você ficar sozinho, sai na hora."
+  },
+  "confirmNow": {
+    "message": "na hora"
+  },
+  "confirmSeconds": {
+    "message": "$1 s"
+  },
+  "vigiaExampleAlone": {
+    "message": "Exemplo: numa call que chegou a $1 pessoas, o vigia espera todo mundo sair e sai na hora em que você ficar sozinho."
+  },
+  "vigiaExampleLimit": {
+    "message": "Exemplo: numa call que chegou a $1 pessoas, o vigia sai quando restarem $2 ou menos, $3. Se você ficar sozinho, sai na hora."
+  },
+  "vigiaExampleSmall": {
+    "message": "Numa call que nunca passou de $1 pessoas, só sai quando você ficar sozinho."
+  },
+  "vigiaWaitSeconds": {
+    "message": "depois de $1 s confirmando"
+  },
+  "vigiaWaitNow": {
+    "message": "sem esperar"
+  },
+  "optExampleInvalid": {
+    "message": "Corrija os números para ver o exemplo."
+  },
+  "optVigiaIndicator": {
+    "message": "Mostrar o indicador na página da call (\"6 na call · pico 10 · sai com 5 ou menos\")"
+  },
+  "optVigiaAdvanced": {
+    "message": "Ajustes finos"
+  },
+  "optVigiaRestore": {
+    "message": "Voltar aos valores padrão"
+  },
+  "optSave": {
+    "message": "Salvar"
+  },
+  "vigiaFieldInterval": {
+    "message": "Conferir a contagem a cada (segundos)"
+  },
+  "vigiaFieldIntervalHint": {
+    "message": "Padrão: 5. O tempo de \"Confirmar antes de sair\" é contado nessas conferências."
+  },
+  "vigiaFieldMinimum": {
+    "message": "\"Boa parte das pessoas\": sair também quando restarem até (pessoas)"
+  },
+  "vigiaFieldMinimumHint": {
+    "message": "Vale mesmo que a proporção dê menos. Padrão: 2 (numa call de 4 com 30%, sai quando restarem 2)."
+  },
+  "vigiaFieldPeak": {
+    "message": "\"Boa parte das pessoas\" só vale em call que chegou a (pessoas)"
+  },
+  "vigiaFieldPeakHint": {
+    "message": "Numa call menor, só sai quando você ficar sozinho. Padrão: 4."
+  },
+  "vigiaFieldMisses": {
+    "message": "Fechar a aba quando a call sumir da tela por (conferências seguidas)"
+  },
+  "vigiaFieldMissesHint": {
+    "message": "Para quando a call acaba sem você sair (o organizador encerrou, a internet caiu). Padrão: 3."
+  },
+  "formInteger": {
+    "message": "use um número inteiro"
+  },
+  "formNumber": {
+    "message": "digite um número"
+  },
+  "formInvalid": {
+    "message": "valor inválido"
+  },
+  "formMinChars": {
+    "message": "no mínimo $1 caracteres"
+  },
+  "formMin": {
+    "message": "no mínimo $1"
+  },
+  "formMaxChars": {
+    "message": "no máximo $1 caracteres"
+  },
+  "formMax": {
+    "message": "no máximo $1"
+  },
+  "formFractionBelowOne": {
+    "message": "use uma fração menor que 1 (com 1, sairia sem ninguém ter saído)"
+  },
+  "formPeakAboveMinimum": {
+    "message": "use um número maior que o de \"sair também quando restarem até\" ($1); senão o vigia sairia de uma call cheia"
+  },
+  "formPeopleRange": {
+    "message": "escolha de 1 a 50 pessoas"
+  },
+  "formAbsolutePath": {
+    "message": "use um caminho absoluto ou começando com ~"
+  },
+  "formLanguageCode": {
+    "message": "use auto ou um código de idioma como pt ou en"
+  },
+  "helperStatusInstalled": {
+    "message": "Instalado (versão $1). Ele grava na pasta escolhida, aos poucos, durante a call."
+  },
+  "helperStatusNotOpening": {
+    "message": "Instalado, mas não abre ($1): as gravações vão para $2."
+  },
+  "helperStatusAbsent": {
+    "message": "Não instalado: as gravações vão para $1."
+  },
+  "helperHowTo": {
+    "message": "Para instalar (atende todos os perfis), na pasta do projeto:"
+  },
+  "helperHowToHint": {
+    "message": "Não precisa recarregar a extensão: em até 15 s ela encontra o helper. Rode de novo depois de atualizar o projeto, mover a pasta dele ou trocar a versão do Node. Para remover:"
+  },
+  "optConsentLink": {
+    "message": "O que é gravado e o aviso sobre consentimento"
+  },
+  "optPrivacyLink": {
+    "message": "Política de privacidade"
+  },
+  "welcomeTitle": {
+    "message": "Bem-vindo ao Gravador de Calls"
+  },
+  "welcomeIntro": {
+    "message": "Antes da primeira gravação, veja o que a extensão faz e confirme no fim da página."
+  },
+  "welcomeWhatTitle": {
+    "message": "O que é gravado"
+  },
+  "welcomeWhatRemote": {
+    "message": "Só o áudio que chega dos outros participantes das calls do Google Meet e do Microsoft Teams, cada aba na sua gravação."
+  },
+  "welcomeWhatNoMic": {
+    "message": "Nunca o seu microfone: a sua voz não entra na gravação."
+  },
+  "welcomeWhatAuto": {
+    "message": "A gravação começa sozinha quando a call começa e termina quando você sai. Dá para desligar por plataforma nas configurações, e o ícone mostra REC na aba que está gravando."
+  },
+  "welcomeWhereTitle": {
+    "message": "Onde fica"
+  },
+  "welcomeWhereDownloads": {
+    "message": "No seu computador, em Downloads/$1: uma pasta por call, com o áudio (audio.webm) e os dados da call (info.json)."
+  },
+  "welcomeWhereNothingLeaves": {
+    "message": "Nada sai do computador: a extensão não tem servidor, não envia as gravações a ninguém e não coleta dados de uso."
+  },
+  "welcomeConsentTitle": {
+    "message": "Consentimento dos participantes"
+  },
+  "welcomeConsentLaw": {
+    "message": "Gravar uma conversa pode exigir o consentimento de todos os participantes, conforme o país e o estado. No Brasil, a LGPD trata a voz como dado pessoal; em alguns estados dos Estados Unidos, todos os participantes precisam concordar com a gravação."
+  },
+  "welcomeConsentAdvice": {
+    "message": "Avise os participantes antes de gravar. Você é responsável por usar a gravação de acordo com a lei do lugar onde você e eles estão."
+  },
+  "welcomeAck": {
+    "message": "Entendi"
+  },
+  "welcomeAckHint": {
+    "message": "Até você confirmar, a gravação automática fica desligada neste perfil do Chrome."
+  },
+  "welcomeAcked": {
+    "message": "Tudo certo: a gravação automática está ligada neste perfil. Pode fechar esta aba."
+  },
+  "welcomeAckedAt": {
+    "message": "Confirmado em $1."
+  },
+  "welcomeAckError": {
+    "message": "Não deu para salvar a confirmação: $1"
+  },
+  "speakerYou": {
+    "message": "Você"
+  },
+  "speakerUnknown": {
+    "message": "Participante $1"
+  },
+  "speakerYouNotRecorded": {
+    "message": "(sua fala não é gravada)"
+  }
+}

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gravador de Calls: grave o áudio das suas calls, aba por aba</title>
+  <meta name="description" content="Extensão do Chrome que grava sozinha, aba por aba, o áudio dos outros participantes das calls do Google Meet e do Microsoft Teams. Tudo fica no seu computador." />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon" type="image/svg+xml" href="/img/icone.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/icone-32.png" />
+  <link rel="apple-touch-icon" href="/img/icone-128.png" />
+  <link rel="alternate" hreflang="pt-BR" href="https://gravador-de-calls.vercel.app/" />
+  <link rel="alternate" hreflang="en" href="https://gravador-de-calls.vercel.app/en" />
+  <link rel="stylesheet" href="/estilo.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topo">
+      <a class="marca" href="/"><img src="/img/icone.svg" alt="" width="32" height="32" />Gravador de Calls</a>
+      <a class="idioma" href="/en" hreflang="en" lang="en">English</a>
+    </div>
+
+    <main>
+      <div class="hero">
+        <img src="/img/icone.svg" alt="Ícone do Gravador de Calls" width="96" height="96" />
+        <div>
+          <h1>Grave as suas calls, aba por aba</h1>
+          <p>Extensão do Chrome que grava sozinha o áudio dos outros participantes das calls do Google Meet e do Microsoft Teams. Tudo fica no seu computador.</p>
+        </div>
+      </div>
+
+      <div class="acoes">
+        <a class="botao" href="https://chromewebstore.google.com/detail/gravador-de-calls/kpbjnbedejcbakdjacjmhaofidooddjp?hl=pt-BR" data-loja>Instalar pela Chrome Web Store</a>
+        <a href="/privacidade">Política de privacidade</a>
+      </div>
+
+      <h2>O que ele faz</h2>
+      <div class="grade">
+        <div class="card">
+          <h3>Começa sozinho</h3>
+          <p>Quando a call começa de fato (depois da tela de entrada e da sala de espera), a gravação daquela aba começa sem clique. O ícone mostra <span class="rec">REC</span> na aba.</p>
+        </div>
+        <div class="card">
+          <h3>Uma gravação por aba</h3>
+          <p>Três calls abertas ao mesmo tempo viram três gravações separadas, sem misturar o áudio de uma com o da outra.</p>
+        </div>
+        <div class="card">
+          <h3>Só os outros participantes</h3>
+          <p>Grava o áudio que a página da call recebe das outras pessoas. O seu microfone nunca entra na gravação.</p>
+        </div>
+        <div class="card">
+          <h3>Salva com os dados da call</h3>
+          <p>No fim, o áudio (<code>audio.webm</code>) e um <code>info.json</code> com título, data, duração e os nomes dos participantes vão para <code>Downloads/Gravações de calls</code> (<code>Downloads/Call recordings</code> com o Chrome em inglês), numa pasta por call.</p>
+        </div>
+        <div class="card">
+          <h3>Modo aba</h3>
+          <p>Se uma call não pegar áudio, o atalho Alt+Shift+G grava o que a aba toca, também em outros sites.</p>
+        </div>
+        <div class="card">
+          <h3>Volume desta aba</h3>
+          <p>Ajuste o volume de qualquer aba de 0% a 200% pelo popup, sem mudar o nível das gravações.</p>
+        </div>
+        <div class="card">
+          <h3>Sair quando a call esvaziar</h3>
+          <p>Opcional e desligado por padrão: sai da call e fecha a aba quando você fica sozinho ou quando quase todos já saíram, depois de salvar a gravação.</p>
+        </div>
+        <div class="card">
+          <h3>Avançado: pasta escolhida e transcrição</h3>
+          <p>Gravar numa pasta à sua escolha e transcrever cada call no próprio computador exigem o helper local, que ainda não é distribuído pela loja. Sem ele, tudo acima funciona normalmente.</p>
+        </div>
+      </div>
+
+      <h2>Tudo fica no seu computador</h2>
+      <p>A extensão não tem servidor, não pede conta e não tem analytics. As gravações ficam na sua pasta Downloads (ou na pasta escolhida, com o helper local), e o áudio de uma call em andamento fica guardado no próprio navegador só até ser salvo. Nada é enviado para a Enkode nem para ninguém. Detalhes na <a href="/privacidade">política de privacidade</a>.</p>
+
+      <h2>Avise quem está na call</h2>
+      <p>Gravar uma conversa pode exigir o consentimento de todos os participantes, conforme o país e o estado (no Brasil, a LGPD; em vários lugares, o consentimento de todas as partes). Quem decide gravar é você, e avisar os participantes é responsabilidade sua.</p>
+
+      <p class="muted">Google Meet e Microsoft Teams são marcas dos seus respectivos titulares. O Gravador de Calls é uma ferramenta independente, sem afiliação, patrocínio ou endosso do Google ou da Microsoft.</p>
+    </main>
+
+    <footer>
+      <p class="muted">© 2026 Enkode. Contato: <a href="mailto:jefersonftlopes@gmail.com">jefersonftlopes@gmail.com</a></p>
+      <p class="muted"><a href="/privacidade">Política de privacidade</a> · <a href="/en" hreflang="en" lang="en">English</a></p>
+    </footer>
+  </div>
+</body>
+</html>

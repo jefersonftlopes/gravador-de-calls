@@ -1,0 +1,67 @@
+/* Site do Gravador de Calls: landing e política de privacidade. Mesma estrutura de tokens da
+   página de privacidade do Zapdesk (precedente), com o azul do ícone como destaque. */
+:root {
+  --bg: #ffffff; --fg: #1f2937; --muted: #5b6472; --border: #e5e7eb;
+  --card: #f6f8fb; --accent: #2563eb; --btn: #2563eb; --accent-fg: #ffffff; --link: #1d4ed8; --rec: #dc2626;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f141a; --fg: #e5e7eb; --muted: #9aa4b2; --border: #222b36;
+    --card: #151c24; --accent: #3b82f6; --btn: #2563eb; --accent-fg: #ffffff; --link: #7aa7ff; --rec: #f87171;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.65; font-size: 16px;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 32px 16px 80px; }
+.topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+.marca { display: flex; align-items: center; gap: 10px; color: var(--fg); text-decoration: none; font-weight: 600; }
+.marca img { width: 32px; height: 32px; }
+.idioma { font-size: 14px; color: var(--link); }
+header.doc { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 8px; }
+h1 { font-size: 28px; margin: 0 0 8px; line-height: 1.25; }
+h2 { font-size: 19px; margin: 34px 0 10px; }
+.muted { color: var(--muted); font-size: 14px; }
+a { color: var(--link); }
+ul { padding-left: 22px; }
+li { margin: 4px 0; }
+code { font-size: 0.92em; background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 18px; margin: 12px 0;
+}
+.card p { margin: 6px 0; }
+strong { font-weight: 600; }
+.badge {
+  display: inline-block; font-size: 12px; color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 999px; padding: 2px 10px; margin-bottom: 12px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 15px; margin: 12px 0; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; }
+td:first-child { white-space: nowrap; }
+@media (max-width: 520px) { td:first-child { white-space: normal; } }
+
+/* Landing */
+.hero { display: flex; gap: 20px; align-items: center; margin: 8px 0 12px; }
+.hero img { width: 96px; height: 96px; flex: none; }
+.hero p { margin: 0; color: var(--muted); font-size: 18px; }
+@media (max-width: 520px) { .hero { flex-direction: column; align-items: flex-start; } .hero img { width: 72px; height: 72px; } }
+.acoes { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 20px 0 8px; }
+.botao {
+  display: inline-block; background: var(--btn); color: var(--accent-fg); text-decoration: none;
+  border-radius: 10px; padding: 10px 18px; font-weight: 600;
+}
+.botao:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 16px 0; }
+.grade .card { margin: 0; }
+.grade h3 { font-size: 16px; margin: 0 0 4px; }
+.grade p { margin: 0; color: var(--muted); font-size: 15px; }
+.rec { color: var(--rec); }
+footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
+footer p { margin: 4px 0; }

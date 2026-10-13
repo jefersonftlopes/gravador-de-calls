@@ -1,0 +1,171 @@
+<!doctype html>
+<!--
+  Gravador de Calls privacy policy (English). Mirrors /privacidade (pt-BR); keep both in sync.
+  Check before each store release that the descriptions still match the published extension.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy Policy: Gravador de Calls</title>
+  <meta name="description" content="How Gravador de Calls handles your data: it records only the other participants' audio, keeps everything on your computer and has no server, account or analytics." />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon" type="image/svg+xml" href="/img/icone.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/icone-32.png" />
+  <link rel="apple-touch-icon" href="/img/icone-128.png" />
+  <link rel="alternate" hreflang="pt-BR" href="https://gravador-de-calls.vercel.app/privacidade" />
+  <link rel="alternate" hreflang="en" href="https://gravador-de-calls.vercel.app/en/privacy" />
+  <link rel="stylesheet" href="/estilo.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topo">
+      <a class="marca" href="/en"><img src="/img/icone.svg" alt="" width="32" height="32" />Gravador de Calls</a>
+      <a class="idioma" href="/privacidade" hreflang="pt-BR" lang="pt-BR">Português</a>
+    </div>
+
+    <header class="doc">
+      <span class="badge">Gravador de Calls</span>
+      <h1>Privacy Policy</h1>
+      <p class="muted"><strong>Last updated / Effective date:</strong> October 13, 2026</p>
+    </header>
+
+    <main>
+    <p>This Privacy Policy explains, clearly and honestly, how the <strong>Gravador de Calls</strong> extension for Google Chrome (the "Extension") handles data when you use it. The short version: the Extension records only the audio coming from the other participants, keeps everything on your computer and sends nothing to Enkode. The one exception, off by default and turned on only by you, is <strong>transcription through a provider API</strong> (section 7-A): with it on, the call audio is sent to the provider you choose, with your own key.</p>
+
+    <h2>1. Who is responsible</h2>
+    <div class="card">
+      <p><strong>Publisher of the Extension:</strong> Enkode</p>
+      <p><strong>Contact e-mail:</strong> <a href="mailto:jefersonftlopes@gmail.com">jefersonftlopes@gmail.com</a></p>
+      <p><strong>Website:</strong> <a href="https://gravador-de-calls.vercel.app/en">https://gravador-de-calls.vercel.app/en</a></p>
+    </div>
+    <p>Whenever this policy says "we" or "Enkode", it refers to the publisher of the Extension. Enkode does not receive your recordings or your call data: they stay only on your computer, under your control (section 5).</p>
+
+    <h2>2. What the Extension is</h2>
+    <p>Gravador de Calls records, tab by tab, the audio of the <strong>other participants</strong> in <strong>Google Meet</strong> and <strong>Microsoft Teams</strong> calls in Chrome, together with the call details, and saves each recording to a folder on your computer. It also has a tab mode (record what a tab plays, through the shortcut or the popup button), a per-tab volume control and an option, off by default, to leave the call and close the tab when it empties.</p>
+    <p><strong>The Extension is an independent tool. It is not affiliated with, sponsored or endorsed by Google LLC or Microsoft Corporation.</strong> "Google Meet" and "Microsoft Teams" are trademarks of their respective owners and are mentioned here only to describe which services the Extension works with.</p>
+
+    <h2>3. What is recorded</h2>
+    <ul>
+      <li><strong>Automatic recording (Meet and Teams):</strong> only the audio the call page receives from the other participants. <strong>Your microphone is never recorded.</strong> To mark in the transcript where you spoke, the Extension measures on your computer only whether there is sound on the microphone (the level, every fraction of a second), without keeping or sending the sound. Sounds from the call interface itself (join chime, notification) may appear, because they arrive through the same path.</li>
+      <li><strong>Tab mode:</strong> only when you trigger it (Alt+Shift+G shortcut or the popup button), it records what that tab plays, through Chrome's tab capture. It does not include your microphone either. It applies to the tab where you triggered it, including outside Meet and Teams.</li>
+      <li><strong>Volume for this tab:</strong> the tab's sound is processed live, in the browser, to change the volume. Nothing is recorded or stored because of it.</li>
+      <li>Recordings contain no video, screen capture, chat, captions or typed text.</li>
+    </ul>
+
+    <h2>4. Which call data is kept</h2>
+    <p>Along with the audio, each recording has an <code>info.json</code> file with:</p>
+    <ul>
+      <li>platform (Meet, Teams or another site in tab mode), call title (or the meeting code when there is no title), meeting code or ID, the tab's address (URL) and title;</li>
+      <li>start and end date and time, duration and time zone;</li>
+      <li><strong>the participants' display names as shown in the call</strong> (best effort, read from the page) and your own display name, when the page shows it;</li>
+      <li>who spoke and when: each participant's speaking intervals, read from the signals Meet and Teams send to the page, and the intervals when you spoke (only the moment, never the sound), in a <code>falantes.json</code> file in the same folder, with each person's total seconds in <code>info.json</code>; the transcript uses this to say who said each part;</li>
+      <li>the profile name you type yourself in the settings (optional);</li>
+      <li>technical details of the recording: which audio path was used, source switches, gaps, the reason it ended (including the head count, when the auto-leave acted) and the Extension versions.</li>
+    </ul>
+    <p>For the auto-leave (when you turn it on), the Extension reads on the page how many people are in the call. That count is used on the spot and is not kept, except in the end reason described above.</p>
+    <p><strong>What is NOT processed:</strong> browsing history, cookies, passwords, content from other sites, advertising identifiers. The Extension uses no tracking cookies and no analytics tools.</p>
+
+    <h2>5. Where the data is stored (only on your computer)</h2>
+    <ul>
+      <li><strong>Recordings:</strong> in the <code>Downloads/Call recordings</code> folder (<code>Downloads/Gravações de calls</code> when Chrome is in Portuguese), one folder per call (<code>audio.webm</code> and <code>info.json</code>). With the optional local helper installed (section 7), in the folder you choose.</li>
+      <li><strong>Audio in progress:</strong> while the call is happening, the audio is kept in chunks in the Extension's local storage in the browser (IndexedDB), so it is not lost if the tab or Chrome crashes. The chunks are deleted as soon as the recording is saved to the folder.</li>
+      <li><strong>Settings and recent recordings:</strong> your preferences and the list of recent recordings (title, platform, date and where the file was saved) are kept in the Extension's local storage (<code>chrome.storage.local</code> and IndexedDB), in your Chrome profile.</li>
+    </ul>
+    <p><strong>The Extension has no server, asks for no account or login, and by default makes no network requests of its own.</strong> No recording, participant name or call data is sent to Enkode. With API transcription turned on by you (section 7-A), the Extension starts making one request per recording, straight to the provider you choose: nothing passes through any Enkode server, which does not exist.</p>
+
+    <h2>6. What the data is used for</h2>
+    <p>Only to provide the Extension's features to you: recording your calls, organizing each recording in a folder with the call details, showing in the popup what is recording and what was saved, and leaving the call on its own when you turn that option on.</p>
+
+    <h2>7. Local helper and transcription (optional)</h2>
+    <p>Two advanced features require a separate program, the <strong>local helper</strong>, which <strong>is not yet distributed through the Chrome Web Store</strong>: saving to a folder of your choice and transcribing each call. Without it, the Extension works normally and saves to Downloads.</p>
+    <p>When installed, the helper runs on your computer and talks only to the Extension (Chrome native messaging). Transcription also runs on your computer (whisper.cpp), and the text (<code>transcricao.md</code> and <code>.srt</code>) stays in the call folder. None of this leaves the machine.</p>
+
+    <h2>7-A. Transcription through a provider API (optional, off by default)</h2>
+    <p>This is the <strong>only feature of the Extension in which data leaves your computer</strong>, and it only works after you turn it on and paste your own key.</p>
+    <ul>
+      <li><strong>What leaves:</strong> the call audio file (<code>audio.webm</code>), with the participants' voices, sent to the API address of the provider you choose. Today the Extension ships one declared provider: <strong>OpenAI</strong> (<code>https://api.openai.com/v1/audio/transcriptions</code>). The Extension refuses any other address.</li>
+      <li><strong>What does not leave:</strong> no participant name, no call details and no file other than the audio. The <code>info.json</code>, the <code>falantes.json</code> and the names of who spoke stay on your computer: the names are matched to the text <em>after</em> the transcription comes back, here on your machine.</li>
+      <li><strong>Your key:</strong> stored on this machine only, in this Chrome profile, in its own slot of the Extension's storage, and used only in the authorization header of the request to the provider. It never goes into <code>info.json</code>, the log, any error message, or to Enkode. You can delete it in the settings.</li>
+      <li><strong>Permission:</strong> Chrome asks for your authorization for the Extension to talk to the provider, at the moment you turn the feature on. Without it, nothing is sent.</li>
+      <li><strong>Per Chrome profile:</strong> the choice applies only to the profile where you made it. Another profile keeps sending nothing.</li>
+      <li><strong>While it waits:</strong> the call audio stays in the Extension's local storage until the transcription finishes, and is deleted right after. It is also deleted, with a notice on the recording, if the attempts, the deadline (24 hours) or the total stored size (300 MB) run out.</li>
+      <li><strong>Cost and terms:</strong> the provider bills you, on your own account, and what it does with the audio is governed by <em>its</em> terms and privacy policy, not by this one. Read them before turning the feature on.</li>
+      <li><strong>Consent:</strong> sending other people's voices to a third party is one more act of data processing. Section 9 applies here in full, and all the more so.</li>
+    </ul>
+
+    <h2>8. What we do NOT do</h2>
+    <ul>
+      <li><strong>We do not sell</strong> anyone's data;</li>
+      <li><strong>We do not transfer or share</strong> data with third parties, for advertising or any other purpose;</li>
+      <li><strong>We do not use</strong> analytics, trackers or tracking cookies;</li>
+      <li><strong>We do not use</strong> the data to determine creditworthiness, or for any purpose unrelated to the Extension's function;</li>
+      <li><strong>We do not receive</strong> your recordings: they never reach Enkode. With API transcription turned on by you, the audio goes straight from your machine to the provider you chose, without passing through us.</li>
+    </ul>
+    <p><strong>Limited Use (Chrome Web Store):</strong> the use of information received by the Extension adheres to the <a href="https://developer.chrome.com/docs/webstore/program-policies/limited-use" target="_blank" rel="noopener">Chrome Web Store User Data Policy</a>, including the <strong>Limited Use</strong> requirements.</p>
+
+    <h2>9. Participants' consent: the recorder's responsibility</h2>
+    <p>The Extension records other people. <strong>You decide to record, and you are responsible for the recordings you make</strong> (in data protection terms, the controller of that data).</p>
+    <ul>
+      <li>In Brazil, the <strong>General Data Protection Law (LGPD, Law No. 13,709/2018)</strong> requires a legal basis to process personal data such as the participants' voices and names (for example, their consent or legitimate interest, as the case may be).</li>
+      <li>In other countries and in several US states, the law requires the <strong>consent of all parties</strong> before a conversation is recorded.</li>
+      <li>On installation, the Extension shows a notice about what is recorded and about consent; automatic recording stays off in that Chrome profile until you confirm it with "I understand".</li>
+      <li>Tell the participants before recording and respect anyone who does not want to be recorded. The platforms themselves and your employer may also have rules about recording.</li>
+    </ul>
+
+    <h2>10. How long the data is kept</h2>
+    <ul>
+      <li><strong>Recordings and transcripts:</strong> they stay on your computer until you delete them. The Extension never deletes a saved recording.</li>
+      <li><strong>Audio waiting for API transcription:</strong> kept in the browser only until the transcription finishes, and at most for 24 hours, 5 attempts and 300 MB in total (whichever comes first). After that it is deleted and the recording keeps the reason.</li>
+      <li><strong>Audio in progress:</strong> only until the recording is saved. If it cannot be saved (for example, the disk is full), the popup tells you and the Extension retries every minute. A recording shorter than the minimum duration (30 seconds by default) is discarded without being saved, together with its title and participants.</li>
+      <li><strong>Settings and the recent recordings list:</strong> while the Extension is installed. Removing the Extension deletes everything it keeps in the browser, including the audio of a recording not yet saved; files already saved to the folder remain there.</li>
+    </ul>
+
+    <h2>11. Your rights</h2>
+    <p>Because Enkode neither receives nor keeps your data, you already have full control: you can open, move or delete the recordings in the folder, clear the recent recordings list by removing the Extension, and turn off automatic recording per platform in the settings. A participant who wants access to, or deletion of, a recording should contact the person who recorded it. For questions about this policy, use the contact in section 15.</p>
+
+    <h2>12. Security</h2>
+    <ul>
+      <li>Everything stays on your computer: there is no server copy that could leak;</li>
+      <li>The files are protected by your account on the computer. Anyone with access to it also has access to the recordings;</li>
+      <li>The local helper, when installed, accepts messages only from the Extension and opens only transcript files inside the recordings folder.</li>
+    </ul>
+
+    <h2>13. Extension permissions</h2>
+    <table>
+      <thead><tr><th>Permission</th><th>What for</th></tr></thead>
+      <tbody>
+        <tr><td>Access to meet.google.com, teams.microsoft.com, teams.cloud.microsoft and teams.live.com, and to the same addresses through the Microsoft Defender for Cloud Apps proxy (ending in .mcas.ms, .mcas-gov.us or .mcas-gov.ms)</td><td>Detect when the call starts and ends, record the audio the page receives and read the title and the participants' names. Only on these sites. The proxy addresses are the same Meet and Teams pages when a company opens them through the Defender for Cloud Apps session control.</td></tr>
+        <tr><td><code>tabCapture</code>, <code>activeTab</code></td><td>Tab mode and volume for this tab: only on the tab where you used the shortcut or the popup.</td></tr>
+        <tr><td><code>offscreen</code></td><td>Build the audio file and play the tab's sound in tab mode and with the per-tab volume.</td></tr>
+        <tr><td><code>downloads</code></td><td>Save the recordings to Downloads/Call recordings (Downloads/Gravações de calls in Portuguese).</td></tr>
+        <tr><td><code>storage</code>, <code>unlimitedStorage</code></td><td>Keep the settings and the audio in progress until it is saved, without hitting the quota on a long call.</td></tr>
+        <tr><td><code>notifications</code></td><td>Tell you when a recording is not picking up audio, when a tab needs to be reloaded or when a recording was not saved.</td></tr>
+        <tr><td><code>alarms</code></td><td>Retry saving an interrupted recording.</td></tr>
+        <tr><td>Access to <code>api.openai.com</code> (optional)</td><td>Sending the call audio for API transcription, with your own key (section 7-A). Chrome only asks for this permission when you turn that feature on, and without it nothing is sent.</td></tr>
+        <tr><td><code>nativeMessaging</code></td><td>Talk to the optional local helper, when installed.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>14. Children</h2>
+    <p>The Extension is a work tool and is not directed at children. Enkode collects no data from anyone, children included.</p>
+
+    <h2>15. Contact</h2>
+    <div class="card">
+      <p><strong>E-mail:</strong> <a href="mailto:jefersonftlopes@gmail.com">jefersonftlopes@gmail.com</a></p>
+      <p><strong>Publisher:</strong> Enkode</p>
+      <p><strong>Website:</strong> <a href="https://gravador-de-calls.vercel.app/en">https://gravador-de-calls.vercel.app/en</a></p>
+    </div>
+    <p>We will reply within a reasonable time and as required by applicable law.</p>
+
+    <h2>16. Changes to this policy</h2>
+    <p>We may update this policy when the Extension changes (for example, if a feature that sends anything off the computer ever exists, it will be optional, off by default and described here before it applies) or when the law changes. The effective date at the top shows the current version.</p>
+    </main>
+
+    <footer>
+      <p class="muted">© 2026 Enkode. Independent tool, not affiliated with Google LLC or Microsoft Corporation.</p>
+      <p class="muted"><a href="/en">Home</a> · <a href="/privacidade" hreflang="pt-BR" lang="pt-BR">Versão em português</a></p>
+    </footer>
+  </div>
+</body>
+</html>

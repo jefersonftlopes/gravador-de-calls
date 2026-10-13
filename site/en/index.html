@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gravador de Calls: record your calls, tab by tab</title>
+  <meta name="description" content="Chrome extension that automatically records, tab by tab, the audio of the other participants in Google Meet and Microsoft Teams calls. Everything stays on your computer." />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon" type="image/svg+xml" href="/img/icone.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/icone-32.png" />
+  <link rel="apple-touch-icon" href="/img/icone-128.png" />
+  <link rel="alternate" hreflang="pt-BR" href="https://gravador-de-calls.vercel.app/" />
+  <link rel="alternate" hreflang="en" href="https://gravador-de-calls.vercel.app/en" />
+  <link rel="stylesheet" href="/estilo.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topo">
+      <a class="marca" href="/en"><img src="/img/icone.svg" alt="" width="32" height="32" />Gravador de Calls</a>
+      <a class="idioma" href="/" hreflang="pt-BR" lang="pt-BR">Português</a>
+    </div>
+
+    <main>
+      <div class="hero">
+        <img src="/img/icone.svg" alt="Gravador de Calls icon" width="96" height="96" />
+        <div>
+          <h1>Record your calls, tab by tab</h1>
+          <p>A Chrome extension that automatically records the audio of the other participants in Google Meet and Microsoft Teams calls. Everything stays on your computer.</p>
+        </div>
+      </div>
+
+      <div class="acoes">
+        <a class="botao" href="https://chromewebstore.google.com/detail/gravador-de-calls/kpbjnbedejcbakdjacjmhaofidooddjp?hl=en" data-loja>Add from the Chrome Web Store</a>
+        <a href="/en/privacy">Privacy policy</a>
+      </div>
+
+      <h2>What it does</h2>
+      <div class="grade">
+        <div class="card">
+          <h3>Starts on its own</h3>
+          <p>When the call actually starts (past the join screen and the waiting room), recording of that tab begins without a click. The icon shows <span class="rec">REC</span> on the tab.</p>
+        </div>
+        <div class="card">
+          <h3>One recording per tab</h3>
+          <p>Three calls open at the same time become three separate recordings, with no audio mixed from one into another.</p>
+        </div>
+        <div class="card">
+          <h3>Only the other participants</h3>
+          <p>It records the audio the call page receives from the other people. Your microphone is never recorded.</p>
+        </div>
+        <div class="card">
+          <h3>Saved with the call details</h3>
+          <p>At the end, the audio (<code>audio.webm</code>) and an <code>info.json</code> with the title, date, duration and participants' names go to <code>Downloads/Call recordings</code> (<code>Downloads/Gravações de calls</code> when Chrome is in Portuguese), one folder per call.</p>
+        </div>
+        <div class="card">
+          <h3>Tab mode</h3>
+          <p>If a call does not pick up audio, the Alt+Shift+G shortcut records what the tab plays, on other sites too.</p>
+        </div>
+        <div class="card">
+          <h3>Volume for this tab</h3>
+          <p>Set the volume of any tab from 0% to 200% in the popup, without changing the level of the recordings.</p>
+        </div>
+        <div class="card">
+          <h3>Leave when the call empties</h3>
+          <p>Optional and off by default: leaves the call and closes the tab when you are alone or almost everyone has left, after the recording is saved.</p>
+        </div>
+        <div class="card">
+          <h3>Advanced: chosen folder and transcription</h3>
+          <p>Saving to a folder of your choice and transcribing each call on your own computer require the local helper, which is not yet distributed through the store. Without it, everything above works normally.</p>
+        </div>
+      </div>
+
+      <h2>Everything stays on your computer</h2>
+      <p>The extension has no server, no account and no analytics. Recordings stay in your Downloads folder (or in the folder you choose, with the local helper), and the audio of a call in progress is kept in the browser only until it is saved. Nothing is sent to Enkode or anyone else. Details in the <a href="/en/privacy">privacy policy</a>.</p>
+
+      <h2>Tell the people on the call</h2>
+      <p>Recording a conversation may require the consent of every participant, depending on the country and state (in Brazil, the LGPD; in many places, all-party consent laws). You decide to record, and informing the participants is your responsibility.</p>
+
+      <p class="muted">Google Meet and Microsoft Teams are trademarks of their respective owners. Gravador de Calls is an independent tool, not affiliated with, sponsored or endorsed by Google or Microsoft.</p>
+    </main>
+
+    <footer>
+      <p class="muted">© 2026 Enkode. Contact: <a href="mailto:jefersonftlopes@gmail.com">jefersonftlopes@gmail.com</a></p>
+      <p class="muted"><a href="/en/privacy">Privacy policy</a> · <a href="/" hreflang="pt-BR" lang="pt-BR">Português</a></p>
+    </footer>
+  </div>
+</body>
+</html>

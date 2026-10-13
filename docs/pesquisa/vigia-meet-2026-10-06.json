@@ -1,0 +1,587 @@
+{
+ "results": [
+  {
+   "selectors": [
+    {
+     "purpose": "participant-count",
+     "value": "[data-avatar-count]  (read Number(el.getAttribute('data-avatar-count')))",
+     "meaning": "Badge span in the new Meet 'minimal controls' UI (rolled out from Dec 2025): the participant count sits next to the avatar stack at the top right, no longer on a bottom-bar People button. ScreenApp reads it with a global querySelector and treats count < 2 as 'bot alone', so the value includes yourself.",
+     "source": "https://github.com/screenappai/meeting-bot/blob/main/src/bots/GoogleMeetBot.ts#L854-L870 (PR https://github.com/screenappai/meeting-bot/pull/40). Corroborated by https://github.com/zikompo/logitech-meet-plugin/blob/main/extension/meet-dom.js#L64-L68, https://github.com/KXPN/meetrilla/blob/main/meetrilla.js#L9, https://github.com/LambyPants/google-meet-randomizer/blob/master/content.js#L13, https://github.com/dmzoneill/redhat-ai-workflow/blob/main/tool_modules/aa_meet_bot/src/meet_participants.py#L128",
+     "last_touched": "2026-05-21 (screenapp 6b3eaaa31b, file last edited 2026-06-18); logitech 2026-09-24 (9c3ec9b06b); meetrilla 2025-12-19 (0c4a66357c); randomizer 2026-02-16 ('2026 update since it borked')",
+     "stale_risk": "Low to medium. This is the newest structural signal and five independent 2025-12 to 2026-09 repos use it. But PR #40's test plan checkboxes are unticked, and nobody checks whether N counts lobby/waiting people, presentations or companion devices, or whether it is total vs '+k overflow'. Check it live before trusting it.",
+     "locale_notes": "Attribute is language-independent, so no pt-BR text needed."
+    },
+    {
+     "purpose": "participant-count",
+     "value": "button[aria-label^=\"People -\"]  with regex /^People - (\\d+) joined$/ (also 'Personen -')",
+     "meaning": "Old UI: bottom-bar People button whose aria-label carried the count, e.g. 'People - 2 joined'.",
+     "source": "https://github.com/screenappai/meeting-bot/blob/main/src/bots/GoogleMeetBot.ts#L871-L897 and #L399-L419",
+     "last_touched": "2026-01-09 (dbde753a98) / 2025-11-12 (12119dfdd5)",
+     "stale_risk": "High. ScreenApp PR #40 (2026-05-21) says the new UI 'no longer renders' this button, and all 6 People-button selectors failed. Keep only as a fallback.",
+     "locale_notes": "Only en and de patterns exist in code. No pt-BR form ('Pessoas - N ...') was found anywhere."
+    },
+    {
+     "purpose": "participant-count",
+     "value": "div.egzc7c (badge text, 1-3 digits)  /  .egzc7c > div > div",
+     "meaning": "Obfuscated class of the numeric badge near the People button.",
+     "source": "https://github.com/screenappai/meeting-bot/blob/main/src/bots/GoogleMeetBot.ts#L925-L958 ; https://github.com/yasharusakov/ghost-student/blob/main/src/attend/selectors.rs#L14",
+     "last_touched": "2026-01-09 (screenapp dbde753a98); 2026-02-22 (ghost-student 654151e19b, initial commit)",
+     "stale_risk": "High: obfuscated class tied to the pre-2026 People button. ScreenApp now runs it only after [data-avatar-count].",
+     "locale_notes": "Language-independent."
+    },
+    {
+     "purpose": "participant-count",
+     "value": ".uGOf1d (textContent = number)",
+     "meaning": "Legacy participant-count number in the old People badge. This is what the classic 'auto leave below N participants' extensions read.",
+     "source": "https://github.com/PreMiD/Activities/blob/main/websites/G/Google%20Meet/presence.ts#L95 ; https://github.com/Abcent1k/MeetBouncer/blob/main/js/googlemeet.js#L66 (auto-leave below threshold; clicks the <i>call_end</i> icon)",
+     "last_touched": "PreMiD: last functional change 2024-07-29 (c348e410f8), reformatted 2025-02-12 (239a48fad8), chores only after. MeetBouncer 2024-02-07. Others: jyan212/AutoLeaveMeet 2021, PkNeves/quitmeet 2022, harshithva/Meet-Auto-Exit-Bot 2023, NoapMat/g-leave 2024-10",
+     "stale_risk": "High. No repo maintained in 2025-2026 verifies it, and it predates the Dec 2025 People-UI change.",
+     "locale_notes": "Language-independent."
+    },
+    {
+     "purpose": "participant-count",
+     "value": "[jsname=\"Nqj9L\"]",
+     "meaning": "Reported (unverified) as a count element.",
+     "source": "GitHub code search on 2026-10-06 for 'Nqj9L' returned zero Meet-related files (only binary/noise hits).",
+     "last_touched": "none found",
+     "stale_risk": "Unknown / treat as unverified. No prior art backs it.",
+     "locale_notes": "n/a"
+    },
+    {
+     "purpose": "other",
+     "value": "[data-participant-id] video tiles (count)",
+     "meaning": "Participant tiles in the grid. Do NOT use them as a head count: only tiles that fit on screen render. In a 46-person pt-BR meeting the count stuck near 9.",
+     "source": "https://github.com/dotch3/googleMeetParticipantTracker/blob/main/content.js#L392-L410 ; Vexa uses it only as an admission hint https://github.com/Vexa-ai/vexa/blob/main/core/meetings/modules/join/src/googlemeet/selectors.ts#L21-L29",
+     "last_touched": "dotch3 2026-09-15 (61935e6eb5); Vexa 2026-06-19 (50ffb2de5f)",
+     "stale_risk": "Attribute is current (value 'spaces/<space>/devices/<n>'), but as a count it undercounts by design.",
+     "locale_notes": "Language-independent."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "[role=\"button\"]:has([data-avatar-count])",
+     "meaning": "New UI: the People panel opens from the participant-avatar button at the top right ('Since 2026 the People panel opens from the participant avatars at the top right').",
+     "source": "https://github.com/zikompo/logitech-meet-plugin/blob/main/extension/meet-dom.js#L64-L68 ; meetrilla clicks [data-avatar-count] then reads [data-panel-container-id=sidePanel1] [data-participant-id] https://github.com/KXPN/meetrilla/blob/main/meetrilla.js#L5-L9",
+     "last_touched": "2026-09-24 (logitech 9c3ec9b06b); 2025-12-19 (meetrilla 0c4a66357c)",
+     "stale_risk": "Low to medium. Recent, structural, two independent repos.",
+     "locale_notes": "Language-independent. The button's aria-label is not documented in code. meet-sorteador filters the sentence 'abrir o painel Pessoas / open the People panel', which hints at the label (unverified)."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "div[role=\"button\"][aria-haspopup=\"dialog\"]  whose textContent includes 'People'  (Playwright form: :has(span:text(\"People\"))), then click body at (10,10) to dismiss the hover dialog",
+     "meaning": "Meeting-BaaS's 'NEW UI selectors (Dec 2025+) - Badge/hover tray style People button'. Clicking opens a hover dialog that must be dismissed.",
+     "source": "https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet.ts#L736-L744 and #L780-L786 ; in-page variant with text check https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet/speakersObserver.ts#L576-L591",
+     "last_touched": "2025-12-19 (09ee8da0be 'new People icon UI', f66620e23b, 3fb72b691a); 2026-01-14 (ed094d7e22)",
+     "stale_risk": "Medium: text check is English-only, and aria-haspopup=dialog alone matches other controls.",
+     "locale_notes": "In pt-BR the text check must be 'Pessoas' (not verified in code)."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "div[jsname=\"QbKf1d\"]",
+     "meaning": "Participants toggle in the new Meet UI (Stream Deck plugin).",
+     "source": "https://github.com/ChrisRegado/streamdeck-googlemeet/blob/master/browser-extension/event_handlers/participants_event_handler.js#L10",
+     "last_touched": "2026-03-01 (3dfec9c3bb 'Update Participants button for new Meet UI changes')",
+     "stale_risk": "Medium: obfuscated jsname, though jsnames have outlived class names in this codebase family. Community PR #58 proposed span[jsname=\"WyRtCb\"] and warned that 'Call feature notifications and actions' can be hit by mistake. It was closed unmerged on 2026-05-22.",
+     "locale_notes": "Language-independent."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "nav button[aria-label=\"People\"][role=\"button\"] | nav button[aria-label=\"Show everyone\"][role=\"button\"] | nav button[data-panel-id=\"1\"][role=\"button\"] | [jsname=\"A5il2e\"][data-panel-id=\"1\"] | button[aria-label=\"People\"]",
+     "meaning": "Old bottom-bar People / 'Show everyone' toggle (side panel id 1).",
+     "source": "https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet.ts#L737-L741 (labelled 'OLD UI selectors (pre-Dec 2025)'); https://github.com/attendee-labs/attendee/blob/main/bots/google_meet_bot_adapter/google_meet_chromedriver_payload.js#L713 ; https://github.com/ChrisRegado/streamdeck-googlemeet/blob/master/browser-extension/event_handlers/side_panel_event_handler.js#L7",
+     "last_touched": "Meeting-BaaS 2025-12-19 (relabelled old); attendee 2025-04-29 (6403815764); ChrisRegado moved off A5il2e on 2026-03-01",
+     "stale_risk": "High on the current UI. May still exist for some rollout cohorts, so keep as fallback.",
+     "locale_notes": "pt-BR: dotch3 uses button[aria-label*=\"pessoas\" i] / [aria-label*=\"participantes\" i] (2026-09-11, https://github.com/dotch3/googleMeetParticipantTracker/blob/main/content.js#L64-L67). No maintained code uses 'Mostrar todos'."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "Keyboard shortcut: Ctrl+Alt+P (Windows/ChromeOS), Control+Command+P (macOS)",
+     "meaning": "Official toggle for the people panel. Meeting-BaaS uses it first and falls back to clicking.",
+     "source": "Google Help https://support.google.com/meet/answer/15738543 ; https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet.ts#L617-L635",
+     "last_touched": "Meeting-BaaS 2026-02-02 (86b90079a6)",
+     "stale_risk": "Low as a documented shortcut. It is a toggle, so it closes the panel if already open. Bots send trusted events through Playwright. A synthetic KeyboardEvent from a userscript/content script is untrusted and was not verified to work.",
+     "locale_notes": "Language-independent."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "[role=\"list\"] containing [role=\"listitem\"][data-participant-id]; each row's aria-label = display name",
+     "meaning": "People panel rows found structurally. In a 46-person pt-BR meeting all 46 rows were in the DOM at once (not virtualized). One person can have a second listitem for their screen presentation, so dedupe by aria-label/name.",
+     "source": "https://github.com/ricardojustus/blaise/blob/main/extension/src/selectors.js#L200-L221 ; https://github.com/dotch3/googleMeetParticipantTracker/blob/main/content.js#L431-L457",
+     "last_touched": "blaise 2026-06-15 (45bd88e01d); dotch3 2026-09-15 (61935e6eb5)",
+     "stale_risk": "Low: data-* and ARIA roles, field-verified in 2026, pt-BR included.",
+     "locale_notes": "blaise deliberately avoids the localized list aria-label ('Participants'/'Participantes')."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "div[aria-label=\"Participants\"][role=\"list\"]  (pt-BR: div[aria-label=\"Participantes\"] / div[aria-label=\"Pessoas\"]) > div[role=\"listitem\"][aria-label]",
+     "meaning": "Labelled participant list inside the People panel.",
+     "source": "https://github.com/attendee-labs/attendee/blob/main/bots/google_meet_bot_adapter/google_meet_chromedriver_payload.js#L669-L676 ; https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet/speakersObserver.ts#L191-L230 ; pt-BR https://github.com/dotch3/googleMeetParticipantTracker/blob/main/content.js#L363-L368",
+     "last_touched": "attendee 2025-04-28 (e0c323cbc6); Meeting-BaaS lines 2025-10-26 (file active 2026-09-18); dotch3 2026-09-11 (53b4c59894)",
+     "stale_risk": "Low to medium: aria-label is localized and could be renamed.",
+     "locale_notes": "en 'Participants'; pt-BR 'Participantes' (blaise comment) or 'Pessoas' (dotch3 tries both)."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "span with text '(You)' inside the row  /  pt-BR '(você)'",
+     "meaning": "Marks your own row, so the panel list includes yourself. It is the only name-independent self signal.",
+     "source": "https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet/speakersObserver.ts#L306-L314 ; pt-BR https://github.com/silvakwan1/meet-sorteador/blob/main/content.js#L22",
+     "last_touched": "2026-09-02 (Meeting-BaaS 5ab6f9098d); 2026-09-01 (meet-sorteador 002ed5955f)",
+     "stale_risk": "Low.",
+     "locale_notes": "en '(You)', pt-BR '(você)'. Self tile label 'You'/'Você' (blaise L161)."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "div text === 'Presentation' inside a listitem  /  pt-BR 'Apresentando'; 'Merged audio' rows with [data-cohort-id] and [aria-label=\"Adaptive audio group\"]",
+     "meaning": "Presentation and merged-audio (room/adaptive audio) pseudo rows that inflate a naive listitem count.",
+     "source": "https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet/speakersObserver.ts#L232-L333 ; pt-BR https://github.com/silvakwan1/meet-sorteador/blob/main/content.js#L16 ; attendee internal model: screen share = separate device with parentDeviceId https://github.com/attendee-labs/attendee/blob/main/bots/google_meet_bot_adapter/google_meet_chromedriver_payload.js#L1026-L1032",
+     "last_touched": "Meeting-BaaS 2025-10-26 (0acaebb952); sorteador 2026-09-01",
+     "stale_risk": "Medium.",
+     "locale_notes": "en 'Presentation', pt-BR 'Apresentando'."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "[role=\"region\"][aria-label=\"In call\"]; section words 'Contributors', 'In the meeting', 'Waiting to join'",
+     "meaning": "People panel region and group headings, which a scraper must filter out of name lists.",
+     "source": "https://github.com/dmzoneill/redhat-ai-workflow/blob/main/tool_modules/aa_meet_bot/src/meet_participants.py#L113-L116 and #L155-L160",
+     "last_touched": "2026-02-08 (f68cce9e28, refactor; origin may be older)",
+     "stale_risk": "Medium. Only one repo has it, and English only.",
+     "locale_notes": "pt-BR equivalents ('Na reunião', 'Colaboradores', etc.) NOT found in any code."
+    },
+    {
+     "purpose": "leave-button",
+     "value": "button[jsname=\"CQylAd\"]  (aria-label 'Leave call' / pt-BR 'Sair da chamada'; child <i class=\"google-symbols\">call_end</i>)",
+     "meaning": "Red hang-up button in the call controls.",
+     "source": "https://github.com/attendee-labs/attendee/blob/main/bots/google_meet_bot_adapter/google_meet_ui_methods.py#L1277-L1297 ; https://github.com/ralphm/megingjord/blob/master/extension/meet.js#L21 and #L66 ('verified: meeting', 'Selectors were verified against the live Meet UI (September 2026)') ; pt-BR HTML https://github.com/mastria/meeting-webhook/blob/main/content.js#L18-L26",
+     "last_touched": "attendee selector 2025-04-28, function edited 2026-09-23 (b63fe776ce: switched to JS arguments[0].click()); megingjord 2026-09-01 (4bf7ccbaf6); mastria 2026-06-11 (57f48cd229)",
+     "stale_risk": "Low. Strongest-evidenced selector in this set. A JS .click() works even when the hover tray hides the bar (attendee).",
+     "locale_notes": "Prefer the jsname. If you combine it with aria-label, accept both 'Leave call' and 'Sair da chamada'."
+    },
+    {
+     "purpose": "leave-button",
+     "value": ".google-symbols / i whose text is 'call_end' (also 'call_end_alt'); clickable = closest('button') or icon.parentElement.parentElement",
+     "meaning": "Language-independent icon ligature inside the leave button.",
+     "source": "https://github.com/vivek-nexus/transcriptonic/blob/main/extension/content-scripts/google-meet/config.js#L4-L5 and index.js#L157 ; https://github.com/ricardojustus/blaise/blob/main/extension/src/selectors.js#L171-L190",
+     "last_touched": "TranscripTonic 2026-07-12/2026-07-17 (dd75752c2c, 8689e50f5f); blaise 2026-07-11 (75a7c1878b)",
+     "stale_risk": "Low.",
+     "locale_notes": "Language-independent."
+    },
+    {
+     "purpose": "leave-button",
+     "value": "aria-label in {'Leave call','Sair da chamada'} (heed adds 'leave the call','sair da reunião')",
+     "meaning": "Closed aria-label set for the leave control.",
+     "source": "https://github.com/ricardojustus/blaise/blob/main/extension/src/selectors.js#L170 ; https://github.com/augustocbx/heed-macos/blob/main/packages/desktop/browser-meet/signals.js#L4",
+     "last_touched": "blaise 2026-06-15 (45bd88e01d); heed 2026-10-06 (574e733fd7)",
+     "stale_risk": "Low. Caveat: the leave button also exists in the waiting room ('DANGER: Leave call... exist in the lobby too!'), so its presence does not prove you were admitted.",
+     "locale_notes": "pt-BR 'Sair da chamada' was confirmed by blaise and mastria. The Google Help pt-BR text calls the button 'Encerrar chamada', but no code observed that label."
+    },
+    {
+     "purpose": "host-leave-dialog",
+     "value": "[data-mdc-dialog-action=\"Pd96ce\"]  (dialog container was [jscontroller=\"ZakeSe\"])",
+     "meaning": "The 'Just leave the call' button of the MDC dialog Meet shows a host when they click leave. Prior art presses leave once to open the dialog, then a second time to click this.",
+     "source": "https://github.com/ChrisRegado/streamdeck-googlemeet/blob/master/browser-extension/event_handlers/leave_call_event_handler.js#L9-L23 ; copied in https://github.com/ralphm/megingjord/blob/master/extension/meet.js#L67 and #L209-L215, and https://github.com/FuSan21/Macro-Deck-Google-Meet-Plugin/blob/main/extension/event_handlers/leave_call_event_handler.js",
+     "last_touched": "2024-08-10 (ChrisRegado 0be4695ba1 / 913832e041); megingjord 2026-09-01 (not tagged 'verified', unlike its other selectors); FuSan21 copy 2026-08-13",
+     "stale_risk": "Medium. No live verification in 2025-2026. Obfuscated action id.",
+     "locale_notes": "The attribute is language-independent, but confirm the button's text before clicking."
+    },
+    {
+     "purpose": "host-leave-dialog",
+     "value": "Option texts. en UI (code): 'Just leave the call' vs 'End the call for everyone' (variants seen: 'Leave meeting'/'Just leave the meeting', 'Leave anyway'). Google Help desktop: 'Leave meeting' vs 'End meeting for all'. pt-BR Help: 'Sair da reunião' vs 'Encerrar a reunião para todos'.",
+     "meaning": "A dialog (not an arrow menu) shown to a host when Host Management is on. One click on CQylAd only opens it and does not end the call. The risk is the SECOND click landing on the end-for-everyone option.",
+     "source": "https://github.com/ChrisRegado/streamdeck-googlemeet/blob/master/browser-extension/event_handlers/leave_call_event_handler.js#L9-L13 ; https://github.com/OpenChonker/OpenChonker/blob/main/crates/chonker-host/src/ax.rs#L62 and #L1062 ; https://github.com/Vexa-ai/vexa/blob/main/core/meetings/modules/join/src/googlemeet/selectors.ts#L433-L436 ; https://support.google.com/meet/answer/9303164?hl=en&co=GENIE.Platform%3DDesktop ; https://support.google.com/meet/answer/9303164?hl=pt-BR&co=GENIE.Platform%3DDesktop ; https://workspaceupdates.googleblog.com/2021/02/end-google-meet-video-call-for-everyone.html",
+     "last_touched": "ChrisRegado 2024-08-10; OpenChonker 2026-09-16 (50880b82da); Vexa 2026-07-18 (790d04f598); Help pages read 2026-10-06",
+     "stale_risk": "Medium to high for exact wording. Help text and code disagree, and no maintained code contains the pt-BR UI strings (a search for 'Encerrar a chamada para todos' found no Meet code).",
+     "locale_notes": "pt-BR live strings unverified. Guess: 'Apenas sair da chamada' / 'Encerrar a chamada para todos'."
+    },
+    {
+     "purpose": "host-leave-dialog",
+     "value": "Exclusion filter: reject any candidate whose label/text contains 'everyone' | 'for all' | 'end the call for everyone' | 'end meeting for all' (pt-BR add 'todos' | 'para todos' | 'encerrar')",
+     "meaning": "Safety guard so an auto-leave never presses end-for-everyone.",
+     "source": "https://github.com/AntoNova1212/MeetBot/blob/main/meetbot/meet/locators.py#L53-L57 (LEAVE_EXCLUDE). Anti-patterns that could hit it: https://github.com/mastria/meeting-webhook/blob/main/content.js#L59-L62 (matches 'encerrar'/'sair' substrings), https://github.com/Vexa-ai/vexa/blob/main/core/meetings/modules/join/src/googlemeet/selectors.ts#L426-L432 (substring 'End meeting'/'End call')",
+     "last_touched": "AntoNova 2026-08-21 (5b434b3558); mastria 2026-06-11; Vexa 2026-07-18",
+     "stale_risk": "Low (it is logic, not a selector).",
+     "locale_notes": "Must include pt-BR words."
+    },
+    {
+     "purpose": "alone-signal",
+     "value": "Body text 'You're the only one here' / 'No one else is here' / 'No one else'",
+     "meaning": "Alone hints. Usage contradicts across repos: AntoNova treats 'you're the only one here' as an IN-CALL marker, meeboter as admission confirmation, ScreenApp as LOBBY text, and Meeting-BaaS treats 'No one else' as an alone/end signal it ignores during the grace period.",
+     "source": "https://github.com/AntoNova1212/MeetBot/blob/main/meetbot/meet/locators.py#L170-L174 ; https://github.com/Payme-Works/meeboter/blob/main/apps/bots/providers/google-meet/src/selectors.ts#L145-L152 ; https://github.com/screenappai/meeting-bot/blob/main/src/bots/GoogleMeetBot.ts#L436-L439 ; https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet.ts#L585-L594",
+     "last_touched": "AntoNova 2026-08-21; meeboter 2025-12-19 (a11503afc8); ScreenApp 2026-06-18 (780cf39c13); Meeting-BaaS 2026-06-22 (83603a441d)",
+     "stale_risk": "High as a primary signal: copy appears in both green room and call, it is English-only, and repos disagree. Use the count instead.",
+     "locale_notes": "No pt-BR string found in any code or doc."
+    },
+    {
+     "purpose": "alone-signal",
+     "value": ".roSPhc text: 'The call ended because everyone left' | 'Your host ended the meeting for everyone' | 'You've been removed from the meeting'",
+     "meaning": "Post-call screen messages. Use them to stop the watcher and avoid clicking anything.",
+     "source": "https://github.com/attendee-labs/attendee/blob/main/bots/google_meet_bot_adapter/google_meet_chromedriver_payload.js#L337-L353",
+     "last_touched": "2026-09-09 (60f59ce735 'handle meeting ended because everyone left case in gmeet')",
+     "stale_risk": "Low for the text (Sept 2026). Medium for the .roSPhc class.",
+     "locale_notes": "English only. pt-BR strings unknown."
+    },
+    {
+     "purpose": "alone-signal",
+     "value": "Meet's own 'Leave empty calls' prompt ('Are you still there?'), setting Settings > General > 'Leave empty calls' (iOS pt-BR: 'Sair de chamadas vazias')",
+     "meaning": "Built-in auto-leave: after 10 minutes alone Meet prompts, and with no answer within 2 minutes it removes you. ON by default on desktop and iOS.",
+     "source": "https://workspaceupdates.googleblog.com/2022/04/additional-improvements-for-google-meet.html ; still handled by bots in https://github.com/Quenchh/MeetBot3.1/blob/main/bot.py#L197-L215 ; pt-BR iOS https://macmagazine.com.br/post/2025/10/28/como-sair-automaticamente-de-chamadas-vazias-do-meet-no-gmail-iphone-e-ipad/",
+     "last_touched": "Google post 2022-04-07; Quenchh 2026-09-23 (598c62cbf2); MacMagazine 2025-10-28",
+     "stale_risk": "Low that the feature exists. The prompt's exact DOM and pt-BR web text are unverified.",
+     "locale_notes": "Web pt-BR prompt text not found."
+    }
+   ],
+   "answers": [
+    "Q1 Current participant count. The bottom-right People badge the request assumes is gone. Since the Dec 2025 'minimal controls / hover tray' Meet UI, the count lives in [data-avatar-count] next to the avatar stack at the top right. ScreenApp PR #40 (2026-05-21): the old <button aria-label=\"People - N joined\"> 'no longer renders', and all of their People-button selectors failed until they added a global document.querySelector('[data-avatar-count]'). It is language-independent and needs no user action. Four other repos (2025-12 to 2026-09) use the same attribute.",
+    "Q1 fallbacks. The old aria-label 'People - N joined' (en/de only, high stale risk), div.egzc7c badge text, and .uGOf1d (only 2024-and-older auto-leave extensions; PreMiD's last functional change was 2024-07-29) are all likely stale. [jsname=\"Nqj9L\"] has no prior art at all: GitHub code search on 2026-10-06 found zero Meet hits. Do not count [data-participant-id] tiles: only on-screen tiles render (stuck near 9 in a 46-person pt-BR call, dotch3 2026-09-15).",
+    "Q1 People panel as a source. Rows are [role=listitem][data-participant-id] with aria-label = display name, inside a [role=list]. The list aria-label is 'Participants' (en) or 'Participantes'/'Pessoas' (pt-BR). All rows are in the DOM, not virtualized. A presenter can get a second listitem for their presentation, and Meeting-BaaS also handles 'Merged audio' (adaptive/room audio) rows, so dedupe by name and drop presentation and merged rows. Your own row carries a '(You)' span ('(você)' in pt-BR). Section headings seen in code: 'Contributors', 'In the meeting', 'Waiting to join' (en only); no pt-BR headings found.",
+    "Q1 does it include yourself? Yes, for both sources. ScreenApp's rule is 'contributors >= 2 means someone else is here, < 2 means alone', and the panel lists your '(You)' row. Presentations: they are separate rows in the panel, and internally a screen share is a separate device with parentDeviceId (attendee). Whether [data-avatar-count] counts presentations, companion-mode devices or lobby waiters is NOT documented anywhere. Treat it as unknown and check live.",
+    "Q2 opening the People panel. Current UI: click [role=\"button\"]:has([data-avatar-count]) (logitech plugin 2026-09-24) or div[jsname=\"QbKf1d\"] (Stream Deck plugin 2026-03-01). Meeting-BaaS clicks div[role=button][aria-haspopup=dialog] containing 'People', then clicks the body to dismiss the hover dialog the new button opens. The official shortcut is Ctrl+Alt+P (Windows/ChromeOS) or Control+Command+P (macOS), but it is a toggle, and a synthetic KeyboardEvent from a userscript is untrusted (not verified to work).",
+    "Q2 is it safe? Not fully. People and chat share one side panel, so opening People closes a chat the user opened (dotch3 avoids clicking when chat is open, and checks aria-pressed first). The new button also pops a hover dialog. Blaise and meet-sorteador deliberately never open it. Attendee opens and immediately closes it. Recommendation: read [data-avatar-count] passively, and use the panel only if it is already open.",
+    "Q3 leave button. button[jsname=\"CQylAd\"] is the best-evidenced selector. aria-label is 'Leave call' / 'Sair da chamada' (pt-BR HTML captured 2026-06-11 by mastria), with child <i class=\"google-symbols\">call_end</i>. Megingjord re-verified it live in Sept 2026, and attendee changed to a JS element.click() on 2026-09-23, which works even when the hover tray hides the bar. A language-independent fallback is the 'call_end' icon text (TranscripTonic 2026-07). Caveat: the button also exists in the waiting room (Vexa, TranscripTonic), so arm the watcher only after a count >= 2 has been seen.",
+    "Q3 host leave. For a host with Host Management on, clicking leave opens a MODAL DIALOG; no prior art describes an arrow menu. Options: 'Just leave the call' vs 'End the call for everyone' (code); Google Help says 'Leave meeting' vs 'End meeting for all', and pt-BR Help says 'Sair da reunião' vs 'Encerrar a reunião para todos'. The 'just leave' button was [data-mdc-dialog-action=\"Pd96ce\"] (2024-08; still copied in 2026 but not re-verified). One click on CQylAd cannot end the call for everyone; the danger is the second click. Safe pattern: after clicking leave, wait about 400 ms. If a dialog appears, click only a button that matches 'just leave'/'Apenas sair' or Pd96ce AND does not contain 'everyone'/'for all'/'todos'/'encerrar'. Otherwise abort and notify. Anti-patterns to avoid: substring 'encerrar' (mastria) and 'End meeting'/'End call' (Vexa).",
+    "Q4 alone signals. The texts 'You're the only one here' / 'No one else is here' are used inconsistently (in-call marker vs lobby text vs end signal), are English-only, and have no pt-BR form in code. Do not use them as the primary trigger. End screens to stop on (.roSPhc, attendee 2026-09-09): 'The call ended because everyone left', 'Your host ended the meeting for everyone', 'You've been removed from the meeting'. Robust design from attendee and ScreenApp: start only after someone else has been seen (count >= 2), then leave after the count stays <= 1 for a grace period.",
+    "Q4 Meet's own auto-leave. 'Leave empty calls' is ON by default on desktop: after 10 minutes alone Meet asks 'Are you still there?', and with no answer in 2 minutes it removes you (Workspace Updates 2022-04-07; still handled by Quenchh/MeetBot3.1 on 2026-09-23). The setting is under Settings > General; the pt-BR iOS label is 'Sair de chamadas vazias'. So the ported script mainly needs to leave sooner than 10 minutes and handle the host dialog; Meet already covers the long-tail case."
+   ],
+   "open_questions": [
+    "What exactly does [data-avatar-count] hold in a live pt-BR call: total including self? Does it count people waiting in the lobby, presentations, companion-mode devices, or only a '+k' overflow? None of the sources verified this (ScreenApp PR #40's test plan is unticked). It needs one live test with 1, 2 and 3 participants, one of them presenting.",
+    "pt-BR aria-label of the new avatar/People button (a candidate is 'Abrir o painel Pessoas', inferred from meet-sorteador's text filters, unverified).",
+    "Exact live pt-BR texts of the host leave dialog (guess 'Apenas sair da chamada' / 'Encerrar a chamada para todos'), and whether [data-mdc-dialog-action=\"Pd96ce\"] still marks the 'just leave' button in 2026. No live verification was found after 2024-08.",
+    "Does the host dialog appear when the host is already alone in the call? If not, the auto-leave case never sees it.",
+    "Does a synthetic KeyboardEvent (Control+Command+P on macOS) from a userscript or content script toggle the People panel, or does Meet ignore untrusted events?",
+    "Does the People list stay in the DOM after the panel is closed? Attendee's open-then-close pattern suggests it might. Unverified.",
+    "pt-BR copy of Meet's in-call 'You're the only one here' and of the 'Leave empty calls' / 'Are you still there?' prompt on web. Not found in any code or doc.",
+    "[jsname=\"Nqj9L\"]: no public code uses it. It stays unverified until checked in DevTools."
+   ]
+  },
+  {
+   "selectors": [
+    {
+     "purpose": "participant-count",
+     "value": "[data-avatar-count]  (read Number(el.getAttribute('data-avatar-count')))",
+     "meaning": "Participant count badge on the avatar stack in the TOP-RIGHT of the new 'minimal controls' Meet UI. screenapp PR #40: the old bottom-bar <button aria-label='People - N joined'> no longer renders; the count moved to <span data-avatar-count='N'> next to the user's avatar, present whether or not the bottom hover tray is expanded. Value includes yourself (bot alone => 1).",
+     "source": "https://github.com/screenappai/meeting-bot/blob/main/src/bots/GoogleMeetBot.ts#L854-L866 and PR https://github.com/screenappai/meeting-bot/pull/40 ; corroborated as the People entry point by https://github.com/KXPN/meetrilla/blob/main/meetrilla.js#L9 , https://github.com/LambyPants/google-meet-randomizer/blob/master/content.js#L13 ('2026 update since it borked'), https://github.com/zikompo/logitech-meet-plugin/blob/main/extension/meet-dom.js#L64-L68",
+     "last_touched": "screenapp 2026-05-21 (6b3eaaa31b); meetrilla 2025-12-19 (0c4a66357c, 'Corrige selectores por cambio de interfaz'); randomizer 2026-02-16 (ada11962cf); logitech-meet-plugin 2026-09-24 (9c3ec9b06b)",
+     "stale_risk": "LOW-MEDIUM. Newest signal, four independent repos found it after the Dec 2025 UI change. Only screenapp reads it as a number and its PR test plan boxes are unchecked, so the count semantics (presentations, companion devices, caps) are not proven live.",
+     "locale_notes": "Data attribute, language independent."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "[role=\"button\"]:has([data-avatar-count])   (or click the [data-avatar-count] element itself; it toggles)",
+     "meaning": "Opens/closes the People side panel from the top-right participant avatars. Code comment: 'Since 2026 the People panel opens from the participant avatars at the top right.' meetrilla clicks it once to open, reads the list, clicks again to close.",
+     "source": "https://github.com/zikompo/logitech-meet-plugin/blob/main/extension/meet-dom.js#L64-L68 ; https://github.com/KXPN/meetrilla/blob/main/meetrilla.js#L26-L41",
+     "last_touched": "2026-09-24 (logitech-meet-plugin); 2026-02-16 (meetrilla 484260d1c7, moved the closing click after the list loads)",
+     "stale_risk": "LOW-MEDIUM (two recent independent repos).",
+     "locale_notes": "Language independent."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "[role=\"button\"][aria-labelledby]  where document.getElementById(aria-labelledby).textContent.trim().startsWith('People')",
+     "meaning": "People toggle found via its labelling element. Comment: 'with participants present the accessible name often carries a count (e.g. \"People3\")', so the count is concatenated to the label text.",
+     "source": "https://github.com/wanderingstan/vibeconf-app/blob/main/electron-app/google-meet-provider.js#L2336-L2346 and https://github.com/wanderingstan/vibeconf-app/blob/main/electron-app/meet-selectors.js#L154-L156",
+     "last_touched": "2026-06-24 (f04cbcfac3 / e830cbe3cd, extraction into registry; repo pushed 2026-10-06)",
+     "stale_risk": "MEDIUM. Labels are English; repo forces English UI for its bot.",
+     "locale_notes": "pt-BR label text presumably 'Pessoas' (seen as aria-label substring in https://github.com/Payme-Works/meeboter/blob/main/apps/bots/providers/google-meet/e2e/fixtures/host.fixture.ts#L316-L318 , 2025-12-21), not verified on the new avatar button."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "div[role=\"button\"][aria-haspopup=\"dialog\"]:has(span:text(\"People\"))  (Playwright pseudo) + hover dialog div[role=\"dialog\"][aria-label*=\"people in the call\" i]",
+     "meaning": "Meeting-BaaS 'NEW UI selectors (Dec 2025+) - Badge/hover tray style People button'. Clicking shows a hover dialog that must be dismissed (Escape or click on body).",
+     "source": "https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet.ts#L736-L787 ; https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/services/dialog-observer/simple-dialog-observer.ts#L34-L35 ; origin commits 45d84022bd 'feat: new people selector UI' and f66620e23b 'fix: bring people UI change from main'",
+     "last_touched": "2025-12-19 (original); lines re-touched 2026-01-14 (ed094d7e22) and 2026-07-20 (05bc06a99b); file active 2026-10-05",
+     "stale_risk": "MEDIUM. Kept side by side with OLD selectors, which suggests a staged rollout.",
+     "locale_notes": "English text match only."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "Keyboard: Ctrl+Alt+P (Windows/ChromeOS), Ctrl+Cmd+P (Mac)",
+     "meaning": "Official 'Show or hide participants' shortcut (toggle). Used by Meeting-BaaS before falling back to button clicks.",
+     "source": "https://support.google.com/a/users/answer/9896256?hl=en&co=GENIE.Platform%3DDesktop ; https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet.ts#L620-L624",
+     "last_touched": "Meeting-BaaS line 2026-02-02 (86b90079a6); help page current",
+     "stale_risk": "LOW for existence; it is a toggle, so sending it when the panel is already open closes it.",
+     "locale_notes": "Language independent."
+    },
+    {
+     "purpose": "open-people-panel",
+     "value": "button[aria-label=\"People\"], nav button[aria-label=\"Show everyone\"][role=\"button\"], button[data-panel-id=\"1\"], [data-tooltip~=\"everyone\"], i:text('people') -> closest('button')",
+     "meaning": "Legacy bottom-bar People button (count badge lived inside it).",
+     "source": "https://github.com/attendee-labs/attendee/blob/main/bots/google_meet_bot_adapter/google_meet_chromedriver_payload.js#L713 ; https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet.ts#L738-L741 (labelled 'OLD UI selectors (pre-Dec 2025)') ; https://github.com/meetingbot/meetingbot/blob/main/src/bots/meet/src/bot.ts#L618-L635 ; randomizer diff ada11962cf",
+     "last_touched": "attendee line 2025-04-28 (e0c323cbc6); meetingbot 2025-07-22 (5d724df537)",
+     "stale_risk": "HIGH since Dec 2025 (screenapp PR #40 says the bottom-bar People button no longer renders in the new UI). May survive for accounts still on the old UI.",
+     "locale_notes": "pt-BR: 'Pessoas' (meeboter 2025-12-21) and 'Mostrar todos' for 'Show everyone' (https://github.com/alanfrigo/rkj-ai/blob/main/services/meet-bot/src/bot.py#L834 , 2026-01-23, unverified)."
+    },
+    {
+     "purpose": "participant-count",
+     "value": "button[aria-label^=\"People - \"]  aria-label format 'People - N joined'  (/^People - \\d+ joined$/)",
+     "meaning": "Legacy accessible name of the bottom-bar People button carrying the count.",
+     "source": "https://github.com/screenappai/meeting-bot/blob/main/src/bots/GoogleMeetBot.ts#L874 and #L899",
+     "last_touched": "2026-06-18 (780cf39c13), but PR #40 (2026-05-21) states this button no longer renders in the new UI",
+     "stale_risk": "HIGH (kept only as fallback for old UI variants).",
+     "locale_notes": "German 'Personen - N' also matched; pt-BR form unknown."
+    },
+    {
+     "purpose": "participant-count",
+     "value": "role=button whose accessible name matches /people(?: \\(\\d+\\))?.*/i or /show everyone.*/i; count = bare digit text of the control (/^\\s*\\(?\\s*(\\d{1,3})\\s*\\)?\\s*$/)",
+     "meaning": "'Current Meet renders the count chip as a bare digit (no \"People (N)\" wrapper) on the participants control.' PR #4 reports the bare-digit count parsed live, bot alone => 1.",
+     "source": "https://github.com/OREEAI/oreeai-notetaker/blob/main/bot/selectors.py#L63-L66 ; https://github.com/OREEAI/oreeai-notetaker/blob/main/bot/states.py#L42-L46 ; PR https://github.com/OREEAI/oreeai-notetaker/pull/4",
+     "last_touched": "2026-09-07 (a42e46c28d / 8365aa8e0b)",
+     "stale_risk": "MEDIUM. Live-tested once on an en-US forced UI; test fixtures are synthetic HTML.",
+     "locale_notes": "English only; for pt-BR the name would start with 'Pessoas' (unverified)."
+    },
+    {
+     "purpose": "participant-count",
+     "value": "div.egzc7c  (number text, also '.egzc7c > div > div')",
+     "meaning": "Count number inside/near the People button (obfuscated class).",
+     "source": "https://github.com/screenappai/meeting-bot/blob/main/src/bots/GoogleMeetBot.ts#L949 ; https://github.com/yasharusakov/ghost-student/blob/main/src/attend/selectors.rs#L14",
+     "last_touched": "2026-01-09 (dbde753a98); ghost-student 2026-02-22",
+     "stale_risk": "MEDIUM-HIGH: minified class, and screenapp demoted it below data-avatar-count in May 2026.",
+     "locale_notes": "Language independent."
+    },
+    {
+     "purpose": "participant-count",
+     "value": ".uGOf1d  (innerText = count)",
+     "meaning": "Legacy count badge number inside the old 'Show everyone' button, the selector of the 2020-2022 auto-leave extensions (if count <= N then click leave).",
+     "source": "https://github.com/NoapMat/g-leave/blob/main/scripts/exitMeet.js#L3 ; https://github.com/PreMiD/Activities/blob/main/websites/G/Google%20Meet/presence.ts#L95 ; 2025-2026 bots list it only as one guess among many: https://github.com/abhijith-benny/automated-meeting-assistant/blob/main/automation-service/src/platform/GoogleMeetAdapter.js#L716-L741 , https://github.com/VijayPatidar354/MeetMind-Autonomous-AI-Meeting-Assistant/blob/main/ai-service/app/meeting_bot/bot.py#L66 , https://github.com/franciscolh04/Meeting-Transcriber/blob/main/src/services/providers/google_meet.py#L171",
+     "last_touched": "g-leave 2024-10-03; PreMiD line 2025-02-12 (mechanical reformat 239a48fad8); guess lists 2025-12-28 to 2026-10-04. Of ~80 GitHub files using it, 13 date from 2021 and 14 from 2026, none claims live verification.",
+     "stale_risk": "HIGH. No 2025-2026 source verifies it; it belonged to the bottom-bar button that the Dec 2025 UI removed.",
+     "locale_notes": "Language independent."
+    },
+    {
+     "purpose": "participant-count",
+     "value": "[jsname=\"Nqj9L\"]",
+     "meaning": "Unverified count element; appears as fallback after .uGOf1d.",
+     "source": "https://github.com/darshan-gowdaa/MeetMaxxing/blob/main/extension/content.js#L647 (the only Meet repo in GitHub code search with this jsname)",
+     "last_touched": "2026-07-22 (7d5530c789, commit message '.'); 1-star repo created 2026-07-09",
+     "stale_risk": "UNKNOWN/HIGH. Single unverified source.",
+     "locale_notes": "Language independent."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "[role=\"region\"][aria-label=\"In call\" i]  then  div[role=\"listitem\"][aria-label][data-participant-id]",
+     "meaning": "In-call section of the People panel (panel is <aside aria-label=\"Side panel\">). Scoping to this region excludes 'Also invited' and 'Waiting to be admitted' rows that share the same listitem markup. listitem aria-label = display name; data-participant-id = 'spaces/<space>/devices/<n>'.",
+     "source": "https://github.com/wanderingstan/vibeconf-app/blob/main/electron-app/meet-selectors.js#L104-L121 ; https://github.com/wanderingstan/vibeconf-app/blob/main/electron-app/google-meet-provider.js#L2603-L2690 ; https://github.com/BohdanFL/meet-switcher/blob/main/docs/GOOGLE_MEET_DOM_GUIDE.md (2026 'confirmed in practice': <span class=\"GWjh7b\" role=\"region\" aria-label=\"In call\">)",
+     "last_touched": "vibeconf 2026-06-29 (d89fb90c20, #276) and 2026-08-05; meet-switcher 2026-09-18 (408c196428)",
+     "stale_risk": "LOW-MEDIUM",
+     "locale_notes": "Region label is LOCALIZED (meet-switcher uses Ukrainian/Russian variants). pt-BR value not found in any repo ('Na chamada' is a guess). Match structurally when possible."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "div[role=\"list\"][aria-label=\"Participants\"] > [role=\"listitem\"]  (structural alternative: any [role=\"list\"] containing [role=\"listitem\"][data-participant-id])",
+     "meaning": "Participant list inside the People panel; only exists while the panel is open (or after it was opened once).",
+     "source": "https://github.com/attendee-labs/attendee/blob/main/bots/google_meet_bot_adapter/google_meet_chromedriver_payload.js#L669-L675 ; https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet/speakersObserver.ts#L191-L197 ; https://github.com/ricardojustus/blaise/blob/main/extension/src/selectors.js#L198-L215",
+     "last_touched": "attendee 2025-04-28; Meeting-BaaS 2025-10-26 (reformat); blaise 2026-07-11",
+     "stale_risk": "MEDIUM",
+     "locale_notes": "aria-label localized: pt-BR 'Participantes' (blaise comment). blaise deliberately matches structurally instead."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "Presentation pseudo-row: listitem with the SAME aria-label as the sharer and status row text 'Presentation' / 'Your presentation' (div.d93U2d), visible text \"<Name>'s presentation\"",
+     "meaning": "Screen share gets its own People-panel row with its own data-participant-id; must be excluded when counting humans. Measured live 2026-08-04 (two people, three rows) and 2026-09-03.",
+     "source": "https://github.com/wanderingstan/vibeconf-app/blob/main/electron-app/meet-selectors.js#L114-L148 ; https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet/speakersObserver.ts#L327-L333 ; meet-switcher guide section 2",
+     "last_touched": "2026-08-05 (80c90dd353); meet-switcher 2026-09-18",
+     "stale_risk": "LOW for the behaviour; .d93U2d class is minified (vibeconf matches the text instead).",
+     "locale_notes": "Text localized; escale-browser uses /pr[eé]sent|präsent|presentaci|apresenta/ (pt 'apresentação')."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "'Merged audio' listitem (has data-cohort-id, NO data-participant-id); member rows contain [aria-label=\"Adaptive audio group\"]",
+     "meaning": "Pseudo-row created when devices share one microphone (adaptive audio / co-located). Not a person; exclude by requiring data-participant-id.",
+     "source": "https://github.com/wanderingstan/vibeconf-app/blob/main/electron-app/meet-selectors.js#L149-L153 ; https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet/speakersObserver.ts#L234-L291",
+     "last_touched": "2026-08-05 (vibeconf); Meeting-BaaS 2025-10-26",
+     "stale_risk": "LOW-MEDIUM",
+     "locale_notes": "Labels English; the data-attribute rule is language independent."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "Self marker: span with text '(You)' inside your own listitem; host rows also show 'Meeting host'",
+     "meaning": "Identifies your own row (count includes it).",
+     "source": "https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet/speakersObserver.ts#L306-L313 ; https://github.com/wanderingstan/vibeconf-app/blob/main/electron-app/meet-selectors.js#L157 ; https://github.com/wanderingstan/vibeconf-app/issues/552",
+     "last_touched": "2026-09-02 (5ab6f9098d)",
+     "stale_risk": "LOW",
+     "locale_notes": "pt-BR probably '(Você)' (blaise lists 'Você' for tiles, 2026-06); not verified for the panel."
+    },
+    {
+     "purpose": "people-panel-list",
+     "value": "//span[.//div[text()=\"Contributors\"]]//div[text()=\"1\"]",
+     "meaning": "'Contributors' section header with its count (1 = only you). Workspace docs describe 'Contributors' and 'Also invited' sections.",
+     "source": "https://github.com/meetingbot/meetingbot/blob/main/src/bots/meet/src/bot.ts#L29 (declared but never used in the file)",
+     "last_touched": "2025-02-24 (82fe207678)",
+     "stale_risk": "MEDIUM-HIGH (unused by its own author; 2026 sources use the 'In call' region instead).",
+     "locale_notes": "Header localized; pt-BR unknown."
+    },
+    {
+     "purpose": "leave-button",
+     "value": "button[jsname=\"CQylAd\"]  (aria-label 'Leave call' / pt-BR 'Sair da chamada')",
+     "meaning": "Red hang-up button in the bottom bar. Real pt-BR HTML quoted in mastria: <button jsname=\"CQylAd\" aria-label=\"Sair da chamada\"><i class=\"... google-symbols ...\">call_end</i></button>.",
+     "source": "https://github.com/attendee-labs/attendee/blob/main/bots/google_meet_bot_adapter/google_meet_ui_methods.py#L1277-L1297 ; https://github.com/ralphm/megingjord/blob/master/extension/meet.js#L66 ('verified: meeting'; header 'Selectors were verified against the live Meet UI (September 2026)') ; https://github.com/mastria/meeting-webhook/blob/main/content.js#L17-L26 ; https://github.com/kndpt/escale-browser/blob/main/Sources/Escale/Page/Scripts/meeting.js#L37",
+     "last_touched": "attendee line 2025-04-28 but same function changed 2026-09-23 (b63fe776ce 'fix: forcefully click gmeet leave button'); megingjord 2026-09-01 (4bf7ccbaf6); mastria 2026-06-11; escale 2026-10-05",
+     "stale_risk": "LOW. CAVEAT: the waiting room/knock page also renders a 'Leave call' control (vibeconf #330/#376, OREEAI selectors.py L41-L45), so its presence alone is not proof of admission.",
+     "locale_notes": "jsname language independent; aria-label en 'Leave call', pt-BR 'Sair da chamada' (also Google Help pt-BR)."
+    },
+    {
+     "purpose": "leave-button",
+     "value": "i.google-symbols (or any <i>) whose textContent.trim() === 'call_end'  -> closest('button')",
+     "meaning": "Material Symbols ligature of the hang-up icon; same text in every UI language.",
+     "source": "https://github.com/vivek-nexus/transcriptonic/blob/main/extension/content-scripts/google-meet/config.js#L4-L5 (TranscripTonic; index.js L157 attaches to parentElement.parentElement) ; https://github.com/openclaw/openclaw/blob/main/extensions/google-meet/src/transports/google-meet-page-scripts.ts#L413-L419 ; https://github.com/mastria/meeting-webhook/blob/main/content.js#L28-L31 ; https://github.com/ricardojustus/blaise/blob/main/extension/src/selectors.js#L170-L188 (also 'call_end_alt')",
+     "last_touched": "TranscripTonic 2026-07-12 (dd75752c2c, repo pushed 2026-09-10); openclaw 2026-07-17; blaise 2026-07-11",
+     "stale_risk": "LOW",
+     "locale_notes": "Language independent."
+    },
+    {
+     "purpose": "leave-button",
+     "value": "div[jsname=\"CQylAd\"][aria-label=\"Leave call\"] ; button span[jsname=\"S5tZuc\"] i:has-text(\"call_end\")",
+     "meaning": "Meeting-BaaS quick-exit variants (div form is from an older UI; element is a <button> today).",
+     "source": "https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet/closeMeeting.ts",
+     "last_touched": "2025-10-26 (0acaebb952, formatting)",
+     "stale_risk": "MEDIUM for the div form; S5tZuc unverified elsewhere.",
+     "locale_notes": "English aria-label."
+    },
+    {
+     "purpose": "host-leave-dialog",
+     "value": "[data-mdc-dialog-action=\"Pd96ce\"]",
+     "meaning": "'Just leave the call' button of the host dialog that appears after clicking Leave call. Pattern: if this button exists click it, else click CQylAd (second press = just leave).",
+     "source": "https://github.com/ChrisRegado/streamdeck-googlemeet/blob/master/browser-extension/event_handlers/leave_call_event_handler.js#L9-L23 ; copied into https://github.com/ralphm/megingjord/blob/master/extension/meet.js#L67 and L209-L215",
+     "last_touched": "ChrisRegado 2024-08-10 (913832e041); megingjord 2026-09-01 (8e627d81ed), but unlike neighbouring selectors it is NOT annotated 'verified'",
+     "stale_risk": "MEDIUM. Only 2024 evidence of being live; obfuscated action id.",
+     "locale_notes": "Language independent."
+    },
+    {
+     "purpose": "host-leave-dialog",
+     "value": "[jscontroller=\"ZakeSe\"]",
+     "meaning": "Container of the host leave dialog.",
+     "source": "ChrisRegado commit 0be4695ba1 https://github.com/ChrisRegado/streamdeck-googlemeet/commit/0be4695ba1",
+     "last_touched": "2024-08-10, removed the same day by 913832e041",
+     "stale_risk": "HIGH (dropped by its author).",
+     "locale_notes": "Language independent."
+    },
+    {
+     "purpose": "host-leave-dialog",
+     "value": "[role=\"dialog\"], [role=\"alertdialog\"] buttons: leave option /just leave the call|just leave|leave meeting|apenas sair|sair da reuni[aã]o/i ; END option (never click) /end the call for everyone|end call for everyone|end meeting for all|encerrar a chamada para todos|encerrar a reuni[aã]o para todos/i",
+     "meaning": "Desktop host flow is a dialog/window shown AFTER clicking Leave call, with two options. Label wording conflicts by source: code says 'Just leave the call' / 'End the call for everyone' (pt-BR 'Apenas sair' / 'Encerrar a chamada para todos'); Google Help says 'Leave meeting' / 'End meeting for all' (pt-BR 'Sair da reunião' / 'Encerrar a reunião para todos').",
+     "source": "https://github.com/Newton-School/sentinel/blob/main/src/meet-bot/joiner.ts#L354-L373 ; https://github.com/Payme-Works/meeboter/blob/main/apps/bots/providers/google-meet/e2e/fixtures/host.fixture.ts#L433-L451 ; https://github.com/vivek-nexus/google-meet-slack-integration/blob/main/testSuite.js#L157 ; https://github.com/openclaw/openclaw/blob/main/extensions/google-meet/src/transports/google-meet-page-scripts.ts#L433-L440 ; https://support.google.com/meet/answer/9303164?hl=en&co=GENIE.Platform%3DDesktop ; https://support.google.com/meet/answer/9303164?hl=pt-BR&co=GENIE.Platform%3DDesktop ; https://github.com/kndpt/escale-browser/blob/main/Sources/Escale/Page/Scripts/meeting.js#L105-L117",
+     "last_touched": "sentinel 2026-04-21; meeboter 2025-12-21; vivek-nexus 2023-12-16; openclaw 2026-07-17 (PR #103522 says no live Meet call was run); escale 2026-10-05 (doc says selectors 'as remembered, not from a qualified page'; its regex would not match 'Just leave the call')",
+     "stale_risk": "MEDIUM-HIGH for exact wording; LOW for the dialog mechanism.",
+     "locale_notes": "pt-BR texts only from meeboter (Brazilian dev, regex partly loose /encerrar/) and Google Help pt-BR."
+    },
+    {
+     "purpose": "alone-signal",
+     "value": "page text /you[’']?re the only one here|no one else is here/i",
+     "meaning": "In-call notice while you are alone. Meeting-BaaS warns it 'legitimately appears while the bot waits alone during the early grace period', so it must not trigger leave right after joining; screenapp even treats 'You're the only one here' as a lobby-like text.",
+     "source": "https://github.com/Meeting-BaaS/meet-teams-bot/blob/v2-improvements/src/meeting/meet.ts#L585-L594 ; https://github.com/Ascent-AI-org/OpenNotetaker/blob/main/src/bot-runner/meet-browser.js#L371 ; https://github.com/OREEAI/oreeai-notetaker/blob/main/bot/selectors.py#L67-L70 ; https://github.com/screenappai/meeting-bot/blob/main/src/bots/GoogleMeetBot.ts#L435-L438",
+     "last_touched": "Meeting-BaaS 2026-06-22 (83603a441d); OpenNotetaker 2026-07-02; OREEAI 2026-09-07; screenapp 2026-06-18",
+     "stale_risk": "MEDIUM (text, English only in all sources).",
+     "locale_notes": "pt-BR 'Só você está aqui' only in https://github.com/alanfrigo/rkj-ai/blob/main/services/meet-bot/src/bot.py#L845-L847 (2026-01-23, unverified)."
+    },
+    {
+     "purpose": "alone-signal",
+     "value": ".roSPhc textContent includes 'The call ended because everyone left' | 'Your host ended the meeting for everyone' | 'You've been removed from the meeting'",
+     "meaning": "Post-call screen messages (call already over).",
+     "source": "https://github.com/attendee-labs/attendee/blob/main/bots/google_meet_bot_adapter/google_meet_chromedriver_payload.js#L338-L354",
+     "last_touched": "2026-09-09 (60f59ce735, PR #1004 'handle meeting ended because everyone left case in gmeet')",
+     "stale_risk": "LOW-MEDIUM (minified class; texts English). 'Your host ended the meeting for everyone' also matched live by OREEAI PR #4 (2026-09-07).",
+     "locale_notes": "English only; pt-BR equivalents not found."
+    },
+    {
+     "purpose": "other",
+     "value": "dialog text /are you still there/i with buttons 'Leave now' / 'Stay in the call'",
+     "meaning": "Meet prompt observed live 2026-07-27; if unanswered Meet ejects the participant. Authors attribute it to inactivity; may be the 'Leave empty calls' prompt or a related idle check.",
+     "source": "https://github.com/wanderingstan/vibeconf-app/blob/main/electron-app/meet-selectors.js#L381-L387 ; https://github.com/wanderingstan/vibeconf-app/issues/61",
+     "last_touched": "2026-07-27 (dd7bb9cf7d)",
+     "stale_risk": "MEDIUM",
+     "locale_notes": "English only; pt-BR unknown."
+    }
+   ],
+   "answers": [
+    "COUNT (Q1): Since about Dec 2025 the current Meet web UI moved the participant count out of the bottom-bar People button into a badge on the top-right avatar stack: <span data-avatar-count=\"N\">. Evidence: screenapp PR #40 (2026-05-21), plus meetrilla (2025-12-19), google-meet-randomizer (2026-02-16), logitech-meet-plugin (2026-09-24), Meeting-BaaS 'NEW UI (Dec 2025+) badge/hover tray'. Recommended read order: (1) Number(document.querySelector('[data-avatar-count]').getAttribute('data-avatar-count')); (2) the People control's accessible name/inner text (aria-labelledby text like 'People3', or a bare digit; OREEAI parsed it live 2026-09-07); (3) only if the panel is already open, count [role=region][aria-label='In call'] [role=listitem][data-participant-id], excluding presentation rows and 'Merged audio' rows; (4) legacy .uGOf1d / 'People - N joined' / div.egzc7c as last resort. [jsname='Nqj9L'] has a single unverified 2026 source (MeetMaxxing). .uGOf1d has no 2025-2026 live verification and belonged to the button the new UI removed.",
+    "SELF / PSEUDO PARTICIPANTS (Q1): The count includes yourself in every source: screenapp alone => 1 (exits when contributors < 2), OREEAI live alone => 1, attendee/meetingbot treat participants.length === 1 (self) as alone. In the People panel, a screen share is a SEPARATE listitem with the sharer's same aria-label and its own data-participant-id, with 'Presentation'/'Your presentation' text (vibeconf, measured live 2026-08-04 and 2026-09-03; meet-switcher 2026-09-18 shows \"<Name>'s presentation\" rows). Shared-microphone/adaptive audio produces a 'Merged audio' pseudo-row with data-cohort-id and no data-participant-id. Tile-based counting is unreliable: AbroadWorks/vexa PR #17 (2026-07-30) saw tile count drop to 0 during screen share. Whether data-avatar-count counts presentations or companion-mode devices: no evidence found in any repo.",
+    "OPEN PANEL (Q2): Current entry point is the top-right avatar button ([role=button]:has([data-avatar-count]), logitech-meet-plugin 2026-09-24) or the official toggle shortcut Ctrl+Alt+P / Ctrl+Cmd+P (Google keyboard-shortcuts help; Meeting-BaaS uses it). Legacy: button[aria-label='People'] / 'Show everyone' / data-panel-id='1'. It is NOT invisible: it opens the right side panel (<aside aria-label='Side panel'>), which replaces whatever side panel the user had (chat etc.), and Meeting-BaaS reports the Dec 2025 button pops a hover dialog that must be dismissed. Prior art either keeps it open (Meeting-BaaS reopens it if closed), opens-reads-closes (attendee clicks People twice; meetrilla opens, waits for rows, clicks again), or refuses to open it (blaise: 'open-only; never opened by the extension'; meet-sorteador asks the user to open 'Pessoas'). For a user-facing auto-leave script, read the badge and do not open the panel.",
+    "LEAVE BUTTON (Q3): button[jsname='CQylAd'] is the most consistently confirmed selector in 2026 (attendee, file changed 2026-09-23; megingjord 'verified against the live Meet UI (September 2026)'; mastria quotes real pt-BR HTML <button jsname='CQylAd' aria-label='Sair da chamada'><i class='... google-symbols ...'>call_end</i></button>, 2026-06-11). Language-independent fallback: <i> with text 'call_end' -> closest('button') (TranscripTonic, openclaw, blaise). Caveat: the waiting/knock page also shows a 'Leave call' control (vibeconf #330/#376, OREEAI), so require real admission (count badge present, no 'Asking to be let in'/'Please wait until a meeting host...' text) before arming auto-leave.",
+    "HOST DIALOG (Q3): On desktop web the host flow is a dialog/window that appears AFTER clicking Leave call (Google Help 9303164 desktop: 'On the window that appears, click End meeting for all' or 'Leave meeting'; pt-BR help: 'Encerrar a reunião para todos' / 'Sair da reunião'). No source describes a split arrow menu on the web hang-up button. Code from 2023-2026 names the buttons 'Just leave the call' / 'End the call for everyone' (ChrisRegado 2024, vivek-nexus 2023, Newton-School/sentinel 2026-04) or 'End call for everyone' / 'encerrar a chamada para todos' / 'apenas sair' (meeboter 2025-12), so exact wording is unresolved. Known selector for the leave option: [data-mdc-dialog-action='Pd96ce'] (2024-08, re-used unverified 2026-09). One click on CQylAd does not end the call for everyone; ending needs a second, explicit choice. Help says End meeting for all requires Host Management. Real risk is in the script's second click: generic matchers like vexa's {text:'End call'}, {text:'End meeting'}, '[role=dialog] button' or meeboter's /encerrar/ could hit the end option. Safe rule: after clicking CQylAd, if a dialog appears click Pd96ce or a button matching /just leave|apenas sair|leave meeting|sair da reuni/i and explicitly reject /end|encerrar|everyone|todos|for all/i. If unsure, do nothing. Meet mobile has no end-for-everyone (AbroadWorks/vexa PR #17).",
+    "ALONE SIGNALS (Q4): Live notice text /you're the only one here|no one else is here/i (Meeting-BaaS 2026-06-22, OpenNotetaker 2026-07-02, OREEAI 2026-09-07); pt-BR 'Só você está aqui' appears only in one unverified Brazilian repo (rkj-ai 2026-01). Meeting-BaaS warns the notice also appears legitimately while you wait alone at the start, so combine it with 'had seen >= 2 before' plus a grace timer, as screenapp (hasSeenOtherParticipant + loneParticipantExitDelayMs), meetingbot (everyoneLeftTimeout default 30 s), attendee (only_participant_in_meeting_timeout_seconds) and AbroadWorks/vexa (90 s, presentation-guarded) do. Post-call texts in .roSPhc: 'The call ended because everyone left', 'Your host ended the meeting for everyone' (attendee 2026-09-09).",
+    "MEET'S OWN AUTO-LEAVE (Q4): Google's 'Leave empty calls' feature (Workspace Updates 2022-04-07): when you are the only person in a meeting for ten minutes Meet prompts stay/leave, and if there is no answer within two minutes you leave automatically. It is ON by default on desktop and iOS and can be turned off by the user (press reports place it in More options > Settings > General > 'Leave empty calls'; some outlets say five minutes). The pt-BR setting name 'Sair de chamadas vazias' comes from MacMagazine (2025-10-28, Gmail iOS). Separately, vibeconf saw live (2026-07-27) an 'Are you still there?' dialog with 'Leave now' / 'Stay in the call' that ejects if unanswered. The user's script is therefore mostly needed to leave faster than about 12 minutes, or when the setting is off.",
+    "PORTING PLAN DERIVED FROM PRIOR ART: poll every 2-5 s; armed only when admitted (CQylAd present AND [data-avatar-count] present AND no knock/waiting text); count = data-avatar-count (fallback: People control digit); require hasSeenOthers (count >= 2 at some point) and count <= 1 sustained for a grace period (30-90 s in prior art); click CQylAd; within 2 s, if a [role=dialog]/[role=alertdialog] appears, click only the just-leave option (Pd96ce or text whitelist above) and never an end/encerrar/todos button; confirm via post-call screen ('Return to home screen'/'Voltar à tela inicial' or URL change). Do not open the People panel. Selectors with the best 2026 evidence are attribute/structure/icon based (data-avatar-count, jsname CQylAd, call_end, data-participant-id). Minified classes (uGOf1d, egzc7c, roSPhc, d93U2d) and aria-label text are the most fragile, especially in a pt-BR UI."
+   ],
+   "open_questions": [
+    "Exact current host-dialog button labels on desktop web, en and pt-BR: code says 'Just leave the call' / 'End the call for everyone', Google Help says 'Leave meeting' / 'End meeting for all' ('Sair da reunião' / 'Encerrar a reunião para todos'). Is [data-mdc-dialog-action='Pd96ce'] still the leave option in 2026? No 2025-2026 live-verified source found; needs one host test.",
+    "Semantics of data-avatar-count: does it count presentation pseudo-participants, companion-mode devices, 'Merged audio' cohorts, people still in the waiting room? Does it cap (e.g. 99+) or ever disappear briefly (screenapp notes it can be missing during load)? Only screenapp reads it numerically, and its PR test plan is unchecked.",
+    "pt-BR accessible names in the new UI: the avatar/People control (likely 'Pessoas' + count), the People panel 'In call' region (pt-BR string not found anywhere), self marker ('(Você)'?), and the alone notice ('Só você está aqui' comes from one unverified repo).",
+    "Is the Dec 2025 avatar-stack UI rolled out to every account (personal Gmail vs Workspace, consumer vs enterprise), or is it A/B? Meeting-BaaS and screenapp keep OLD and NEW selectors side by side.",
+    "Do .uGOf1d and [jsname='Nqj9L'] exist at all in the current DOM? No source that runs live in 2025-2026 confirms either; both should be checked in DevTools before relying on them.",
+    "Is Meet's 'Are you still there?' (Leave now / Stay in the call) dialog the same mechanism as the 2022 'Leave empty calls' prompt, and what are its pt-BR texts and the current timing (10 min per the official blog vs 5 min in some press)?",
+    "For a Workspace host without Host Management (or a personal-account organizer), does clicking Leave call skip the dialog and simply leave? If so, a dialog handler must tolerate no dialog appearing.",
+    "Does sending Ctrl+Alt+P or clicking the avatar button steal keyboard focus or close an open chat panel in the user's session? This matters only if the script ever opens the panel; prior art suggests it replaces the open side panel."
+   ]
+  }
+ ],
+ "final": {
+  "recommendations": [
+   {
+    "purpose": "participant-count (read the current count passively, no user action)",
+    "primary": "Number(document.querySelector('[data-avatar-count]')?.getAttribute('data-avatar-count')); accept only an integer > 0, otherwise treat as 'unknown' (do not treat a missing badge as 0).",
+    "fallbacks": [
+     "Accessible name or inner digit of the People control: [role=\"button\"]:has([data-avatar-count]) or a role=button whose label starts with People/Pessoas/Participantes; parse /(\\d{1,3})/ (OREEAI 2026-09-07, vibeconf 2026-06-24; English only in code, pt-BR unverified)",
+     "Only if the People panel is ALREADY open: count unique aria-label of [role=\"listitem\"][data-participant-id] inside a [role=\"list\"], dropping presentation rows ('Presentation'/'Apresentando'/\"<Name>'s presentation\") and 'Merged audio' rows (no data-participant-id). Structural match, avoids the localized list label 'Participants'/'Participantes' (blaise 2026-07-11, dotch3 2026-09-15, vibeconf 2026-08-05)",
+     "Legacy, last resort only: button[aria-label^=\"People - \"] /^People - (\\d+) joined$/, div.egzc7c, .uGOf1d (all tied to the removed bottom-bar People button)",
+     "Do NOT use: [data-participant-id] video tiles (only on-screen tiles render, undercounts), [jsname=\"Nqj9L\"] (one unverified 1-star repo, MeetMaxxing 2026-07-22; researcher 1 found zero hits)"
+    ],
+    "evidence": "Re-verified myself on 2026-10-06. screenappai/meeting-bot src/bots/GoogleMeetBot.ts L854-L866 reads document.querySelector('[data-avatar-count]') first with the comment that the current UI has no visible People button and the count is a <span data-avatar-count=\"N\"> next to the avatar at the top right; PR #40 'detect participants via data-avatar-count for new Meet UI' MERGED 2026-05-21; file last commit 2026-06-18 (37f89d61d4). Logic L831-L846: contributors >= 2 means someone else present, then a lone-exit delay; so the value includes yourself. Corroborated by zikompo/logitech-meet-plugin extension/meet-dom.js L64-L68 (last commit 2026-09-24, 9c3ec9b06b) and KXPN/meetrilla meetrilla.js L9 (last commit 2026-02-16). Legacy selectors: ScreenApp keeps them below data-avatar-count; .uGOf1d has no live-verified 2025-2026 source.",
+    "confidence": "medium"
+   },
+   {
+    "purpose": "open-people-panel (programmatically)",
+    "primary": "Do not open it. For auto-leave the badge is enough. If you must: click [role=\"button\"]:has([data-avatar-count]) once, read, click again to close (toggle), and skip entirely if the side panel is already showing chat or anything else.",
+    "fallbacks": [
+     "Click the [data-avatar-count] element itself (meetrilla opens and closes the panel this way, 2026-02-16)",
+     "div[jsname=\"QbKf1d\"] (ChrisRegado streamdeck participants_event_handler.js, commit 3dfec9c3bb 2026-03-01 'Update Participants button for new Meet UI changes'; obfuscated jsname)",
+     "Meeting-BaaS: div[role=\"button\"][aria-haspopup=\"dialog\"] containing 'People' (pt-BR presumably 'Pessoas', unverified), then dismiss the hover dialog (Escape or click body)",
+     "Legacy: button[aria-label=\"People\"|\"Show everyone\"|pt-BR aria-label*=\"pessoas\"/\"participantes\"], [data-panel-id=\"1\"] (labelled OLD UI pre-Dec 2025 by Meeting-BaaS)",
+     "Shortcut Ctrl+Alt+P (Win/ChromeOS) or Ctrl+Cmd+P (macOS): documented, but a toggle, and a synthetic KeyboardEvent from a userscript is untrusted; not verified to work"
+    ],
+    "evidence": "Re-verified: logitech-meet-plugin meet-dom.js L64-L68 has the comment 'Since 2026 the People panel opens from the participant avatars at the top right' with bySelector('[role=\"button\"]:has([data-avatar-count])') then label prefixes people/show everyone/participants; meetrilla.js L26-L41 clicks [data-avatar-count] to open, waits for '[data-panel-container-id=sidePanel1] [data-participant-id]', clicks again. Not safe in a user session: People and chat share one side panel, so opening People replaces an open chat, and the new button pops a hover dialog (Meeting-BaaS). blaise and meet-sorteador deliberately never open it.",
+    "confidence": "medium"
+   },
+   {
+    "purpose": "leave-button",
+    "primary": "button[jsname=\"CQylAd\"] clicked with element.click() (JS click works even when the hover tray hides the control bar). Do not combine with an English-only aria-label: in pt-BR it is 'Sair da chamada'.",
+    "fallbacks": [
+     "Icon ligature, language independent: i.google-symbols (or any i) whose textContent.trim() is 'call_end' (also 'call_end_alt'), then closest('button') (TranscripTonic config.js TEXT_CALL_END, last commit 2026-07-18; blaise 2026-07-11)",
+     "aria-label whitelist on button/[role=button]: 'Leave call' | 'Sair da chamada' (exact or startsWith, never a loose 'sair'/'encerrar' substring)"
+    ],
+    "evidence": "Re-verified: mastria/meeting-webhook content.js L17-L26 quotes real pt-BR HTML <button jsname=\"CQylAd\" aria-label=\"Sair da chamada\"><i class=\"... google-symbols ...\">call_end</i></button> (commit 2026-06-11, 57f48cd229). ralphm/megingjord extension/meet.js L11 'Selectors were verified against the live Meet UI (September 2026)', L66 LEAVE_SELECTOR '[jsname=\"CQylAd\"]' // verified: meeting (file last commit 2026-09-10). attendee google_meet_ui_methods.py L1277-L1297 uses 'button[jsname=\"CQylAd\"][aria-label=\"Leave call\"]' (English-forced bot) with click_element_forcefully = execute_script('arguments[0].click()'), file last commit 2026-09-23 (b63fe776ce 'fix: forcefully click gmeet leave button'). Caveat: the waiting room also renders a leave control, so arm only after admission and after seeing count >= 2.",
+    "confidence": "high"
+   },
+   {
+    "purpose": "host-leave-dialog (never end the call for everyone)",
+    "primary": "After clicking CQylAd, wait up to ~2 s for [role=\"dialog\"], [role=\"alertdialog\"] or [data-mdc-dialog-action]. If one appears, click ONLY a button that matches the leave whitelist (/^(just leave( the call)?|leave meeting|apenas sair( da chamada)?|sair da reuni[aã]o)$/i on trimmed text or aria-label) AND does not match the blacklist (/everyone|for all|todos|encerrar|^end /i). If no button passes both checks, do nothing and notify the user. If no dialog appears, the leave already happened.",
+    "fallbacks": [
+     "[data-mdc-dialog-action=\"Pd96ce\"] as a hint for the 'just leave' button, but still run the blacklist check on its text before clicking (ChrisRegado 2024-08-10; copied unverified in megingjord 2026)",
+     "Pattern from ChrisRegado: if Pd96ce exists click it, else click CQylAd. Acceptable only together with the text blacklist"
+    ],
+    "evidence": "Re-verified: ChrisRegado leave_call_event_handler.js (last commit 2024-08-10, 913832e041 'Check for only the leave confirmation button') comments that some meetings ask 'just leave the call' or 'end the call for everyone' and a second press selects 'just leave the call' via [data-mdc-dialog-action=\"Pd96ce\"]. megingjord L67 keeps it WITHOUT the 'verified' tag its neighbours have. Google Help 9303164 desktop (read 2026-10-06): 'On the bottom, click Leave call', then 'On the window that appears' choose 'End meeting for all' or 'Leave meeting'; requires Host Management. pt-BR Help: 'Sair da chamada', then a window with 'Encerrar a reunião para todos' or 'Sair da reunião'. It is a dialog window after the click, not an arrow menu; one click on CQylAd cannot end the call for everyone. Exact live wording is unresolved (code says 'Just leave the call'/'End the call for everyone', Help says 'Leave meeting'/'End meeting for all'), hence the whitelist plus blacklist.",
+    "confidence": "medium"
+   },
+   {
+    "purpose": "alone-signal and stop conditions",
+    "primary": "Count-based state machine: armed once admitted; hasSeenOthers = true when count >= 2; when count <= 1 after hasSeenOthers, start a timer; leave after the grace period (prior art 30 to 90 s); reset the timer if count goes back to >= 2. Unknown count (badge missing) never triggers leave.",
+    "fallbacks": [
+     "Body text /you[’']?re the only one here|no one else is here/i as a secondary hint only (English; pt-BR 'Só você está aqui' from one unverified repo, rkj-ai 2026-01); also appears at join time while waiting alone",
+     "Stop the watcher on the post-call screen: .roSPhc text 'The call ended because everyone left' | 'Your host ended the meeting for everyone' | 'You've been removed from the meeting' (attendee payload L339-L353, PR 2026-09-09), or when CQylAd disappears",
+     "Meet's built-in 'Leave empty calls' (Settings > General, ON by default on desktop and iOS): prompt after 10 min alone, auto-leave if no answer in 2 min. The script only needs to beat that"
+    ],
+    "evidence": "ScreenApp L828-L846 (hasSeenOtherParticipant + aloneSince + loneParticipantExitDelayMs), attendee only_participant_in_meeting timeout, meetingbot everyoneLeftTimeout 30 s. Repos disagree on what 'You're the only one here' means (in-call vs lobby vs end), so it is not a primary trigger. Leave empty calls: Workspace Updates blog 2022-04-07 (re-found by search 2026-10-06).",
+    "confidence": "medium"
+   }
+  ],
+  "host_dialog": "It is a modal dialog ('window that appears' in Google Help), shown after clicking Leave call, only to a host when Host Management is on. Google Help 9303164 (read 2026-10-06): en 'Leave meeting' vs 'End meeting for all'; pt-BR 'Sair da reunião' vs 'Encerrar a reunião para todos'. Code wording differs: 'Just leave the call' vs 'End the call for everyone' (ChrisRegado 2024-08, Newton-School/sentinel 2026-04), pt-BR 'apenas sair' / 'encerrar a chamada para todos' (meeboter 2025-12). No source describes a split arrow menu on the web hang-up button. One click on button[jsname=\"CQylAd\"] cannot end the call for everyone; the risk is only in the script's second click. Known 'just leave' selector [data-mdc-dialog-action=\"Pd96ce\"] dates from 2024-08-10 and has no live re-verification since. Safe rule: click only a button matching a leave whitelist and not matching /everyone|for all|todos|encerrar|^end /i; otherwise abort and notify. Avoid loose matchers seen in prior art (mastria's 'encerrar'/'sair' substrings, Vexa's 'End meeting'/'End call'). Unknown: whether the dialog appears at all when the host is already alone (the auto-leave case), so the handler must tolerate no dialog.",
+  "count_includes_self": "Yes. [data-avatar-count] reads 1 when you are alone: ScreenApp treats contributors >= 2 as 'someone else is here' (GoogleMeetBot.ts L831-L846, verified), OREEAI saw 1 live when alone (2026-09-07). The People panel also lists your own row with a '(You)' marker (pt-BR '(você)' per meet-sorteador, unverified on the panel). So the Teams-style rule 'leave when count <= 1' ports directly. Not documented anywhere: whether data-avatar-count also counts screen-share presentations, companion-mode devices, 'Merged audio' cohorts or people still waiting in the lobby. In the People panel, a presentation IS a separate listitem with its own data-participant-id, so a naive panel row count is inflated while someone presents.",
+  "not_verified": [
+   "Nothing was tested in a live Meet call by me; all evidence is third-party code and Google Help. The user must run one live test in their pt-BR account before trusting the script.",
+   "Live test to do: in DevTools run document.querySelector('[data-avatar-count]')?.getAttribute('data-avatar-count') with 1, 2 and 3 participants, once with someone presenting and once with a companion-mode device, and with someone in the waiting room.",
+   "Whether the Dec 2025 avatar-stack UI is rolled out to the user's account (personal Gmail vs Workspace). Meeting-BaaS and ScreenApp keep old and new selectors side by side, which suggests a staged rollout.",
+   "Exact live pt-BR texts of the host leave dialog and whether [data-mdc-dialog-action=\"Pd96ce\"] still marks the 'just leave' button (last live evidence 2024-08-10). Needs one test as host with Host Management on.",
+   "Whether the host dialog appears at all when the host clicks leave while already alone.",
+   "pt-BR aria-label of the new avatar/People button and of the People panel 'In call' region (no repo has them).",
+   "pt-BR text of 'You're the only one here' and of the 'Are you still there?' / Leave empty calls prompt on web.",
+   "Whether a synthetic Ctrl+Alt+P / Ctrl+Cmd+P KeyboardEvent from a content script toggles the People panel.",
+   "[jsname=\"Nqj9L\"] and .uGOf1d existence in the current DOM: no live-verified 2025-2026 source. Researchers contradicted on Nqj9L (zero hits vs one unverified 1-star repo, MeetMaxxing 2026-07-22); resolved as unusable.",
+   "Commit dates for repos I did not re-query myself (blaise, dotch3, vibeconf, Meeting-BaaS, OREEAI, meeboter) are taken from the researchers' reports. Ones I re-checked on 2026-10-06: ScreenApp file 2026-06-18 and PR #40 merged 2026-05-21; logitech-meet-plugin 2026-09-24; megingjord 2026-09-10; attendee ui_methods 2026-09-23; mastria 2026-06-11; meetrilla 2026-02-16; TranscripTonic config 2026-07-18; ChrisRegado leave handler 2024-08-10 and participants handler 2026-03-01."
+  ]
+ }
+}

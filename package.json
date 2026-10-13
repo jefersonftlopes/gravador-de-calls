@@ -1,0 +1,47 @@
+{
+  "name": "gravador-de-calls",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Extensão do Chrome que grava, aba por aba, o áudio dos outros participantes das calls do Google Meet e do Microsoft Teams.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "build:only": "vite build",
+    "test": "vitest run",
+    "test:e2e": "npm run build:only && playwright test",
+    "publicar": "npm run build && node scripts/publicar.mjs",
+    "empacotar": "tsc --noEmit && node scripts/empacotar.mjs",
+    "teste:transcricao-real": "node scripts/teste-transcricao-real.mjs",
+    "transcrever": "node scripts/transcrever-de-novo.mjs",
+    "instalar": "node host/instalar.mjs",
+    "desinstalar": "node host/desinstalar.mjs",
+    "chave": "node scripts/gerar-chave.mjs",
+    "id": "node scripts/extension-id.mjs",
+    "capturas": "npm run build:only && playwright test -c playwright.capturas.config.ts --workers=1"
+  },
+  "dependencies": {
+    "date-fns": "^4.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-hook-form": "^7.89.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^3.0.0",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/chrome": "^0.3.4",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}

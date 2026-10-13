@@ -1,0 +1,1172 @@
+{
+  "extName": {
+    "message": "Gravador de Calls"
+  },
+  "extDescription": {
+    "message": "Records, tab by tab, only the other participants' audio in Google Meet and Microsoft Teams calls, on your own computer."
+  },
+  "actionTitle": {
+    "message": "Gravador de Calls"
+  },
+  "commandTabMode": {
+    "message": "Record this tab with Chrome's tab capture (tab mode)"
+  },
+  "localeTag": {
+    "message": "en"
+  },
+  "privacyUrl": {
+    "message": "https://gravador-de-calls.vercel.app/en/privacy"
+  },
+  "downloadsFolderName": {
+    "message": "Call recordings"
+  },
+  "datePattern": {
+    "message": "MMM d, h:mm a"
+  },
+  "dateTimePattern": {
+    "message": "MMM d, yyyy 'at' h:mm a"
+  },
+  "untitled": {
+    "message": "Untitled"
+  },
+  "errUnknown": {
+    "message": "unknown error"
+  },
+  "reasonUnknown": {
+    "message": "unknown reason"
+  },
+  "platformOther": {
+    "message": "Other site"
+  },
+  "tabModeTag": {
+    "message": "tab mode"
+  },
+  "durationSeconds": {
+    "message": "$1 s"
+  },
+  "durationMinutes": {
+    "message": "$1 min"
+  },
+  "durationHours": {
+    "message": "$1 h $2 min"
+  },
+  "audioArriving": {
+    "message": "audio coming in"
+  },
+  "audioSilentFor": {
+    "message": "no audio for $1"
+  },
+  "audioSilentNow": {
+    "message": "no audio right now"
+  },
+  "audioNoneTryTabMode": {
+    "message": "no audio since the start: try tab mode"
+  },
+  "audioNoneYet": {
+    "message": "no audio yet"
+  },
+  "vigiaOutOfCall": {
+    "message": "not in a call"
+  },
+  "vigiaNoCount": {
+    "message": "no count right now · peak $1"
+  },
+  "vigiaLine": {
+    "message": "$1 in the call · peak $2 · leaves at $3 or fewer"
+  },
+  "vigiaLineAlone": {
+    "message": "$1 in the call · peak $2 · leaves if you are alone"
+  },
+  "vigiaDisarmed": {
+    "message": "(waiting for someone to join)"
+  },
+  "vigiaDrop": {
+    "message": "confirming $1/$2"
+  },
+  "vigiaVia": {
+    "message": "via $1"
+  },
+  "vigiaNoCountPage": {
+    "message": "Couldn't find the count ($1x): $2"
+  },
+  "vigiaHintMeet": {
+    "message": "is the people badge on screen?"
+  },
+  "vigiaHintTeams": {
+    "message": "is the People panel open?"
+  },
+  "vigiaPagePrefix": {
+    "message": "auto-leave: $1"
+  },
+  "vigiaWaitingCall": {
+    "message": "waiting for the call to start..."
+  },
+  "vigiaCallGone": {
+    "message": "the call is gone ($1/$2)"
+  },
+  "vigiaClosing": {
+    "message": "closing..."
+  },
+  "vigiaCouldNotLeave": {
+    "message": "COULDN'T leave on my own: confirm in the tab"
+  },
+  "vigiaSrcTeamsPanel": {
+    "message": "People panel"
+  },
+  "vigiaSrcPageText": {
+    "message": "page text"
+  },
+  "vigiaSrcPeopleButton": {
+    "message": "people button"
+  },
+  "vigiaSrcPeoplePanel": {
+    "message": "people panel"
+  },
+  "vigiaSrcPeopleButtonOld": {
+    "message": "people button (old interface)"
+  },
+  "trNoticeOldHelper": {
+    "message": "No transcription: $1."
+  },
+  "trNoticeUnavailable": {
+    "message": "Transcription unavailable: $1. Calls wait in the queue until this is fixed."
+  },
+  "helperNoAnswer": {
+    "message": "the helper did not answer"
+  },
+  "trOldHelper": {
+    "message": "the installed helper is from a version without transcription: run npm run instalar again"
+  },
+  "helperChecking": {
+    "message": "Checking the helper..."
+  },
+  "helperCurrentFolder": {
+    "message": "the current folder"
+  },
+  "helperNoWrite": {
+    "message": "The helper can't write to $1: saving to Downloads/$2. Choose another folder in the settings (on macOS, also check Privacy & Security > Files and Folders for Google Chrome)."
+  },
+  "helperAbsent": {
+    "message": "Saving to Downloads/$1."
+  },
+  "helperNotOpening": {
+    "message": "The helper is installed but didn't open ($1): saving to Downloads/$2. Run npm run instalar again (after updating Node or moving the project folder, for example); the reason is in ~/Library/Logs/gravador-de-calls/helper.log."
+  },
+  "hrNoPermission": {
+    "message": "no permission to write there; on macOS, check System Settings > Privacy & Security > Files and Folders (the request comes from Google Chrome)"
+  },
+  "hrNotAFolder": {
+    "message": "the path goes through a file, not a folder"
+  },
+  "hrReadOnly": {
+    "message": "the disk is read-only"
+  },
+  "hrDiskFull": {
+    "message": "the disk is full"
+  },
+  "hrDiskNotConnected": {
+    "message": "the disk is not connected"
+  },
+  "hrCannotCreate": {
+    "message": "the folder doesn't exist and couldn't be created"
+  },
+  "hrProgramNotFoundAt": {
+    "message": "$1 not found at $2 (check the path in the settings)"
+  },
+  "hrProgramNotFoundInstall": {
+    "message": "$1 not found (install it with: brew install $2, or set the path in the settings)"
+  },
+  "hrProgramNotExecutable": {
+    "message": "$1 not found or not executable: $2"
+  },
+  "hrModelMissing": {
+    "message": "model not found: download a whisper.cpp model (ggml-tiny, base, small, medium or large, such as ggml-small.bin) to ~/.cache/whisper-models or set the path in the settings"
+  },
+  "hrModelNotFoundAt": {
+    "message": "model not found: $1"
+  },
+  "hrFfmpegFailed": {
+    "message": "ffmpeg couldn't convert the audio"
+  },
+  "hrWhisperFailed": {
+    "message": "whisper-cli failed (code $1)"
+  },
+  "hrLeftQueue": {
+    "message": "the transcription left the queue without finishing (see the helper's log)"
+  },
+  "hrAudioMissing": {
+    "message": "audio not found"
+  },
+  "hrAbsolutePath": {
+    "message": "$1: use an absolute path or one starting with ~"
+  },
+  "hrFfmpegTimeout": {
+    "message": "ffmpeg took too long converting the audio"
+  },
+  "hrWhisperTimeout": {
+    "message": "whisper-cli took too long"
+  },
+  "hrWhisperNoJson": {
+    "message": "whisper-cli finished without writing the result (JSON)"
+  },
+  "hrInterrupted": {
+    "message": "the transcription was interrupted $1 times midway; the audio is still in the folder"
+  },
+  "hrAudioMissingFile": {
+    "message": "audio not found: $1"
+  },
+  "hrEngineUnavailable": {
+    "message": "transcription engine unavailable"
+  },
+  "hrUnknownEngine": {
+    "message": "unknown engine: $1"
+  },
+  "errRecentNotFound": {
+    "message": "recording not found in the recent recordings"
+  },
+  "errDownloadNoId": {
+    "message": "recording in Downloads without the download ID"
+  },
+  "errRecordingNotFound": {
+    "message": "recording not found"
+  },
+  "errTranscriptNeedsHelper": {
+    "message": "transcription needs the local helper"
+  },
+  "errNotInTabMode": {
+    "message": "this tab is not in tab mode"
+  },
+  "errCaptureNoAnswer": {
+    "message": "the capture document didn't answer"
+  },
+  "errCaptureDenied": {
+    "message": "tab capture denied: $1"
+  },
+  "errCaptureBusy": {
+    "message": "Another extension (for example, Volume Master) is already capturing this tab's sound. Turn that extension off in chrome://extensions, or close and reopen the tab, and try again."
+  },
+  "errWorkerNoAnswer": {
+    "message": "the extension's service worker didn't answer the \"$1\" request (it may be running an earlier version: reload the extension)"
+  },
+  "uiUnexpectedError": {
+    "message": "Something failed: $1"
+  },
+  "versionSkew": {
+    "message": "This profile is still running version $1 of the extension. Reload the extension to use version $2."
+  },
+  "versionSkewUnknown": {
+    "message": "This profile is still running an earlier version of the extension. Reload the extension to use version $1."
+  },
+  "versionReloadNow": {
+    "message": "Reload now"
+  },
+  "versionReloadBlocked": {
+    "message": "A recording is in progress, and reloading now would end it. The button comes back when it ends."
+  },
+  "versionAutoWaiting": {
+    "message": "It reloads by itself when nothing is in use (waiting for: $1)."
+  },
+  "versionGaveUp": {
+    "message": "The automatic reload was already tried for this version and the code did not change: check the published folder and reload in chrome://extensions."
+  },
+  "autoReloadWaitRecording": {
+    "message": "a recording in progress"
+  },
+  "autoReloadWaitSaving": {
+    "message": "a recording being saved"
+  },
+  "autoReloadWaitCall": {
+    "message": "a Meet or Teams tab open"
+  },
+  "autoReloadWaitVolume": {
+    "message": "a tab volume other than 100%"
+  },
+  "autoReloadWaitStarting": {
+    "message": "a tab capture starting"
+  },
+  "autoReloadWaitOptions": {
+    "message": "the settings page open"
+  },
+  "errTabNotFound": {
+    "message": "tab not found"
+  },
+  "errInvalidVolume": {
+    "message": "invalid volume"
+  },
+  "errTabAlreadyRecording": {
+    "message": "this tab is already being recorded"
+  },
+  "errTabNoAudio": {
+    "message": "the tab capture came without audio"
+  },
+  "errTabNoCaptureToReuse": {
+    "message": "the tab has no capture to reuse"
+  },
+  "errTabGetUserMedia": {
+    "message": "tab getUserMedia: $1"
+  },
+  "errBlobNoInfo": {
+    "message": "session $1 has no pending info.json"
+  },
+  "errBlobNoChunks": {
+    "message": "session $1 has no chunks in IndexedDB"
+  },
+  "errOffscreenTabFailed": {
+    "message": "the offscreen document could not record the tab"
+  },
+  "errHelperDisconnected": {
+    "message": "helper disconnected"
+  },
+  "errHelperTimeout": {
+    "message": "helper did not answer $1 within $2 ms"
+  },
+  "errNoWritePermissionAt": {
+    "message": "no permission to write to $1"
+  },
+  "errDownloadInterrupted": {
+    "message": "download interrupted: $1"
+  },
+  "errDownloadNoReason": {
+    "message": "no reason given"
+  },
+  "errDownloadGone": {
+    "message": "download $1 disappeared from the history"
+  },
+  "errDownloadTimeout": {
+    "message": "download $1 did not finish within $2 ms"
+  },
+  "errBlobUrl": {
+    "message": "the offscreen document could not build the file ($1): $2"
+  },
+  "errNoAnswer": {
+    "message": "no answer"
+  },
+  "errNoFreeName": {
+    "message": "could not find a free name for $1"
+  },
+  "errInvalidVolumeRequest": {
+    "message": "invalid volume request"
+  },
+  "errVigiaInactive": {
+    "message": "auto-leave is not active in this tab"
+  },
+  "promptChooseFolder": {
+    "message": "Choose the folder for call recordings"
+  },
+  "promptChooseModel": {
+    "message": "Choose the whisper.cpp model (a ggml-*.bin file)"
+  },
+  "badgeRecording": {
+    "message": "Gravador de Calls: recording this call"
+  },
+  "badgeNoAudio": {
+    "message": "Gravador de Calls: recording, but no audio so far (try tab mode)"
+  },
+  "badgeReload": {
+    "message": "Gravador de Calls: reload this tab to record the call"
+  },
+  "badgePendingSaves_one": {
+    "message": "Gravador de Calls: $1 recording not saved yet; open to try again"
+  },
+  "badgePendingSaves_other": {
+    "message": "Gravador de Calls: $1 recordings not saved yet; open to try again"
+  },
+  "badgeConsent": {
+    "message": "Gravador de Calls: read and confirm the notice to turn on automatic recording"
+  },
+  "badgeUpdateWaiting": {
+    "message": "Gravador de Calls: version $1 was published; the extension reloads by itself when no recording or call is open"
+  },
+  "notifSaveFailedTitle": {
+    "message": "Couldn't save the recording"
+  },
+  "notifSaveFailedMessage": {
+    "message": "The audio is kept in the extension and I try again every minute. Don't remove the extension until it is saved; the popup shows the reason and has \"Try now\"."
+  },
+  "notifNoAudioTitle": {
+    "message": "No audio is coming in"
+  },
+  "notifNoAudioMessage": {
+    "message": "The recording has had no audio from anyone for 1 minute. Record with tab capture: shortcut $1 or \"Record this tab\" in the popup."
+  },
+  "shortcutUnset": {
+    "message": "no shortcut set (change it at chrome://extensions/shortcuts)"
+  },
+  "notifReloadTitle": {
+    "message": "Reload the call tab"
+  },
+  "notifReloadMessage": {
+    "message": "This tab was opened before Gravador de Calls was installed or updated. Reload the tab to record the call (reloading leaves the call in progress)."
+  },
+  "notifReloadButton": {
+    "message": "Reload the tab (leaves the call)"
+  },
+  "notifVigiaMessage": {
+    "message": "I couldn't leave the call by myself: confirm in the tab."
+  },
+  "popupLoading": {
+    "message": "Loading..."
+  },
+  "popupSettings": {
+    "message": "Settings"
+  },
+  "popupThisTab": {
+    "message": "this tab"
+  },
+  "popupReplayOff": {
+    "message": "Hearing it twice? Turn off the repeated sound"
+  },
+  "popupReplayOn": {
+    "message": "No call sound? Turn on the repeated sound"
+  },
+  "popupReplayError": {
+    "message": "Couldn't switch the sound: $1"
+  },
+  "popupReplayFailed": {
+    "message": "couldn't switch"
+  },
+  "popupStopError": {
+    "message": "Couldn't stop: $1"
+  },
+  "popupStopRefused": {
+    "message": "the service worker refused the request"
+  },
+  "popupStopping": {
+    "message": "Stopping..."
+  },
+  "popupStop": {
+    "message": "Stop"
+  },
+  "popupFailed": {
+    "message": "Didn't work: $1"
+  },
+  "vigiaHeading": {
+    "message": "Auto-leave"
+  },
+  "vigiaLeaving": {
+    "message": "Leaving the call..."
+  },
+  "vigiaReading": {
+    "message": "Reading auto-leave..."
+  },
+  "vigiaOffForCall": {
+    "message": "Off for this call. It applies again to the next call in this tab."
+  },
+  "vigiaNotActive": {
+    "message": "Auto-leave is not active in this tab. Reload the call tab."
+  },
+  "vigiaWaitingFirst": {
+    "message": "waiting for the first reading"
+  },
+  "vigiaSource": {
+    "message": "count: $1 ($2)"
+  },
+  "vigiaLeavingAttempt": {
+    "message": "leaving the call (attempt $1)"
+  },
+  "vigiaLeaveNow": {
+    "message": "Leave now"
+  },
+  "vigiaTurnOffForCall": {
+    "message": "Turn off for this call"
+  },
+  "tabModeError": {
+    "message": "Tab mode: $1"
+  },
+  "tabModeNotPossible": {
+    "message": "not possible"
+  },
+  "tabModeStop": {
+    "message": "Stop tab mode in this tab"
+  },
+  "tabModeStart": {
+    "message": "Record this tab (tab mode)"
+  },
+  "volumeHeading": {
+    "message": "This tab's volume"
+  },
+  "volumeError": {
+    "message": "Couldn't change the volume: $1"
+  },
+  "volumeDefaultOutput": {
+    "message": "Away from 100%, this tab's sound plays through the computer's default output (not the headset chosen inside the site)."
+  },
+  "volumeOutsideSite": {
+    "message": "The volume still applies to this tab after you leave the site. The 100% button restores the original sound."
+  },
+  "trCouldNotOpen": {
+    "message": "Couldn't open: $1"
+  },
+  "trNeedsHelper": {
+    "message": "No transcription: it needs the local helper."
+  },
+  "trWaiting": {
+    "message": "In the queue, waiting: $1"
+  },
+  "trQueued": {
+    "message": "Queued for transcription."
+  },
+  "trRunning": {
+    "message": "Transcribing..."
+  },
+  "trReady": {
+    "message": "Transcript ready."
+  },
+  "trOpen": {
+    "message": "Open transcript"
+  },
+  "trFailed": {
+    "message": "Transcription failed: $1"
+  },
+  "recentReveal": {
+    "message": "Show in folder"
+  },
+  "recentInDownloads": {
+    "message": "in Downloads"
+  },
+  "recentInterrupted": {
+    "message": "interrupted"
+  },
+  "pendingSaved": {
+    "message": "Saved."
+  },
+  "pendingNotYet": {
+    "message": "Not yet. I try again every minute."
+  },
+  "pendingHeading": {
+    "message": "Not saved yet"
+  },
+  "pendingKeep": {
+    "message": "The audio is kept in the extension: don't remove the extension until it is saved."
+  },
+  "pendingTrying": {
+    "message": "Trying..."
+  },
+  "pendingRetry": {
+    "message": "Try now"
+  },
+  "popupSavingIn": {
+    "message": "Saving to"
+  },
+  "popupHelperVersion": {
+    "message": "(helper $1)"
+  },
+  "popupProfileReminderBefore": {
+    "message": "This profile has no name yet. Give it a name (e.g. Work) in the"
+  },
+  "popupProfileReminderLink": {
+    "message": "settings"
+  },
+  "popupProfileReminderAfter": {
+    "message": ": it becomes the first folder of this profile's recordings."
+  },
+  "popupReloadTab": {
+    "message": "This tab was opened before Gravador de Calls was installed or updated: it doesn't record until it is reloaded. Reloading leaves the call in progress."
+  },
+  "popupRecordingNow": {
+    "message": "Recording now"
+  },
+  "popupNoneActive": {
+    "message": "No recording in progress."
+  },
+  "popupRecentHeading": {
+    "message": "Recent recordings"
+  },
+  "popupNothingYet": {
+    "message": "Nothing recorded yet."
+  },
+  "popupConsentNeeded": {
+    "message": "Automatic recording hasn't started yet: first read the notice about what is recorded and confirm it."
+  },
+  "popupConsentOpen": {
+    "message": "Read the notice"
+  },
+  "optHeaderHint": {
+    "message": "Settings. The folder applies to every Chrome profile; everything else is only for this profile."
+  },
+  "optHeaderHintNoHelper": {
+    "message": "Settings for this Chrome profile."
+  },
+  "optSectionLanguage": {
+    "message": "Language"
+  },
+  "optLanguageAuto": {
+    "message": "Automatic (Chrome's language)"
+  },
+  "optLanguageHint": {
+    "message": "Applies right away to this profile: settings, popup, welcome page, icon, new notifications, the indicator on the call page and the text of the next recordings. The extension's name in chrome://extensions and the Downloads folder follow Chrome's language."
+  },
+  "optLanguageSaved": {
+    "message": "Language saved: it applies to this Chrome profile."
+  },
+  "optLanguageCannotSave": {
+    "message": "Couldn't save the language: $1"
+  },
+  "optSectionFolder": {
+    "message": "Recordings folder"
+  },
+  "optSectionProfile": {
+    "message": "This profile"
+  },
+  "optSectionAuto": {
+    "message": "Automatic recording"
+  },
+  "optSectionLeave": {
+    "message": "Leave and close the call automatically"
+  },
+  "optSectionTranscription": {
+    "message": "Transcription"
+  },
+  "optSectionTabMode": {
+    "message": "Tab mode (plan B)"
+  },
+  "optSectionHelper": {
+    "message": "Local helper"
+  },
+  "optSectionAdvanced": {
+    "message": "Advanced: local helper"
+  },
+  "optAdvancedIntro": {
+    "message": "Choosing another folder and the helper itself are optional features: they need the local helper, not yet distributed through the store. Without it, the extension is fully functional and saves to Downloads/$1, and transcription through the provider API works all the same."
+  },
+  "optAdvancedFolder": {
+    "message": "Choosing the recordings folder (any folder on the computer, the same for every profile) needs the local helper, not yet distributed through the store."
+  },
+  "optAdvancedTranscription": {
+    "message": "Transcribing each call when it ends, on your own computer, needs the local helper, not yet distributed through the store."
+  },
+  "optSavingToDownloads": {
+    "message": "Saving to Downloads/$1."
+  },
+  "optSavingToDownloadsHint": {
+    "message": "One folder per call, with the audio (audio.webm) and the call details (info.json). To choose another folder, see Advanced."
+  },
+  "rootTypePath": {
+    "message": "Type a folder path."
+  },
+  "rootCannotWrite": {
+    "message": "Can't write to that folder: $1"
+  },
+  "rootCannotSave": {
+    "message": "Couldn't save the folder: $1"
+  },
+  "rootSaved": {
+    "message": "Folder saved in the helper: it applies to every Chrome profile."
+  },
+  "pickerCannotOpen": {
+    "message": "Couldn't open the picker: $1"
+  },
+  "rootLabel": {
+    "message": "Root folder (type the path or choose it in Finder)"
+  },
+  "rootUse": {
+    "message": "Use this folder"
+  },
+  "rootChoose": {
+    "message": "Choose..."
+  },
+  "rootNotWritable": {
+    "message": "The helper can't write to the current folder. Choose another one."
+  },
+  "trAvailNo": {
+    "message": "Can't transcribe right now: $1. Recordings are still saved normally."
+  },
+  "trAvailYes": {
+    "message": "Ready to transcribe. Model:"
+  },
+  "trSaved": {
+    "message": "Transcription saved in the helper: it applies to every Chrome profile."
+  },
+  "trCannotSave": {
+    "message": "Couldn't save the transcription settings: $1"
+  },
+  "trLoadError": {
+    "message": "Couldn't read the transcription settings from the helper: $1"
+  },
+  "trReading": {
+    "message": "Reading the transcription settings..."
+  },
+  "trAutoLabel": {
+    "message": "Transcribe each call automatically when it ends"
+  },
+  "trAutoHint": {
+    "message": "On your computer, right after saving: transcricao.md and transcricao.srt show up in the call folder. With this engine, nothing leaves your computer."
+  },
+  "trEngine": {
+    "message": "Engine"
+  },
+  "trEngineAria": {
+    "message": "Transcription engine"
+  },
+  "trModelLabel": {
+    "message": "Model (empty: the helper looks for the best one in ~/.cache/whisper-models and the usual folders)"
+  },
+  "trModelAria": {
+    "message": "Whisper model"
+  },
+  "trModelPlaceholder": {
+    "message": "empty: find it automatically"
+  },
+  "trChooseModel": {
+    "message": "Choose model..."
+  },
+  "trLanguageLabel": {
+    "message": "Language of the calls"
+  },
+  "trLanguageAria": {
+    "message": "Transcription language"
+  },
+  "trAdvanced": {
+    "message": "Advanced (program paths)"
+  },
+  "trWhisperLabel": {
+    "message": "whisper-cli (empty: PATH, /opt/homebrew/bin, /usr/local/bin)"
+  },
+  "trWhisperAria": {
+    "message": "whisper-cli path"
+  },
+  "trFfmpegLabel": {
+    "message": "ffmpeg (empty: PATH, /opt/homebrew/bin, /usr/local/bin)"
+  },
+  "trFfmpegAria": {
+    "message": "ffmpeg path"
+  },
+  "trSave": {
+    "message": "Save transcription"
+  },
+  "trEngineChoice": {
+    "message": "Who transcribes"
+  },
+  "trEngineLocal": {
+    "message": "Your computer (whisper.cpp)"
+  },
+  "trEngineLocalHint": {
+    "message": "Transcribes on this machine. Nothing leaves your computer. Requires the local helper (whisper.cpp, ffmpeg and a model of a few GB), which is not distributed through the store yet."
+  },
+  "trEngineApi": {
+    "message": "OpenAI's API, with your key"
+  },
+  "trEngineApiHint": {
+    "message": "The extension sends the call audio to OpenAI's server and gets the text back. Works without installing anything: just your key."
+  },
+  "trApiPrivacy": {
+    "message": "Heads up: with this engine on, the call audio, including the participants' voices, is sent to OpenAI's server to be transcribed. The key stays on this machine only, in this Chrome profile. Only record and transcribe a call with the consent of everyone in it."
+  },
+  "trApiCost": {
+    "message": "Costs about US$$ $1 per hour of call, billed by OpenAI to your account."
+  },
+  "trApiLimit": {
+    "message": "A call over $1 is not sent (that is the API limit per request, about 1 h 49 in the format we record): the recording keeps the notice and the local engine transcribes it."
+  },
+  "trApiKeyLabel": {
+    "message": "API key"
+  },
+  "trApiKeyAria": {
+    "message": "Transcription API key"
+  },
+  "trApiLanguageAria": {
+    "message": "Language of the transcription API"
+  },
+  "trApiKeySave": {
+    "message": "Store the key"
+  },
+  "trApiKeyHint": {
+    "message": "The key is stored on this machine only, in this profile, and is used only in the request header to the provider. It never goes into info.json, the log or any error message."
+  },
+  "trApiKeyLink": {
+    "message": "Create a key at OpenAI"
+  },
+  "trApiKeySaved": {
+    "message": "Key stored ($1)."
+  },
+  "trApiKeyClear": {
+    "message": "Delete the key"
+  },
+  "trApiKeyCleared": {
+    "message": "Key deleted."
+  },
+  "trApiKeyMissing": {
+    "message": "Paste the API key before turning this on."
+  },
+  "trApiKeyCannotSave": {
+    "message": "Could not store the key: $1"
+  },
+  "trApiEndpointLabel": {
+    "message": "API address"
+  },
+  "trApiEndpointAria": {
+    "message": "Transcription API address"
+  },
+  "trApiEndpointHint": {
+    "message": "Empty uses the provider's address. Only an address of the declared provider is accepted."
+  },
+  "trApiSaved": {
+    "message": "API transcription saved for this profile."
+  },
+  "trApiCannotSave": {
+    "message": "Could not save: $1"
+  },
+  "trApiPermissionDenied": {
+    "message": "Without permission to access $1 nothing is sent, and the API engine stays off."
+  },
+  "trApiReady": {
+    "message": "Done: the next calls in this profile are transcribed through the API."
+  },
+  "trApiOff": {
+    "message": "Off: no call in this profile is sent to the API."
+  },
+  "apiErrKey": {
+    "message": "the provider rejected the API key: check the key in the settings"
+  },
+  "apiErrRate": {
+    "message": "the provider asked us to wait (usage limit); we will try again"
+  },
+  "apiErrServer": {
+    "message": "the provider answered with an error ($1); we will try again"
+  },
+  "apiErrNetwork": {
+    "message": "could not reach the provider (no network, DNS or VPN); we will try again"
+  },
+  "apiErrRequest": {
+    "message": "the provider rejected the request (code $1)"
+  },
+  "apiErrTooLarge": {
+    "message": "the call is too long for the API ($1, over the $2 limit): the local engine transcribes this recording"
+  },
+  "apiErrAttempts": {
+    "message": "the API transcription failed $1 times; the stored audio was deleted"
+  },
+  "apiErrAttemptsWhy": {
+    "message": "the API transcription failed $1 times and the stored audio was deleted; the last reason was: $2"
+  },
+  "apiErrAge": {
+    "message": "the stored audio waited more than $1 h for the transcription and was deleted"
+  },
+  "apiErrSpace": {
+    "message": "the stored audio went over the $1 limit and was deleted so it would not fill the disk"
+  },
+  "apiErrNoKey": {
+    "message": "no API key: paste the key in the settings"
+  },
+  "apiErrNoPermission": {
+    "message": "no permission to access $1: turn the API engine on again in the settings"
+  },
+  "apiErrEndpoint": {
+    "message": "API address not allowed: $1"
+  },
+  "apiErrOff": {
+    "message": "API transcription is off in this profile"
+  },
+  "apiErrWrite": {
+    "message": "the transcription was ready, but could not be written to the call folder: $1"
+  },
+  "apiErrHelperOld": {
+    "message": "the installed helper is older than $1 and would transcribe the same call on the local engine: run npm run instalar again"
+  },
+  "langAuto": {
+    "message": "Detect automatically"
+  },
+  "langPt": {
+    "message": "Portuguese"
+  },
+  "langEn": {
+    "message": "English"
+  },
+  "langEs": {
+    "message": "Spanish"
+  },
+  "langFr": {
+    "message": "French"
+  },
+  "langDe": {
+    "message": "German"
+  },
+  "langIt": {
+    "message": "Italian"
+  },
+  "shortcutIntro": {
+    "message": "When automatic recording doesn't get the audio (the badge turns amber), record with Chrome's tab capture: with the shortcut or the \"Record this tab\" button in the popup. You keep hearing the call normally."
+  },
+  "shortcutLabel": {
+    "message": "Shortcut:"
+  },
+  "shortcutNone": {
+    "message": "none"
+  },
+  "shortcutChange": {
+    "message": "Change the shortcut"
+  },
+  "pinHint": {
+    "message": "Pin the Gravador de Calls icon to the toolbar (the puzzle piece next to the address bar, then the pin), in each profile. That is where REC, the \"no audio\" warning and the \"reload the tab\" warning appear."
+  },
+  "optLabelSaved": {
+    "message": "Profile name saved: it applies to this profile's next recordings."
+  },
+  "optLabelCannotSave": {
+    "message": "Couldn't save the name: $1"
+  },
+  "optSaved": {
+    "message": "This profile's settings were saved."
+  },
+  "optCannotSave": {
+    "message": "Couldn't save: $1"
+  },
+  "optProfileName": {
+    "message": "Name of this profile (e.g. Work)"
+  },
+  "optProfileHint": {
+    "message": "Goes into info.json and becomes the first folder of this profile's recordings. Empty: no such level. Chrome doesn't tell extensions the profile name, so it is typed here."
+  },
+  "optPreviewPattern": {
+    "message": "YYYY-MM/YYYY-MM-DD HHhMM - title (Meet|Teams)/"
+  },
+  "optAutoMeet": {
+    "message": "Record Google Meet calls automatically"
+  },
+  "optAutoTeams": {
+    "message": "Record Microsoft Teams calls automatically"
+  },
+  "optMinSeconds": {
+    "message": "Discard recordings shorter than (seconds)"
+  },
+  "optMinSecondsHint": {
+    "message": "Avoids keeping a call you joined and left by accident."
+  },
+  "optAutoLeave": {
+    "message": "Leave and close the tab when the call empties"
+  },
+  "optAutoLeaveHint": {
+    "message": "Off by default: leaving a call can't be undone. The tab only closes after the recording is saved."
+  },
+  "optLeaveWhen": {
+    "message": "When to leave"
+  },
+  "optModeAlone": {
+    "message": "When I'm alone in the call"
+  },
+  "optModeProportionName": {
+    "message": "When most people have left"
+  },
+  "optModeProportionLead": {
+    "message": "When most people have left:"
+  },
+  "optModeProportionBefore": {
+    "message": "at most"
+  },
+  "optModeProportionAfter": {
+    "message": "of the call's largest number of people remains"
+  },
+  "optFractionAria": {
+    "message": "How much of the call's largest number of people may remain"
+  },
+  "fraction75": {
+    "message": "three quarters (75%)"
+  },
+  "fraction50": {
+    "message": "half (50%)"
+  },
+  "fraction30": {
+    "message": "30% (the default)"
+  },
+  "fraction25": {
+    "message": "a quarter (25%)"
+  },
+  "fractionOther": {
+    "message": "$1%"
+  },
+  "optModeCountName": {
+    "message": "When only a few people remain"
+  },
+  "optModeCountBefore": {
+    "message": "When"
+  },
+  "optModeCountAfter": {
+    "message": "people or fewer remain, counting you"
+  },
+  "optCountAria": {
+    "message": "Number of people, counting you"
+  },
+  "optConfirmLabel": {
+    "message": "Confirm before leaving"
+  },
+  "optConfirmHint": {
+    "message": "Auto-leave keeps checking the count during this time, so a wrong number for an instant doesn't make it exit. If you are alone, it exits right away."
+  },
+  "confirmNow": {
+    "message": "right away"
+  },
+  "confirmSeconds": {
+    "message": "$1 s"
+  },
+  "vigiaExampleAlone": {
+    "message": "Example: in a call that reached $1 people, auto-leave waits for everyone else to go and exits as soon as you are alone."
+  },
+  "vigiaExampleLimit": {
+    "message": "Example: in a call that reached $1 people, auto-leave exits when $2 or fewer remain, $3. If you are alone, it exits right away."
+  },
+  "vigiaExampleSmall": {
+    "message": "In a call that never had more than $1 people, it only exits when you are alone."
+  },
+  "vigiaWaitSeconds": {
+    "message": "after confirming for $1 s"
+  },
+  "vigiaWaitNow": {
+    "message": "without waiting"
+  },
+  "optExampleInvalid": {
+    "message": "Fix the numbers to see the example."
+  },
+  "optVigiaIndicator": {
+    "message": "Show the indicator on the call page (\"6 in the call · peak 10 · leaves at 5 or fewer\")"
+  },
+  "optVigiaAdvanced": {
+    "message": "Fine-tuning"
+  },
+  "optVigiaRestore": {
+    "message": "Back to the default values"
+  },
+  "optSave": {
+    "message": "Save"
+  },
+  "vigiaFieldInterval": {
+    "message": "Check the count every (seconds)"
+  },
+  "vigiaFieldIntervalHint": {
+    "message": "Default: 5. The \"Confirm before leaving\" time is counted in these checks."
+  },
+  "vigiaFieldMinimum": {
+    "message": "\"Most people have left\": also leave when at most this many remain (people)"
+  },
+  "vigiaFieldMinimumHint": {
+    "message": "Applies even when the fraction gives fewer. Default: 2 (in a call of 4 with 30%, it leaves when 2 remain)."
+  },
+  "vigiaFieldPeak": {
+    "message": "\"Most people have left\" only applies to a call that reached (people)"
+  },
+  "vigiaFieldPeakHint": {
+    "message": "In a smaller call, it only leaves when you are alone. Default: 4."
+  },
+  "vigiaFieldMisses": {
+    "message": "Close the tab when the call is gone from the screen for (checks in a row)"
+  },
+  "vigiaFieldMissesHint": {
+    "message": "For when the call ends without you leaving (the organizer ended it, the internet dropped). Default: 3."
+  },
+  "formInteger": {
+    "message": "use a whole number"
+  },
+  "formNumber": {
+    "message": "type a number"
+  },
+  "formInvalid": {
+    "message": "invalid value"
+  },
+  "formMinChars": {
+    "message": "at least $1 characters"
+  },
+  "formMin": {
+    "message": "at least $1"
+  },
+  "formMaxChars": {
+    "message": "at most $1 characters"
+  },
+  "formMax": {
+    "message": "at most $1"
+  },
+  "formFractionBelowOne": {
+    "message": "use a fraction below 1 (with 1, it would leave with nobody gone)"
+  },
+  "formPeakAboveMinimum": {
+    "message": "use a number larger than \"also leave when at most this many remain\" ($1); otherwise it would leave a full call"
+  },
+  "formPeopleRange": {
+    "message": "choose from 1 to 50 people"
+  },
+  "formAbsolutePath": {
+    "message": "use an absolute path or one starting with ~"
+  },
+  "formLanguageCode": {
+    "message": "use auto or a language code such as pt or en"
+  },
+  "helperStatusInstalled": {
+    "message": "Installed (version $1). It writes to the chosen folder, little by little, during the call."
+  },
+  "helperStatusNotOpening": {
+    "message": "Installed, but doesn't open ($1): recordings go to $2."
+  },
+  "helperStatusAbsent": {
+    "message": "Not installed: recordings go to $1."
+  },
+  "helperHowTo": {
+    "message": "To install it (it serves every profile), in the project folder:"
+  },
+  "helperHowToHint": {
+    "message": "No need to reload the extension: it finds the helper within 15 s. Run it again after updating the project, moving its folder or changing the Node version. To remove it:"
+  },
+  "optConsentLink": {
+    "message": "What is recorded and the consent notice"
+  },
+  "optPrivacyLink": {
+    "message": "Privacy policy"
+  },
+  "welcomeTitle": {
+    "message": "Welcome to Gravador de Calls"
+  },
+  "welcomeIntro": {
+    "message": "Before the first recording, see what the extension does and confirm at the end of the page."
+  },
+  "welcomeWhatTitle": {
+    "message": "What is recorded"
+  },
+  "welcomeWhatRemote": {
+    "message": "Only the audio that comes from the other participants in Google Meet and Microsoft Teams calls, each tab in its own recording."
+  },
+  "welcomeWhatNoMic": {
+    "message": "Never your microphone: your voice is not in the recording."
+  },
+  "welcomeWhatAuto": {
+    "message": "Recording starts by itself when the call starts and ends when you leave. You can turn it off per platform in the settings, and the icon shows REC on the tab being recorded."
+  },
+  "welcomeWhereTitle": {
+    "message": "Where it goes"
+  },
+  "welcomeWhereDownloads": {
+    "message": "On your computer, in Downloads/$1: one folder per call, with the audio (audio.webm) and the call details (info.json)."
+  },
+  "welcomeWhereNothingLeaves": {
+    "message": "Nothing leaves the computer: the extension has no server, doesn't send the recordings to anyone and doesn't collect usage data."
+  },
+  "welcomeConsentTitle": {
+    "message": "Participants' consent"
+  },
+  "welcomeConsentLaw": {
+    "message": "Recording a conversation may require the consent of every participant, depending on the country and the state. In Brazil, the LGPD treats voice as personal data; in some US states, every participant must agree to the recording."
+  },
+  "welcomeConsentAdvice": {
+    "message": "Tell the participants before recording. You are responsible for using the recording according to the law where you and they are."
+  },
+  "welcomeAck": {
+    "message": "I understand"
+  },
+  "welcomeAckHint": {
+    "message": "Until you confirm, automatic recording stays off in this Chrome profile."
+  },
+  "welcomeAcked": {
+    "message": "All set: automatic recording is on in this profile. You can close this tab."
+  },
+  "welcomeAckedAt": {
+    "message": "Confirmed on $1."
+  },
+  "welcomeAckError": {
+    "message": "Couldn't save the confirmation: $1"
+  },
+  "speakerYou": {
+    "message": "You"
+  },
+  "speakerUnknown": {
+    "message": "Participant $1"
+  },
+  "speakerYouNotRecorded": {
+    "message": "(your speech is not recorded)"
+  }
+}

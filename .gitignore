@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.keys/
+test-results/
+playwright-report/
+# Pacote da Chrome Web Store (npm run empacotar).
+artifacts/
+.vitest/
+*.log
+.DS_Store
+*.tsbuildinfo
+# Wrapper gerado pelo npm run instalar (tem o caminho absoluto do node desta máquina).
+host/gravador-host.sh
+# Laboratório: só os scripts .js são versionados; áudios e saídas binárias ficam fora.
+docs/pesquisa/lab/*
+!docs/pesquisa/lab/*.js
+!docs/pesquisa/lab/ext/

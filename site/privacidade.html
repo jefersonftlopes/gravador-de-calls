@@ -1,0 +1,172 @@
+<!doctype html>
+<!--
+  Política de Privacidade do Gravador de Calls (pt-BR). Estrutura e tom seguem a página de
+  privacidade do Zapdesk. Confira antes de cada versão da loja se as descrições ainda batem com a
+  extensão publicada (permissões, o que vai para o info.json, onde fica o áudio).
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Política de Privacidade: Gravador de Calls</title>
+  <meta name="description" content="Como o Gravador de Calls trata os seus dados: grava só o áudio dos outros participantes, guarda tudo no seu computador e não tem servidor, conta nem analytics." />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon" type="image/svg+xml" href="/img/icone.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/icone-32.png" />
+  <link rel="apple-touch-icon" href="/img/icone-128.png" />
+  <link rel="alternate" hreflang="pt-BR" href="https://gravador-de-calls.vercel.app/privacidade" />
+  <link rel="alternate" hreflang="en" href="https://gravador-de-calls.vercel.app/en/privacy" />
+  <link rel="stylesheet" href="/estilo.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topo">
+      <a class="marca" href="/"><img src="/img/icone.svg" alt="" width="32" height="32" />Gravador de Calls</a>
+      <a class="idioma" href="/en/privacy" hreflang="en" lang="en">English</a>
+    </div>
+
+    <header class="doc">
+      <span class="badge">Gravador de Calls</span>
+      <h1>Política de Privacidade</h1>
+      <p class="muted"><strong>Última atualização / Data de vigência:</strong> 13 de outubro de 2026</p>
+    </header>
+
+    <main>
+    <p>Esta Política de Privacidade explica, de forma clara e honesta, como a extensão <strong>Gravador de Calls</strong> para o Google Chrome (a "Extensão") trata os dados quando você a usa. A versão curta: a Extensão grava só o áudio que chega dos outros participantes, guarda tudo no seu computador e não envia nada para a Enkode. A única exceção, desligada por padrão e ligada só por você, é a <strong>transcrição pela API de um provedor</strong> (seção 7-A): com ela ligada, o áudio da call é enviado para o provedor que você escolher, com a sua chave.</p>
+
+    <h2>1. Quem é o responsável</h2>
+    <div class="card">
+      <p><strong>Quem publica a Extensão:</strong> Enkode</p>
+      <p><strong>E-mail de contato:</strong> <a href="mailto:jefersonftlopes@gmail.com">jefersonftlopes@gmail.com</a></p>
+      <p><strong>Site:</strong> <a href="https://gravador-de-calls.vercel.app/">https://gravador-de-calls.vercel.app</a></p>
+    </div>
+    <p>Sempre que esta política mencionar "nós" ou "Enkode", refere-se a quem publica a Extensão. A Enkode não recebe as gravações nem os dados das suas calls: eles ficam só no seu computador, sob o seu controle (seção 5).</p>
+
+    <h2>2. O que é a Extensão</h2>
+    <p>O Gravador de Calls grava, aba por aba, o áudio dos <strong>outros participantes</strong> das calls do <strong>Google Meet</strong> e do <strong>Microsoft Teams</strong> no Chrome, junto com os dados da call, e salva cada gravação numa pasta no seu computador. Também tem um modo aba (gravar o que uma aba toca, pelo atalho ou pelo botão do popup), um controle de volume por aba e uma opção, desligada por padrão, de sair da call e fechar a aba quando ela esvaziar.</p>
+    <p><strong>A Extensão é uma ferramenta independente. Não possui vínculo, patrocínio, afiliação ou endosso do Google LLC nem da Microsoft Corporation.</strong> "Google Meet" e "Microsoft Teams" são marcas dos seus respectivos titulares e são citadas aqui apenas para descrever com quais serviços a Extensão funciona.</p>
+
+    <h2>3. O que é gravado</h2>
+    <ul>
+      <li><strong>Gravação automática (Meet e Teams):</strong> apenas o áudio que a página da call recebe dos outros participantes. <strong>O seu microfone nunca é gravado.</strong> Para marcar na transcrição onde você falou, a Extensão mede no seu computador só se há som no microfone (o volume, a cada fração de segundo), sem guardar nem enviar o som. Sons da própria interface da call (bipe de entrada, notificação) podem aparecer, porque chegam pelo mesmo caminho.</li>
+      <li><strong>Modo aba:</strong> só quando você aciona (atalho Alt+Shift+G ou botão do popup), grava o que aquela aba toca, pela captura de aba do Chrome. Também não inclui o seu microfone. Vale para a aba em que você acionou, inclusive fora do Meet e do Teams.</li>
+      <li><strong>Volume desta aba:</strong> o som da aba é processado na hora, no navegador, para mudar o volume. Nada é gravado nem guardado por causa disso.</li>
+      <li>Não há vídeo, captura de tela, chat, legenda nem texto digitado nas gravações.</li>
+    </ul>
+
+    <h2>4. Que dados da call são guardados</h2>
+    <p>Junto com o áudio, cada gravação tem um arquivo <code>info.json</code> com:</p>
+    <ul>
+      <li>plataforma (Meet, Teams ou outro site no modo aba), título da call (ou o código da reunião, quando não há título), código ou ID da reunião, endereço (URL) e título da aba;</li>
+      <li>data e hora de início e de fim, duração e fuso horário;</li>
+      <li><strong>os nomes de exibição dos participantes como aparecem na call</strong> (melhor esforço, lidos da página) e o seu próprio nome de exibição, quando a página o mostra;</li>
+      <li>quem falou e quando: os intervalos de fala de cada participante, lidos dos sinais que o Meet e o Teams mandam para a página, e os intervalos em que você falou (só o momento, nunca o som), num arquivo <code>falantes.json</code> na mesma pasta, com o total de segundos de cada um no <code>info.json</code>; a transcrição usa isso para dizer quem disse cada trecho;</li>
+      <li>o nome do perfil que você mesmo digitar nas configurações (opcional);</li>
+      <li>dados técnicos da gravação: qual caminho de áudio foi usado, trocas de fonte, lacunas, motivo do fim (inclusive a contagem de pessoas, quando a saída automática agiu) e as versões da Extensão.</li>
+    </ul>
+    <p>Para a saída automática (quando você a liga), a Extensão lê na página quantas pessoas estão na call. Essa contagem é usada na hora e não é guardada, exceto no motivo do fim descrito acima.</p>
+    <p><strong>O que NÃO é tratado:</strong> histórico de navegação, cookies, senhas, conteúdo de outros sites, identificadores de publicidade. A Extensão não usa cookies de rastreamento nem ferramentas de analytics.</p>
+
+    <h2>5. Onde os dados ficam (só no seu computador)</h2>
+    <ul>
+      <li><strong>Gravações:</strong> na pasta <code>Downloads/Gravações de calls</code> (<code>Downloads/Call recordings</code> com o Chrome em inglês), numa pasta por call (<code>audio.webm</code> e <code>info.json</code>). Com o helper local opcional instalado (seção 7), na pasta que você escolher.</li>
+      <li><strong>Áudio em andamento:</strong> enquanto a call acontece, o áudio fica em pedaços no armazenamento local da Extensão no navegador (IndexedDB), para não se perder se a aba ou o Chrome caírem. Os pedaços são apagados assim que a gravação é salva na pasta.</li>
+      <li><strong>Configurações e últimas gravações:</strong> as suas preferências e a lista das últimas gravações (título, plataforma, data e onde o arquivo foi salvo) ficam no armazenamento local da Extensão (<code>chrome.storage.local</code> e IndexedDB), no seu perfil do Chrome.</li>
+    </ul>
+    <p><strong>A Extensão não tem servidor, não pede conta nem login, e por padrão não faz nenhuma requisição de rede própria.</strong> Nenhuma gravação, nome de participante ou dado da call é enviado para a Enkode. Com a transcrição por API ligada por você (seção 7-A), a Extensão passa a fazer uma requisição por gravação, direto para o provedor que você escolher: nada passa por nenhum servidor da Enkode, que não existe.</p>
+
+    <h2>6. Para que os dados são usados</h2>
+    <p>Exclusivamente para entregar as funções da Extensão a você: gravar as suas calls, organizar cada gravação numa pasta com os dados da call, mostrar no popup o que está gravando e o que foi salvo, e sair da call sozinho quando você liga essa opção.</p>
+
+    <h2>7. Helper local e transcrição (opcionais)</h2>
+    <p>Duas funções avançadas exigem um programa separado, o <strong>helper local</strong>, que <strong>ainda não é distribuído pela Chrome Web Store</strong>: gravar numa pasta à sua escolha e transcrever cada call. Sem ele, a Extensão funciona normalmente e salva em Downloads.</p>
+    <p>Quando instalado, o helper roda no seu computador e conversa só com a Extensão (native messaging do Chrome). A transcrição também roda no seu computador (whisper.cpp), e o texto (<code>transcricao.md</code> e <code>.srt</code>) fica na pasta da call. Nada disso sai da máquina.</p>
+
+    <h2>7-A. Transcrição pela API de um provedor (opcional, desligada por padrão)</h2>
+    <p>Esta é a <strong>única função da Extensão em que dados saem do seu computador</strong>, e ela só funciona depois de você ligá-la e colar a sua chave.</p>
+    <ul>
+      <li><strong>O que sai:</strong> o arquivo de áudio da call (<code>audio.webm</code>), com a voz dos participantes, enviado para o endereço da API do provedor que você escolher. Hoje a Extensão traz um provedor declarado: a <strong>OpenAI</strong> (<code>https://api.openai.com/v1/audio/transcriptions</code>). A Extensão recusa qualquer outro endereço.</li>
+      <li><strong>O que não sai:</strong> nenhum nome de participante, nenhum dado da call e nenhum arquivo além do áudio. O <code>info.json</code>, o <code>falantes.json</code> e os nomes de quem falou ficam no seu computador: os nomes são casados com o texto <em>depois</em> que a transcrição volta, aqui na sua máquina.</li>
+      <li><strong>A sua chave:</strong> fica guardada só nesta máquina, neste perfil do Chrome, num espaço próprio do armazenamento da Extensão, e é usada apenas no cabeçalho de autorização da requisição ao provedor. Ela não vai para o <code>info.json</code>, para o log, para nenhuma mensagem de erro, nem para a Enkode. Você pode apagá-la nas configurações.</li>
+      <li><strong>Permissão:</strong> o Chrome pede a sua autorização para a Extensão falar com o provedor, no momento em que você liga a função. Sem essa autorização, nada é enviado.</li>
+      <li><strong>Por perfil do Chrome:</strong> a escolha vale só no perfil em que você a fez. Outro perfil continua sem enviar nada.</li>
+      <li><strong>Enquanto espera:</strong> o áudio da call fica guardado no armazenamento local da Extensão até a transcrição terminar, e é apagado em seguida. Ele também é apagado, com um aviso na gravação, se as tentativas, o prazo (24 horas) ou o espaço total guardado (300 MB) acabarem.</li>
+      <li><strong>Custo e termos:</strong> o provedor cobra de você, na conta dele, e o tratamento que ele dá ao áudio é regido pelos termos e pela política de privacidade <em>dele</em>, não por esta. Leia-os antes de ligar a função.</li>
+      <li><strong>Consentimento:</strong> mandar a voz de outras pessoas para um terceiro é um tratamento de dados a mais. A seção 9 vale inteira aqui, com mais razão.</li>
+    </ul>
+
+    <h2>8. O que NÃO fazemos</h2>
+    <ul>
+      <li><strong>Não vendemos</strong> dados de ninguém;</li>
+      <li><strong>Não transferimos nem compartilhamos</strong> dados com terceiros, para publicidade ou qualquer outro fim;</li>
+      <li><strong>Não usamos</strong> analytics, rastreadores nem cookies de rastreamento;</li>
+      <li><strong>Não usamos</strong> os dados para avaliar crédito, nem para nenhuma finalidade fora da função da Extensão;</li>
+      <li><strong>Não recebemos</strong> as suas gravações: elas nunca chegam à Enkode. Com a transcrição por API ligada por você, o áudio vai direto da sua máquina para o provedor que você escolheu, sem passar por nós.</li>
+    </ul>
+    <p><strong>Uso Limitado (Chrome Web Store):</strong> o uso das informações recebidas pela Extensão adere à <a href="https://developer.chrome.com/docs/webstore/program-policies/limited-use" target="_blank" rel="noopener">Política de Dados do Usuário da Chrome Web Store</a>, incluindo os requisitos de <strong>Uso Limitado (Limited Use)</strong>.</p>
+
+    <h2>9. Consentimento dos participantes: responsabilidade de quem grava</h2>
+    <p>A Extensão grava outras pessoas. <strong>Quem decide gravar é você, e você é o responsável pelas gravações que faz</strong> (na linguagem da LGPD, o controlador desses dados).</p>
+    <ul>
+      <li>No Brasil, a <strong>Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</strong> exige uma base legal para tratar dados pessoais, como a voz e o nome dos participantes (por exemplo, o consentimento deles ou o legítimo interesse, conforme o caso).</li>
+      <li>Em outros países e em vários estados dos EUA, a lei exige o <strong>consentimento de todas as partes</strong> antes de gravar uma conversa.</li>
+      <li>Na instalação, a Extensão mostra um aviso sobre o que é gravado e sobre o consentimento; a gravação automática fica desligada naquele perfil do Chrome até você confirmar em "Entendi".</li>
+      <li>Avise os participantes antes de gravar e respeite quem não quiser ser gravado. As próprias plataformas e a sua empresa podem ter regras sobre gravação.</li>
+    </ul>
+
+    <h2>10. Por quanto tempo os dados ficam</h2>
+    <ul>
+      <li><strong>Gravações e transcrições:</strong> ficam no seu computador até você apagar. A Extensão nunca apaga uma gravação salva.</li>
+      <li><strong>Áudio esperando a transcrição por API:</strong> guardado no navegador só até a transcrição terminar, e no máximo por 24 horas, 5 tentativas e 300 MB somados (o que vier primeiro). Depois disso ele é apagado e a gravação fica com o motivo.</li>
+      <li><strong>Áudio em andamento:</strong> só até a gravação ser salva. Se não der para salvar (por exemplo, o disco cheio), o popup avisa e a Extensão tenta de novo a cada minuto. Uma gravação mais curta que a duração mínima (30 segundos, por padrão) é descartada sem ser salva, junto com o título e os participantes dela.</li>
+      <li><strong>Configurações e lista das últimas gravações:</strong> enquanto a Extensão estiver instalada. Remover a Extensão apaga tudo o que ela guarda no navegador, inclusive o áudio de uma gravação que ainda não foi salva; os arquivos já salvos na pasta continuam lá.</li>
+    </ul>
+
+    <h2>11. Seus direitos</h2>
+    <p>Como a Enkode não recebe nem guarda os seus dados, você já tem o controle total: pode abrir, mover ou apagar as gravações na pasta, limpar a lista das últimas gravações removendo a Extensão e desligar a gravação automática por plataforma nas configurações. Um participante que queira acesso ou a exclusão de uma gravação deve falar com quem gravou. Para dúvidas sobre esta política, use o contato da seção 15.</p>
+
+    <h2>12. Segurança</h2>
+    <ul>
+      <li>Tudo fica no seu computador: não existe cópia em servidor que possa vazar;</li>
+      <li>Os arquivos ficam com a proteção da sua conta no computador. Quem tiver acesso a ela também terá acesso às gravações;</li>
+      <li>O helper local, quando instalado, só aceita mensagens da Extensão e só abre arquivos de transcrição dentro da pasta das gravações.</li>
+    </ul>
+
+    <h2>13. Permissões da Extensão</h2>
+    <table>
+      <thead><tr><th>Permissão</th><th>Para quê</th></tr></thead>
+      <tbody>
+        <tr><td>Acesso a meet.google.com, teams.microsoft.com, teams.cloud.microsoft e teams.live.com, e a esses mesmos endereços pelo proxy do Microsoft Defender for Cloud Apps (terminados em .mcas.ms, .mcas-gov.us ou .mcas-gov.ms)</td><td>Detectar quando a call começa e termina, gravar o áudio que a página recebe e ler o título e os nomes dos participantes. Só nesses sites. Os endereços do proxy são as mesmas páginas do Meet e do Teams quando a empresa as abre pelo controle de sessão do Defender for Cloud Apps.</td></tr>
+        <tr><td><code>tabCapture</code>, <code>activeTab</code></td><td>Modo aba e volume desta aba: só na aba em que você acionou o atalho ou o popup.</td></tr>
+        <tr><td><code>offscreen</code></td><td>Montar o arquivo de áudio e tocar o som da aba no modo aba e no volume por aba.</td></tr>
+        <tr><td><code>downloads</code></td><td>Salvar as gravações em Downloads/Gravações de calls (Downloads/Call recordings em inglês).</td></tr>
+        <tr><td><code>storage</code>, <code>unlimitedStorage</code></td><td>Guardar as configurações e o áudio em andamento até salvar, sem bater na cota numa call longa.</td></tr>
+        <tr><td><code>notifications</code></td><td>Avisar quando uma gravação não está pegando áudio, quando uma aba precisa ser recarregada ou quando uma gravação não foi salva.</td></tr>
+        <tr><td><code>alarms</code></td><td>Tentar de novo salvar uma gravação interrompida.</td></tr>
+        <tr><td><code>nativeMessaging</code></td><td>Conversar com o helper local opcional, quando instalado.</td></tr>
+        <tr><td>Acesso a <code>api.openai.com</code> (opcional)</td><td>Enviar o áudio da call para a transcrição por API, com a sua chave (seção 7-A). O Chrome só pede esta permissão quando você liga essa função, e sem ela nada é enviado.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>14. Crianças</h2>
+    <p>A Extensão é uma ferramenta de trabalho e não é dirigida a crianças. A Enkode não coleta dados de ninguém, inclusive de crianças.</p>
+
+    <h2>15. Contato</h2>
+    <div class="card">
+      <p><strong>E-mail:</strong> <a href="mailto:jefersonftlopes@gmail.com">jefersonftlopes@gmail.com</a></p>
+      <p><strong>Quem publica:</strong> Enkode</p>
+      <p><strong>Site:</strong> <a href="https://gravador-de-calls.vercel.app/">https://gravador-de-calls.vercel.app</a></p>
+    </div>
+    <p>Responderemos dentro de prazo razoável e conforme exigido pela legislação aplicável.</p>
+
+    <h2>16. Alterações nesta política</h2>
+    <p>Podemos atualizar esta política quando a Extensão mudar (por exemplo, se um dia existir uma função que envie algo para fora do computador, ela será opcional, desligada por padrão e descrita aqui antes de valer) ou quando a lei mudar. A data de vigência no topo mostra a versão atual.</p>
+    </main>
+
+    <footer>
+      <p class="muted">© 2026 Enkode. Ferramenta independente, sem afiliação com o Google LLC ou a Microsoft Corporation.</p>
+      <p class="muted"><a href="/">Início</a> · <a href="/en/privacy" hreflang="en" lang="en">English version</a></p>
+    </footer>
+  </div>
+</body>
+</html>

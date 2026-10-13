@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges">
+  <!-- Versão de 16 px do icon.svg, desenhada na grade de pixels: quatro barras de 2 px e o ponto
+       vermelho, para não virar borrão na barra de ferramentas. -->
+  <rect x="0" y="0" width="16" height="16" rx="3.5" fill="#2563eb" shape-rendering="geometricPrecision"/>
+  <g fill="#ffffff">
+    <rect x="2" y="7" width="2" height="5"/>
+    <rect x="5" y="4" width="2" height="11"/>
+    <rect x="8" y="6" width="2" height="7"/>
+    <rect x="11" y="8" width="2" height="3"/>
+  </g>
+  <circle cx="12.5" cy="3.5" r="3" fill="#ffffff" shape-rendering="geometricPrecision"/>
+  <circle cx="12.5" cy="3.5" r="2.1" fill="#ef4444" shape-rendering="geometricPrecision"/>
+</svg>
