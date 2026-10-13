@@ -150,9 +150,14 @@ test('o painel do computador tem o acordeão do passo a passo, fechado por padr�
   await expect(section.getByTestId('passo-a-passo-lista')).toContainText('1,6 GB de download')
   await expect(section.getByTestId('passo-a-passo-lista')).toContainText('o whisper.cpp e o ffmpeg')
 
+  // Emenda 23: terminada a instalação não há nada para digitar ali, e o prompt termina conferindo.
+  await expect(section.getByTestId('passo-a-passo-nada-digitar')).toContainText('normalmente não há nada para digitar aqui')
+  await expect(section.getByTestId('passo-a-passo-nada-digitar')).toContainText('"O seu computador" escolhido')
+
   // O prompt da tela é, letra por letra, o de docs/PROMPT-INSTALAR.md.
   expect(await promptNaTela(options)).toBe(PROMPT_PT)
   await expect(section.getByTestId('passo-a-passo-prompt')).toContainText('npm run teste:transcricao-real')
+  await expect(section.getByTestId('passo-a-passo-prompt')).toContainText('npm run verificar')
   await expect(section.getByTestId('passo-a-passo-prompt')).toContainText('npm install')
 
   // O link para o repositório público, o mesmo que o prompt cita.
@@ -198,6 +203,7 @@ test('o prompt sai no idioma da interface (Emenda 19): escolher English troca o 
   await expect(options.getByRole('heading', { name: 'Language' })).toBeVisible()
   await expect.poll(() => promptNaTela(options)).toBe(PROMPT_EN)
   await expect(section.getByTestId('passo-a-passo-lista')).toContainText('1.6 GB download')
+  await expect(section.getByTestId('passo-a-passo-nada-digitar')).toContainText('nothing to type here')
 
   await options.getByTestId('idioma').selectOption('auto')
   await expect.poll(() => promptNaTela(options)).toBe(PROMPT_PT)
