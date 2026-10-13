@@ -16,6 +16,7 @@
     "publicar": "npm run build && node scripts/publicar.mjs",
     "empacotar": "tsc --noEmit && node scripts/empacotar.mjs",
     "prompt": "ATUALIZAR_PROMPT=1 vitest run tests/unit/prompt-instalar.test.ts",
+    "verificar": "node scripts/verificar.mjs",
     "teste:transcricao-real": "node scripts/teste-transcricao-real.mjs",
     "transcrever": "node scripts/transcrever-de-novo.mjs",
     "instalar": "node host/instalar.mjs",
