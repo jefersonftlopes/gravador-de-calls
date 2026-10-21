@@ -1410,3 +1410,107 @@ Mutações conferidas vermelhas: `pronto` sempre true (5 vermelhos), o estado es
 - O site **não** foi publicado, e nada foi enviado à loja.
 
 O contrato que nenhuma parte muda sozinha passa a incluir a forma do `--json` de `npm run verificar` (`VerifyState`, `versao: 1`) e a saída do processo (0 ou 1), além das chaves `stepVerify*`, `promptEndExplain` e `trSetupNothingToType`.
+
+## Emenda 24: a regra do mudo, provada e medida (21/10/2026, 0.5.3)
+
+Pedido do usuário (21/10/2026): mais adiante ele quer gravar o **próprio microfone** por aba, num arquivo separado, para a transcrição ter a fala dele em vez de "(sua fala não é gravada)". Esta emenda é só o **primeiro passo** disso, e de propósito: a regra que decide quando o microfone está mudo, provada, mais o diagnóstico que mede o comportamento real do Meet e do Teams. **Nada do microfone é gravado aqui.**
+
+Por que este passo vem primeiro: gravar alguém que se achava mudo é o pior defeito possível neste recurso. Se a regra não se provar nas duas plataformas, o recurso não deve existir. **O padrão é fechado: qualquer condição falsa, ou qualquer estado que não se consiga determinar, significa mudo, porque na dúvida não se grava.**
+
+Esta emenda **acrescenta** e não muda nenhum comportamento: a gravação, o `info.json`, a linha do tempo dos falantes e a transcrição saem exatamente como na 0.5.2. O único efeito visível é um campo novo de números no `falantes.json`. Nada muda nas duas descrições da loja, nas duas páginas do site, nas duas políticas de privacidade, na chave `welcomeWhatNoMic` da tela de consentimento nem em qualquer outro texto que promete que o microfone não entra na gravação: eles continuam verdadeiros.
+
+### A. A regra
+
+O microfone conta como **ABERTO** somente quando TODAS valem, nesta ordem:
+
+| | condição | o que ela pega |
+|---|---|---|
+| a | `track.readyState === 'live'` | a página parou a captura (`track.stop()`) |
+| b | `track.enabled === true` | o mudo mais comum da interface |
+| c | `track.muted === false` | mudo do sistema ou do aparelho |
+| d | a faixa é, **agora**, a faixa de algum `RTCRtpSender` de uma `RTCPeerConnection` registrada | a página parou de **enviar** e manteve a captura viva |
+
+A condição (d) existe porque "a faixa está viva?" é insuficiente: um aplicativo pode mutar parando de enviar e mantendo o `getUserMedia` aberto, para não pedir permissão de novo nem ter atraso ao desmutar. Nesse caso a tela diz mudo e a faixa continua quente. As quatro formas de mutar que o arnês mede (item E) mostram que só a (d) pega duas delas.
+
+Qualquer uma falsa, ou qualquer estado indeterminado, fecha. Com **várias faixas**, uma aberta abre o portão (o microfone está quente se alguma via está quente), e com todas fechadas o motivo é o da faixa que **chegou mais longe** na ordem acima: uma faixa morta ao lado de uma viva que ninguém está enviando diz "a página parou de enviar", que é a informação útil, não "a faixa morreu".
+
+### B. A regra é pura e testável (`src/shared/mic-gate.ts`)
+
+Precedente: `vigia-rule.ts` e `speakers.ts` (funções puras em `src/shared/`, sem zod, rodando no MAIN world, no SW e no vitest).
+
+- `MicTrackState`: o estado observado de UMA faixa (`readyState`, `enabled`, `muted`, `sender`). Campo `undefined` é "não deu para determinar".
+- `micGateDecide(tracks)`: devolve `{ open, reason, sender }`. `reason` é a condição que fechou (`readyState`, `enabled`, `muted`, `sem-sender`) ou o padrão fechado (`sem-trilha`, nenhuma faixa à vista; `desconhecido`, algum estado indeterminado). `sender` é o id do sender que está mandando a faixa aberta, para a interface de depois dizer qual via está quente.
+- `stepMicGate(stats, now, tracks)`: uma leitura. Soma o tempo desde a leitura anterior **no estado que valia nele**, aplica a decisão e conta a transição e o motivo. Pura, no estilo do `arbitrate`. O intervalo de uma leitura vale no máximo `MIC_GATE_MAX_STEP_MS` (5 s): o laço é de 250 ms, mas uma aba em segundo plano ou uma máquina suspensa deixariam duas leituras longe uma da outra, e uma suspensão de horas viraria "horas de microfone aberto". Relógio que anda para trás não tira tempo.
+- `micGateDiagnostics(stats)`: os números do `falantes.json` (item D).
+
+Contagem por motivo: cada **leitura fechada** conta no motivo dela, e não só a transição. Uma call mutada do começo ao fim tem zero transições, e é justamente nela que o motivo é a informação que interessa.
+
+### C. O registry observa, não decide (`capture/registry.ts`)
+
+`micGateInputs()` devolve, por faixa de microfone (as de `getUserMedia`, nunca as do `getDisplayMedia`), as quatro condições observadas e o id do sender. Ele **só lê**:
+
+- os senders vêm do mesmo `orig.pcGetSenders` que o `scan()` já usa, dos PCs registrados e não fechados; cada sender ganha um número estável num `WeakMap` (precedente: `receiverIds`, da Emenda 20), nunca o objeto;
+- sem `getSenders` no navegador, ou com ele lançando, o campo `sender` fica `undefined` e a regra fecha por `desconhecido`;
+- `readyState`, `enabled` e `muted` só entram quando são do tipo esperado.
+
+Mudança no `localMicTracks()` (Emenda 18): a faixa que terminou **continua no registro** (antes ela era apagada de `micTracks`), porque é ela que diz que o mudo foi um `track.stop()`; ela só não entra mais na lista que o `measureMic` recebe, como antes. O registro não cresce: cada entrada é um `WeakRef` e sai quando a página larga a faixa.
+
+### D. O diagnóstico, só com números (`falantes.json`)
+
+Precedente: o diagnóstico de CSRC da Emenda 20. O controlador da sessão lê o portão no mesmo laço de 250 ms da arbitragem (em `sampleSpeakers`, depois do `measureMic`) e manda o resultado **só no lote final** do `session:speakers`, junto do diagnóstico do adaptador:
+
+```json
+"diagnostico": { "microfone": {
+  "leituras": 51, "abriu": 2, "fechou": 2, "segundosAberto": 8, "segundosFechado": 4.5, "trilhasMax": 1,
+  "motivos": { "readyState": 0, "enabled": 16, "muted": 0, "semSender": 3, "semTrilha": 0, "desconhecido": 0 }
+} }
+```
+
+Nunca áudio, nunca texto do usuário, nunca nome de dispositivo. O zod do SW aceita só esses campos numéricos, e uma chave a mais sai calada em vez de recusar o lote (que leva a linha do tempo inteira), como na Emenda 20. O helper ignora o campo (`speakerTimelineFrom` só lê `intervalos`, `pessoas` e `textos`), então **`HOST_VERSION` fica em 0.5.0** e ninguém precisa rodar `npm run instalar` de novo.
+
+Duas limitações do diagnóstico, declaradas: ele mora no `falantes.json`, que só existe quando a plataforma disse que **outra pessoa** falou (`speakersOutput` devolve null sem nenhum intervalo de participante), então uma call em que só o usuário falou não deixa o número; e o último intervalo, de até 250 ms entre a última leitura e o fim da gravação, não entra.
+
+O portão **não toca na linha do tempo**: a sua fala continua vindo do `measureMic` da Emenda 18, com o mesmo `MIC_SPEECH_DBFS` de sempre. Um teste do controlador fecha o portão no meio da call e exige que os intervalos de "Você" continuem iguais.
+
+### E. O arnês: as quatro formas de mutar, num Chrome de verdade
+
+`tests/e2e/mudo.spec.ts` com a variante `tests/fixtures/meet/variantes/mudo.js` (precedente: `mic-local.js` e as flags de mídia falsa de `tests/helpers/browser.ts`). A página manda o microfone falso pelo PC, a Ana "fala" pelo `dcrpc` (o `falantes.json` precisa de alguém falando) e cada teste muta de uma forma, 4 s aberto, 4 s mudo e 4 s aberto de novo. A página também expõe `fx.estado()`, o que **ela** vê da faixa e do sender, para o teste provar que mutou de verdade sem depender do que a extensão observou, e o participante remoto confirma que recebeu áudio do microfone (`micRms`) antes do mudo.
+
+| forma | o que a página vê no mudo | motivo medido | leituras fechadas |
+|---|---|---|---|
+| `track.enabled = false` | viva, `enabled: false`, enviando | `enabled` | 16 |
+| `track.stop()` | `ended`, enviando (o sender guarda a faixa morta) | `readyState` | 16 |
+| `sender.replaceTrack(null)` | viva, ligada, **sem sender** | `sem-sender` | 19 |
+| `pc.removeTrack(sender)` | viva, ligada, **sem sender** | `sem-sender` | 19 |
+
+As quatro fecharam e as quatro reabriram ao desmutar (`abriu: 2`), cada uma com o motivo certo e nenhum outro. Desmutar o `track.stop()` é o que um aplicativo de verdade faz: `getUserMedia` novo e `replaceTrack` da faixa nova no sender que já existe (aí `trilhasMax` vira 2, a morta e a nova). **`replaceTrack(null)` e `removeTrack(sender)` são indistinguíveis pela observação**, de propósito: as duas deixam a faixa viva e ligada sem nenhum sender, e o que importa é fechar.
+
+O fim da call fecha o portão de novo: sair fecha o `RTCPeerConnection`, e aí o microfone deixa de estar num sender (3 leituras de `semSender` no fim, nos quatro testes). Esse fechamento é correto, e por isso as contagens do fim entram como faixa no teste.
+
+Nada de microfone sai da sessão, e um teste prova: com o portão aberto a call toda, a pasta fica com exatamente `audio.webm`, `falantes.json` e `info.json` (nenhum arquivo novo), o `info.json` lista só o `audio.webm`, e na gravação o tom de 1000 Hz do microfone falso fica 91 dB abaixo do tom de 440 Hz do outro participante (mediana 440 Hz: -6,0 dBFS; máximo 1000 Hz: -97,0 dBFS), o mesmo critério do AC3.
+
+### F. O que não se sabe, e o que a call real vai responder
+
+- **Qual das quatro formas o Meet e o Teams usam de verdade.** Não está chutado em lugar nenhum do código nem do contrato: o `diagnostico.microfone` da próxima call responde. Se `motivos.enabled` for alto, é a (b); se for `readyState`, a (a); se for `semSender`, a (c) ou a (d), que não se distinguem.
+- **Se o Meet e o Teams enviam a faixa crua ou uma faixa processada.** Se o cliente processa o áudio (cancelamento de ruído com um grafo próprio) e envia uma faixa derivada, a faixa do `getUserMedia` não está em nenhum sender e o portão fica **fechado a call toda**, com `semSender` em quase toda leitura, mesmo com a pessoa falando. É o padrão fechado funcionando (nunca se grava quem parece mudo), mas significaria que a condição (d) precisa de outro caminho antes de gravar o microfone de verdade. O diagnóstico mostra esse caso como `abriu: 0` com `semSender` perto de `leituras`.
+- **O `currentDirection` do transceptor não entra na regra**, de propósito: ele não estava nas condições acordadas, e antes da primeira negociação ele é `null` (indeterminado), o que fecharia o portão no começo de toda call. Consequência declarada: depois de um `removeTrack` seguido de `addTrack` sem renegociar, o portão abre porque o sender já tem a faixa, mesmo que a mídia só volte a fluir depois da negociação.
+- Nenhum indício de terceiros foi usado aqui. Não se procurou código aberto de bot de reunião para dizer como o Meet muta; se algum aparecer, entra como **indício**, nunca como medida.
+
+### Testes
+
+Unidade (cada um conferido vermelho com a mutação indicada e verde de volta):
+- `src/shared/mic-gate.test.ts` (novo, 19 testes): as quatro condições juntas abrindo; cada uma sozinha fechando com o motivo dela; o sender `0` sendo um sender de verdade; nenhuma faixa fechando por `sem-trilha`; cada campo indeterminado fechando por `desconhecido`; as combinações (a condição mais cedo na ordem é a que aparece); uma faixa aberta abrindo o portão ao lado de qualquer outra; o motivo da faixa que chegou mais longe; a primeira leitura só marcando o estado; o tempo de cada intervalo no estado que valia nele; a call mutada o tempo todo sem transição e com o motivo contado; o motivo trocando sem reabrir; o relógio para trás e o salto longo; `trilhasMax`; e o diagnóstico (contagens, segundos com uma casa, só números, os seis motivos). Mutações: sem a condição (d) (4 vermelhos, contando o do registry), o indeterminado abrindo (2), sem trilha abrindo (3), sem o teto do intervalo (1).
+- `src/main-world/capture/registry-falantes.test.ts`: as quatro condições e o id do sender, estável entre leituras; `enabled` e `muted` como a página os deixou; a faixa parada continuando à vista no `micGateInputs` e fora do `localMicTracks`; o `getSenders` que lança deixando o estado indeterminado; o áudio da tela fora do portão; sem microfone pedido, nenhum estado; e um PC fechado não contando como quem manda a faixa. Mutações: `micGateInputs` podando a faixa terminada (1), a leitura dos senders que falhou virando "sem sender" (1).
+- `src/main-world/session.test.ts`: o portão nos números do lote final, com o motivo `semSender` de um aplicativo que parou de enviar, e a linha do tempo intacta (a sua fala continua marcada com o portão fechado). Mutações: o diagnóstico em todo lote (2), sem juntar o portão ao diagnóstico (1), o `sampleSelf` passando a depender do portão (2).
+
+Ponta a ponta:
+- `tests/e2e/mudo.spec.ts` (novo, 5 testes): as quatro formas de mutar (item E) e a prova de que nada do microfone sai da sessão. Mutações conferidas vermelhas no build: sem a condição (d), as duas formas que param de enviar deixam o portão aberto a call toda (`abriu: 1`, `fechou: 0`, 12,5 s aberto); e o `micGateInputs` podando a faixa terminada troca o motivo do `track.stop()` por `sem-trilha` (16 leituras).
+- `tests/e2e/falantes.spec.ts` (atualizado): o teste do Meet trocou `expect(file).not.toHaveProperty('diagnostico')` por `expect(file.diagnostico).not.toHaveProperty('csrc')` (a intenção era "não há CSRC numa conexão direta", e ela continua conferida) e passou a cobrar o `diagnostico.microfone`: ali o microfone falso entra desligado e liga de 13 a 17 s, então o portão fecha por `enabled` e abre no meio da call.
+
+### Não feito (de propósito)
+
+- **Gravar o microfone.** Nenhum `MediaRecorder` novo, nenhum destino de gravação, nenhum `microfone.webm`, nenhuma mudança na tela de consentimento nem nos oito textos que prometem que o microfone nunca entra na gravação. Quando esse passo vier, ele precisa dos oito textos, de uma escolha explícita do usuário e de revisão nova na loja.
+- A interface não mostra o portão. O motivo já vem na decisão para quando ela mostrar.
+- O diagnóstico não distingue `replaceTrack(null)` de `removeTrack(sender)`, nem diz quantos senders diferentes seguraram o microfone.
+
+O contrato que nenhuma parte muda sozinha passa a incluir `MicTrackState`, `MicGateReason` (os seis motivos), `micGateDecide`, `stepMicGate`, `micGateDiagnostics`, `MIC_GATE_MAX_STEP_MS`, o `micGateInputs()` do registry e o `diagnostico.microfone` do `session:speakers` e do `SpeakersFile`.

@@ -1,6 +1,6 @@
 {
   "name": "gravador-de-calls",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "private": true,
   "description": "Extensão do Chrome que grava, aba por aba, o áudio dos outros participantes das calls do Google Meet e do Microsoft Teams.",
   "type": "module",
