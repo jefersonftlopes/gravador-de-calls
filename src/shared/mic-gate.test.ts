@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest'
 import { MIC_GATE_MAX_STEP_MS, MIC_GATE_REASONS, initialMicGate, micGateDecide, micGateDiagnostics, stepMicGate, type MicTrackState } from './mic-gate'
 
-/** Uma trilha aberta: viva, ligada, sem mudo do sistema e num sender de verdade. */
+/** Uma faixa aberta: viva, ligada, sem mudo do sistema e num sender de verdade. */
 const aberta = (over: Partial<MicTrackState> = {}): MicTrackState => ({ readyState: 'live', enabled: true, muted: false, sender: 7, ...over })
 
 describe('o portão do microfone: aberto só com as quatro condições', () => {
@@ -23,8 +23,8 @@ describe('o portão do microfone: aberto só com as quatro condições', () => {
     expect(micGateDecide([aberta({ sender: 0 })])).toMatchObject({ open: true, sender: 0 })
   })
 
-  it('nenhuma trilha é fechado por sem-trilha (o padrão, antes do getUserMedia)', () => {
-    expect(micGateDecide([])).toEqual({ open: false, reason: 'sem-trilha', sender: null })
+  it('nenhuma faixa é fechado por sem-faixa (o padrão, antes do getUserMedia)', () => {
+    expect(micGateDecide([])).toEqual({ open: false, reason: 'sem-faixa', sender: null })
   })
 
   it('estado que não se consegue determinar fecha por desconhecido, campo por campo', () => {
@@ -42,13 +42,13 @@ describe('o portão do microfone: aberto só com as quatro condições', () => {
     expect(micGateDecide([aberta({ muted: true, sender: null })])).toMatchObject({ reason: 'muted' })
   })
 
-  it('com várias trilhas: uma aberta abre o portão, qualquer que seja a outra', () => {
+  it('com várias faixas: uma aberta abre o portão, qualquer que seja a outra', () => {
     expect(micGateDecide([aberta({ readyState: 'ended' }), aberta({ sender: 9 })])).toEqual({ open: true, reason: null, sender: 9 })
     expect(micGateDecide([{}, aberta()])).toMatchObject({ open: true })
   })
 
-  it('com várias trilhas fechadas, o motivo é o da que chegou mais longe', () => {
-    // A trilha morta não explica nada; a viva que ninguém está enviando explica o mudo.
+  it('com várias faixas fechadas, o motivo é o da que chegou mais longe', () => {
+    // A faixa morta não explica nada; a viva que ninguém está enviando explica o mudo.
     expect(micGateDecide([aberta({ readyState: 'ended' }), aberta({ sender: null })])).toMatchObject({ reason: 'sem-sender' })
     expect(micGateDecide([aberta({ sender: null }), aberta({ readyState: 'ended' })])).toMatchObject({ reason: 'sem-sender' })
     expect(micGateDecide([aberta({ enabled: false }), aberta({ readyState: 'ended' })])).toMatchObject({ reason: 'enabled' })
@@ -67,7 +67,7 @@ describe('as leituras: tempo em cada estado, transições e motivos', () => {
     const s = stepMicGate(initialMicGate(), 1000, [aberta()])
     expect(s).toMatchObject({ readings: 1, open: true, at: 1000, openMs: 0, closedMs: 0, opened: 1, closed: 0, maxTracks: 1 })
     const f = stepMicGate(initialMicGate(), 1000, [])
-    expect(f).toMatchObject({ open: false, opened: 0, closed: 1, reasons: { 'sem-trilha': 1 } })
+    expect(f).toMatchObject({ open: false, opened: 0, closed: 1, reasons: { 'sem-faixa': 1 } })
   })
 
   it('o tempo de cada intervalo entra no estado que valia nele', () => {
@@ -102,7 +102,7 @@ describe('as leituras: tempo em cada estado, transições e motivos', () => {
     expect(Object.values(s.reasons).every((n) => n === 0)).toBe(true)
   })
 
-  it('o motivo pode trocar sem o portão reabrir (mutou e depois parou a trilha)', () => {
+  it('o motivo pode trocar sem o portão reabrir (mutou e depois parou a faixa)', () => {
     const s = ler([
       [0, [aberta()]],
       [250, [aberta({ enabled: false })]],
@@ -125,7 +125,7 @@ describe('as leituras: tempo em cada estado, transições e motivos', () => {
     expect(salto.openMs).toBe(MIC_GATE_MAX_STEP_MS)
   })
 
-  it('trilhasMax é o maior número de trilhas visto numa leitura', () => {
+  it('faixasMax é o maior número de faixas visto numa leitura', () => {
     const s = ler([
       [0, [aberta()]],
       [250, [aberta(), aberta({ sender: 8 })]],
@@ -146,8 +146,8 @@ describe('o diagnóstico: só números', () => {
       fechou: 1,
       segundosAberto: 2,
       segundosFechado: 1,
-      trilhasMax: 1,
-      motivos: { readyState: 0, enabled: 0, muted: 4, semSender: 0, semTrilha: 0, desconhecido: 0 },
+      faixasMax: 1,
+      motivos: { readyState: 0, enabled: 0, muted: 4, semSender: 0, semFaixa: 0, desconhecido: 0 },
     })
   })
 
@@ -161,7 +161,7 @@ describe('o diagnóstico: só números', () => {
   it('os seis motivos da regra são os seis do diagnóstico', () => {
     const d = micGateDiagnostics(initialMicGate())
     expect(Object.keys(d.motivos)).toHaveLength(MIC_GATE_REASONS.length)
-    expect(MIC_GATE_REASONS).toEqual(['readyState', 'enabled', 'muted', 'sem-sender', 'sem-trilha', 'desconhecido'])
+    expect(MIC_GATE_REASONS).toEqual(['readyState', 'enabled', 'muted', 'sem-sender', 'sem-faixa', 'desconhecido'])
   })
 
   it('segundos com uma casa (1,8 s de aberto)', () => {

@@ -1,15 +1,15 @@
 // Regra do mudo (Emenda 24): quando o microfone conta como ABERTO (quente) e, quando não conta,
 // qual condição o fechou. Pura e sem zod, como ./vigia-rule.ts e ./speakers.ts: o registry do MAIN
-// world só OBSERVA o estado de cada trilha (capture/registry.ts, `micGateInputs`) e quem decide é
+// world só OBSERVA o estado de cada faixa (capture/registry.ts, `micGateInputs`) e quem decide é
 // este arquivo, que roda também no vitest sem navegador nenhum.
 //
 // O PADRÃO É FECHADO: qualquer uma das condições falsa, ou qualquer estado que não se consiga
 // determinar, significa fechado. Gravar quem se achava mudo é o pior defeito possível deste
 // recurso, então na dúvida não se grava.
 //
-// Mutar não é só parar a trilha: um aplicativo pode mutar PARANDO DE ENVIAR e mantendo a captura
+// Mutar não é só parar a faixa: um aplicativo pode mutar PARANDO DE ENVIAR e mantendo a captura
 // viva, para não pedir permissão de novo nem ter atraso ao desmutar. Nesse caso a tela diz mudo e a
-// trilha continua quente. Por isso a condição (d): a trilha tem de ser, AGORA, a trilha de algum
+// faixa continua quente. Por isso a condição (d): a faixa tem de ser, AGORA, a faixa de algum
 // RTCRtpSender de uma RTCPeerConnection registrada.
 //
 // Qual das formas o Meet e o Teams usam de verdade NÃO se sabe: é o que o diagnóstico mede numa
@@ -20,17 +20,17 @@ import type { SpeakerDiagnostics } from './protocol'
 /**
  * Por que o portão está fechado. Os quatro primeiros são as condições da regra, na ordem em que
  * são conferidas; os dois últimos são o padrão fechado:
- * - `sem-trilha`: nenhuma trilha de microfone à vista (antes do getUserMedia, ou depois de a
+ * - `sem-faixa`: nenhuma faixa de microfone à vista (antes do getUserMedia, ou depois de a
  *   página largar todas);
  * - `desconhecido`: alguma condição não deu para determinar (a regra não chuta).
  */
-export type MicGateReason = 'readyState' | 'enabled' | 'muted' | 'sem-sender' | 'sem-trilha' | 'desconhecido'
+export type MicGateReason = 'readyState' | 'enabled' | 'muted' | 'sem-sender' | 'sem-faixa' | 'desconhecido'
 
 /** Todos os motivos, na ordem em que o diagnóstico os escreve. */
-export const MIC_GATE_REASONS: readonly MicGateReason[] = ['readyState', 'enabled', 'muted', 'sem-sender', 'sem-trilha', 'desconhecido']
+export const MIC_GATE_REASONS: readonly MicGateReason[] = ['readyState', 'enabled', 'muted', 'sem-sender', 'sem-faixa', 'desconhecido']
 
 /**
- * O estado observado de UMA trilha de microfone (o que o registry lê, sem decidir nada). Qualquer
+ * O estado observado de UMA faixa de microfone (o que o registry lê, sem decidir nada). Qualquer
  * campo `undefined` é "não deu para determinar", e fecha o portão por `desconhecido`.
  */
 export interface MicTrackState {
@@ -41,7 +41,7 @@ export interface MicTrackState {
   /** `track.muted`: mudo do sistema ou do aparelho. */
   muted?: boolean
   /**
-   * Id do RTCRtpSender que manda esta trilha agora (número estável por sender, nunca o objeto);
+   * Id do RTCRtpSender que manda esta faixa agora (número estável por sender, nunca o objeto);
    * `null` quando nenhum sender a manda, `undefined` quando não deu para ler os senders.
    */
   sender?: number | null
@@ -51,18 +51,18 @@ export interface MicGateDecision {
   open: boolean
   /** A condição que fechou; `null` quando abriu. */
   reason: MicGateReason | null
-  /** O sender da trilha que abriu o portão; `null` quando fechado. */
+  /** O sender da faixa que abriu o portão; `null` quando fechado. */
   sender: number | null
 }
 
 /**
- * Quão perto do aberto uma trilha chegou. Com várias trilhas, o motivo do portão é o da trilha que
- * chegou mais longe: é a informação mais útil (uma trilha morta ao lado de uma viva que não está
- * sendo enviada diz "a página parou de enviar", não "a trilha morreu").
+ * Quão perto do aberto uma faixa chegou. Com várias faixas, o motivo do portão é o da faixa que
+ * chegou mais longe: é a informação mais útil (uma faixa morta ao lado de uma viva que não está
+ * sendo enviada diz "a página parou de enviar", não "a faixa morreu").
  */
-const RANK: Record<MicGateReason, number> = { desconhecido: 0, 'sem-trilha': 0, readyState: 1, enabled: 2, muted: 3, 'sem-sender': 4 }
+const RANK: Record<MicGateReason, number> = { desconhecido: 0, 'sem-faixa': 0, readyState: 1, enabled: 2, muted: 3, 'sem-sender': 4 }
 
-/** A condição que fecha esta trilha, na ordem da regra; `null` quando ela está aberta. */
+/** A condição que fecha esta faixa, na ordem da regra; `null` quando ela está aberta. */
 function reasonOfTrack(t: MicTrackState): MicGateReason | null {
   if (typeof t.readyState !== 'string' || typeof t.enabled !== 'boolean' || typeof t.muted !== 'boolean' || t.sender === undefined) return 'desconhecido'
   if (t.readyState !== 'live') return 'readyState'
@@ -73,12 +73,12 @@ function reasonOfTrack(t: MicTrackState): MicGateReason | null {
 }
 
 /**
- * O portão do microfone: ABERTO quando alguma trilha passa pelas quatro condições (viva, ligada,
+ * O portão do microfone: ABERTO quando alguma faixa passa pelas quatro condições (viva, ligada,
  * sem mudo do sistema e sendo enviada por um sender de verdade); FECHADO em qualquer outro caso,
- * com o motivo da trilha que chegou mais longe.
+ * com o motivo da faixa que chegou mais longe.
  */
 export function micGateDecide(tracks: readonly MicTrackState[]): MicGateDecision {
-  if (tracks.length === 0) return { open: false, reason: 'sem-trilha', sender: null }
+  if (tracks.length === 0) return { open: false, reason: 'sem-faixa', sender: null }
   let worst: MicGateReason | null = null
   for (const t of tracks) {
     const r = reasonOfTrack(t)
@@ -109,7 +109,7 @@ export interface MicGateStats {
   closed: number
   /** Leituras fechadas por cada motivo (uma leitura aberta não conta em nenhum). */
   reasons: Record<MicGateReason, number>
-  /** Maior número de trilhas de microfone vistas numa leitura. */
+  /** Maior número de faixas de microfone vistas numa leitura. */
   maxTracks: number
 }
 
@@ -122,7 +122,7 @@ export function initialMicGate(): MicGateStats {
     closedMs: 0,
     opened: 0,
     closed: 0,
-    reasons: { readyState: 0, enabled: 0, muted: 0, 'sem-sender': 0, 'sem-trilha': 0, desconhecido: 0 },
+    reasons: { readyState: 0, enabled: 0, muted: 0, 'sem-sender': 0, 'sem-faixa': 0, desconhecido: 0 },
     maxTracks: 0,
   }
 }
@@ -162,13 +162,13 @@ export function micGateDiagnostics(s: MicGateStats): NonNullable<SpeakerDiagnost
     fechou: s.closed,
     segundosAberto: round1(s.openMs),
     segundosFechado: round1(s.closedMs),
-    trilhasMax: s.maxTracks,
+    faixasMax: s.maxTracks,
     motivos: {
       readyState: s.reasons.readyState,
       enabled: s.reasons.enabled,
       muted: s.reasons.muted,
       semSender: s.reasons['sem-sender'],
-      semTrilha: s.reasons['sem-trilha'],
+      semFaixa: s.reasons['sem-faixa'],
       desconhecido: s.reasons.desconhecido,
     },
   }

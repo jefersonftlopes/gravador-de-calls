@@ -258,11 +258,11 @@ describe('registry: o estado das faixas de microfone (Emenda 24)', () => {
     expect(reg.micGateInputs()).toHaveLength(1)
   })
 
-  it('sem nenhum microfone pedido, não há estado nenhum (fechado por sem-trilha)', () => {
+  it('sem nenhum microfone pedido, não há estado nenhum (fechado por sem-faixa)', () => {
     const { orig } = fakeWindow()
     const reg = installRegistry(orig, noLog)
     expect(reg.micGateInputs()).toEqual([])
-    expect(micGateDecide(reg.micGateInputs())).toMatchObject({ open: false, reason: 'sem-trilha' })
+    expect(micGateDecide(reg.micGateInputs())).toMatchObject({ open: false, reason: 'sem-faixa' })
   })
 
   it('um PC fechado não conta como quem manda a faixa', async () => {

@@ -383,7 +383,7 @@ export interface SpeakerDiagnostics {
   /**
    * Emenda 24: o portão do microfone (`src/shared/mic-gate.ts`), só com números, para uma call real
    * dizer como o Meet e o Teams mutam de verdade. Quantas leituras houve, quantas vezes o portão
-   * abriu e fechou, quantos segundos em cada estado, quantas trilhas de microfone apareceram ao
+   * abriu e fechou, quantos segundos em cada estado, quantas faixas de microfone apareceram ao
    * mesmo tempo e quantas leituras cada motivo fechou. Nunca áudio, texto do usuário nem nome de
    * dispositivo. O microfone continua fora da gravação: isto é medida, não captura.
    */
@@ -393,8 +393,8 @@ export interface SpeakerDiagnostics {
     fechou: number
     segundosAberto: number
     segundosFechado: number
-    trilhasMax: number
-    motivos: { readyState: number; enabled: number; muted: number; semSender: number; semTrilha: number; desconhecido: number }
+    faixasMax: number
+    motivos: { readyState: number; enabled: number; muted: number; semSender: number; semFaixa: number; desconhecido: number }
   }
 }
 
@@ -1065,13 +1065,13 @@ const speakerDiagnosticsSchema = z.object({
       fechou: nonNegInt,
       segundosAberto: seconds,
       segundosFechado: seconds,
-      trilhasMax: nonNegInt.max(1000),
+      faixasMax: nonNegInt.max(1000),
       motivos: z.object({
         readyState: nonNegInt,
         enabled: nonNegInt,
         muted: nonNegInt,
         semSender: nonNegInt,
-        semTrilha: nonNegInt,
+        semFaixa: nonNegInt,
         desconhecido: nonNegInt,
       }),
     })

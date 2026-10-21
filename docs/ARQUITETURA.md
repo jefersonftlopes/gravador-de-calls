@@ -1439,7 +1439,7 @@ Qualquer uma falsa, ou qualquer estado indeterminado, fecha. Com **várias faixa
 Precedente: `vigia-rule.ts` e `speakers.ts` (funções puras em `src/shared/`, sem zod, rodando no MAIN world, no SW e no vitest).
 
 - `MicTrackState`: o estado observado de UMA faixa (`readyState`, `enabled`, `muted`, `sender`). Campo `undefined` é "não deu para determinar".
-- `micGateDecide(tracks)`: devolve `{ open, reason, sender }`. `reason` é a condição que fechou (`readyState`, `enabled`, `muted`, `sem-sender`) ou o padrão fechado (`sem-trilha`, nenhuma faixa à vista; `desconhecido`, algum estado indeterminado). `sender` é o id do sender que está mandando a faixa aberta, para a interface de depois dizer qual via está quente.
+- `micGateDecide(tracks)`: devolve `{ open, reason, sender }`. `reason` é a condição que fechou (`readyState`, `enabled`, `muted`, `sem-sender`) ou o padrão fechado (`sem-faixa`, nenhuma faixa à vista; `desconhecido`, algum estado indeterminado). `sender` é o id do sender que está mandando a faixa aberta, para a interface de depois dizer qual via está quente.
 - `stepMicGate(stats, now, tracks)`: uma leitura. Soma o tempo desde a leitura anterior **no estado que valia nele**, aplica a decisão e conta a transição e o motivo. Pura, no estilo do `arbitrate`. O intervalo de uma leitura vale no máximo `MIC_GATE_MAX_STEP_MS` (5 s): o laço é de 250 ms, mas uma aba em segundo plano ou uma máquina suspensa deixariam duas leituras longe uma da outra, e uma suspensão de horas viraria "horas de microfone aberto". Relógio que anda para trás não tira tempo.
 - `micGateDiagnostics(stats)`: os números do `falantes.json` (item D).
 
@@ -1461,8 +1461,8 @@ Precedente: o diagnóstico de CSRC da Emenda 20. O controlador da sessão lê o 
 
 ```json
 "diagnostico": { "microfone": {
-  "leituras": 51, "abriu": 2, "fechou": 2, "segundosAberto": 8, "segundosFechado": 4.5, "trilhasMax": 1,
-  "motivos": { "readyState": 0, "enabled": 16, "muted": 0, "semSender": 3, "semTrilha": 0, "desconhecido": 0 }
+  "leituras": 51, "abriu": 2, "fechou": 2, "segundosAberto": 8, "segundosFechado": 4.5, "faixasMax": 1,
+  "motivos": { "readyState": 0, "enabled": 16, "muted": 0, "semSender": 3, "semFaixa": 0, "desconhecido": 0 }
 } }
 ```
 
@@ -1483,7 +1483,7 @@ O portão **não toca na linha do tempo**: a sua fala continua vindo do `measure
 | `sender.replaceTrack(null)` | viva, ligada, **sem sender** | `sem-sender` | 19 |
 | `pc.removeTrack(sender)` | viva, ligada, **sem sender** | `sem-sender` | 19 |
 
-As quatro fecharam e as quatro reabriram ao desmutar (`abriu: 2`), cada uma com o motivo certo e nenhum outro. Desmutar o `track.stop()` é o que um aplicativo de verdade faz: `getUserMedia` novo e `replaceTrack` da faixa nova no sender que já existe (aí `trilhasMax` vira 2, a morta e a nova). **`replaceTrack(null)` e `removeTrack(sender)` são indistinguíveis pela observação**, de propósito: as duas deixam a faixa viva e ligada sem nenhum sender, e o que importa é fechar.
+As quatro fecharam e as quatro reabriram ao desmutar (`abriu: 2`), cada uma com o motivo certo e nenhum outro. Desmutar o `track.stop()` é o que um aplicativo de verdade faz: `getUserMedia` novo e `replaceTrack` da faixa nova no sender que já existe (aí `faixasMax` vira 2, a morta e a nova). **`replaceTrack(null)` e `removeTrack(sender)` são indistinguíveis pela observação**, de propósito: as duas deixam a faixa viva e ligada sem nenhum sender, e o que importa é fechar.
 
 O fim da call fecha o portão de novo: sair fecha o `RTCPeerConnection`, e aí o microfone deixa de estar num sender (3 leituras de `semSender` no fim, nos quatro testes). Esse fechamento é correto, e por isso as contagens do fim entram como faixa no teste.
 
@@ -1499,12 +1499,12 @@ Nada de microfone sai da sessão, e um teste prova: com o portão aberto a call 
 ### Testes
 
 Unidade (cada um conferido vermelho com a mutação indicada e verde de volta):
-- `src/shared/mic-gate.test.ts` (novo, 19 testes): as quatro condições juntas abrindo; cada uma sozinha fechando com o motivo dela; o sender `0` sendo um sender de verdade; nenhuma faixa fechando por `sem-trilha`; cada campo indeterminado fechando por `desconhecido`; as combinações (a condição mais cedo na ordem é a que aparece); uma faixa aberta abrindo o portão ao lado de qualquer outra; o motivo da faixa que chegou mais longe; a primeira leitura só marcando o estado; o tempo de cada intervalo no estado que valia nele; a call mutada o tempo todo sem transição e com o motivo contado; o motivo trocando sem reabrir; o relógio para trás e o salto longo; `trilhasMax`; e o diagnóstico (contagens, segundos com uma casa, só números, os seis motivos). Mutações: sem a condição (d) (4 vermelhos, contando o do registry), o indeterminado abrindo (2), sem trilha abrindo (3), sem o teto do intervalo (1).
+- `src/shared/mic-gate.test.ts` (novo, 19 testes): as quatro condições juntas abrindo; cada uma sozinha fechando com o motivo dela; o sender `0` sendo um sender de verdade; nenhuma faixa fechando por `sem-faixa`; cada campo indeterminado fechando por `desconhecido`; as combinações (a condição mais cedo na ordem é a que aparece); uma faixa aberta abrindo o portão ao lado de qualquer outra; o motivo da faixa que chegou mais longe; a primeira leitura só marcando o estado; o tempo de cada intervalo no estado que valia nele; a call mutada o tempo todo sem transição e com o motivo contado; o motivo trocando sem reabrir; o relógio para trás e o salto longo; `faixasMax`; e o diagnóstico (contagens, segundos com uma casa, só números, os seis motivos). Mutações: sem a condição (d) (4 vermelhos, contando o do registry), o indeterminado abrindo (2), sem faixa abrindo (3), sem o teto do intervalo (1).
 - `src/main-world/capture/registry-falantes.test.ts`: as quatro condições e o id do sender, estável entre leituras; `enabled` e `muted` como a página os deixou; a faixa parada continuando à vista no `micGateInputs` e fora do `localMicTracks`; o `getSenders` que lança deixando o estado indeterminado; o áudio da tela fora do portão; sem microfone pedido, nenhum estado; e um PC fechado não contando como quem manda a faixa. Mutações: `micGateInputs` podando a faixa terminada (1), a leitura dos senders que falhou virando "sem sender" (1).
 - `src/main-world/session.test.ts`: o portão nos números do lote final, com o motivo `semSender` de um aplicativo que parou de enviar, e a linha do tempo intacta (a sua fala continua marcada com o portão fechado). Mutações: o diagnóstico em todo lote (2), sem juntar o portão ao diagnóstico (1), o `sampleSelf` passando a depender do portão (2).
 
 Ponta a ponta:
-- `tests/e2e/mudo.spec.ts` (novo, 5 testes): as quatro formas de mutar (item E) e a prova de que nada do microfone sai da sessão. Mutações conferidas vermelhas no build: sem a condição (d), as duas formas que param de enviar deixam o portão aberto a call toda (`abriu: 1`, `fechou: 0`, 12,5 s aberto); e o `micGateInputs` podando a faixa terminada troca o motivo do `track.stop()` por `sem-trilha` (16 leituras).
+- `tests/e2e/mudo.spec.ts` (novo, 5 testes): as quatro formas de mutar (item E) e a prova de que nada do microfone sai da sessão. Mutações conferidas vermelhas no build: sem a condição (d), as duas formas que param de enviar deixam o portão aberto a call toda (`abriu: 1`, `fechou: 0`, 12,5 s aberto); e o `micGateInputs` podando a faixa terminada troca o motivo do `track.stop()` por `sem-faixa` (16 leituras).
 - `tests/e2e/falantes.spec.ts` (atualizado): o teste do Meet trocou `expect(file).not.toHaveProperty('diagnostico')` por `expect(file.diagnostico).not.toHaveProperty('csrc')` (a intenção era "não há CSRC numa conexão direta", e ela continua conferida) e passou a cobrar o `diagnostico.microfone`: ali o microfone falso entra desligado e liga de 13 a 17 s, então o portão fecha por `enabled` e abre no meio da call.
 
 ### Não feito (de propósito)

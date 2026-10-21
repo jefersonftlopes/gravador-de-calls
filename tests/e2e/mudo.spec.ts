@@ -91,8 +91,8 @@ async function falantesDaPasta(): Promise<{ file: SpeakersFile; dir: string; fil
   return { file: JSON.parse(readFileSync(join(rec.dir, 'falantes.json'), 'utf8')) as SpeakersFile, dir: rec.dir, files: rec.files }
 }
 
-type Motivo = 'readyState' | 'enabled' | 'muted' | 'semSender' | 'semTrilha' | 'desconhecido'
-const MOTIVOS: readonly Motivo[] = ['readyState', 'enabled', 'muted', 'semSender', 'semTrilha', 'desconhecido']
+type Motivo = 'readyState' | 'enabled' | 'muted' | 'semSender' | 'semFaixa' | 'desconhecido'
+const MOTIVOS: readonly Motivo[] = ['readyState', 'enabled', 'muted', 'semSender', 'semFaixa', 'desconhecido']
 
 /**
  * Nenhum motivo fora dos `permitidos` apareceu. `semSender` é sempre permitido no fim: sair da call
@@ -148,7 +148,7 @@ for (const caso of FORMAS) {
     expect(mic!.leituras).toBeGreaterThan(30)
     expect(mic!.segundosAberto).toBeGreaterThan(5)
     expect(mic!.segundosFechado).toBeGreaterThan(2)
-    expect(mic!.trilhasMax).toBeGreaterThanOrEqual(1)
+    expect(mic!.faixasMax).toBeGreaterThanOrEqual(1)
     // O motivo é o da forma usada, e nenhum outro aparece.
     expect(mic!.motivos[caso.motivo], `motivo ${caso.motivo}`).toBeGreaterThan(8)
     conferirMotivos(mic!.motivos, [caso.motivo])

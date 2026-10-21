@@ -1181,8 +1181,8 @@ describe('o próprio nome e os diagnósticos no info.json (Emenda 20)', () => {
       fechou: 1,
       segundosAberto: 8,
       segundosFechado: 4.5,
-      trilhasMax: 1,
-      motivos: { readyState: 0, enabled: 16, muted: 0, semSender: 3, semTrilha: 0, desconhecido: 0 },
+      faixasMax: 1,
+      motivos: { readyState: 0, enabled: 16, muted: 0, semSender: 3, semFaixa: 0, desconhecido: 0 },
     }
     const iv = { nome: 'Ana Souza', de: 1000, ate: 5000, fonte: 'dsh' }
     port.emit({

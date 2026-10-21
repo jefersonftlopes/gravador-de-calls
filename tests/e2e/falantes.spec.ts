@@ -256,7 +256,7 @@ test('Meet: roster pelo collections e pelo SyncMeetingSpaceCollections, quem fal
   expect(mic.leituras).toBeGreaterThan(30)
   expect(mic.abriu).toBeGreaterThanOrEqual(1)
   expect(mic.motivos.enabled).toBeGreaterThan(8)
-  expect(mic.motivos).toMatchObject({ readyState: 0, muted: 0, semTrilha: 0, desconhecido: 0 })
+  expect(mic.motivos).toMatchObject({ readyState: 0, muted: 0, semFaixa: 0, desconhecido: 0 })
   expect(await fx(call, 'errors')).toEqual([])
   expect(await fx(call, 'unhandled')).toEqual([])
   expect(h!.pageErrors).toEqual([])

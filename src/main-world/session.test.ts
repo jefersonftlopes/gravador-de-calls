@@ -213,15 +213,15 @@ describe('falantes no fim da gravação (Emenda 18)', () => {
     const batches = h.sent.filter((m) => m.t === 'session:speakers')
     const last = batches.at(-1) as { diagnostico?: { microfone?: Record<string, unknown> } }
     const mic = last.diagnostico?.microfone as
-      | { leituras: number; abriu: number; fechou: number; segundosAberto: number; segundosFechado: number; trilhasMax: number; motivos: Record<string, number> }
+      | { leituras: number; abriu: number; fechou: number; segundosAberto: number; segundosFechado: number; faixasMax: number; motivos: Record<string, number> }
       | undefined
     expect(mic).toBeDefined()
-    expect(mic).toMatchObject({ abriu: 1, fechou: 1, trilhasMax: 1 })
+    expect(mic).toMatchObject({ abriu: 1, fechou: 1, faixasMax: 1 })
     expect(mic!.leituras).toBeGreaterThan(40)
     expect(mic!.segundosAberto).toBeGreaterThanOrEqual(5)
     expect(mic!.segundosAberto).toBeLessThanOrEqual(6.5)
     expect(mic!.segundosFechado).toBeGreaterThanOrEqual(5)
-    expect(mic!.motivos).toMatchObject({ readyState: 0, enabled: 0, muted: 0, semTrilha: 0, desconhecido: 0 })
+    expect(mic!.motivos).toMatchObject({ readyState: 0, enabled: 0, muted: 0, semFaixa: 0, desconhecido: 0 })
     expect(mic!.motivos.semSender).toBeGreaterThan(20)
     // Só no lote final, como o diagnóstico de CSRC.
     expect(batches.slice(0, -1).filter((m) => 'diagnostico' in m)).toEqual([])
