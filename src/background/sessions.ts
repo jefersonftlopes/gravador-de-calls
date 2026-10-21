@@ -1,7 +1,7 @@
 // Registro de sessões por aba: recebe o Port do relay, grava cada chunk no IndexedDB ANTES do
 // ack, transmite ao helper durante a call, finaliza (info.json + pasta) e recupera sessões
 // abertas depois de uma queda (docs/ARQUITETURA.md, "Service worker").
-import { PORT_SESSION, PORT_TAB, RECORDING_KBPS, RECORDING_MIME } from '../shared/constants'
+import { MIC_FILE, PORT_MIC, PORT_SESSION, PORT_TAB, RECORDING_KBPS, RECORDING_MIME } from '../shared/constants'
 import { base64ToBlob, blobToBase64 } from '../shared/base64'
 import { format } from 'date-fns'
 import { cleanTitle, makeSessionId, monthFolder, profileFolder, recordingRelDir, sanitizeComponent } from '../shared/naming'
@@ -17,6 +17,8 @@ import {
   type OrphanInfoJson,
   type PendingSave,
   type RecordingPlatform,
+  type InfoFile,
+  type MicTrackState,
   type SessionKind,
   type Settings,
   type SinkKind,
@@ -25,7 +27,7 @@ import {
 import { ensureProfileId, loadSettings, pushRecent } from '../shared/settings'
 import { languageReady, t } from '../shared/i18n'
 import { autoAllowed, hasConsent, loadConsent } from '../shared/consent'
-import { clearRecordingBadge, notifyNoAudio, notifySaveFailed, setBadge, setSaveWarning } from './badge'
+import { clearRecordingBadge, notifyNoAudio, notifySaveFailed, recordingBadge, setBadge, setSaveWarning } from './badge'
 import {
   deleteChunks,
   deleteSession,
@@ -38,7 +40,7 @@ import {
 } from './idb'
 import { queueApiTranscription } from './api-transcription'
 import { closeTrailingGap } from './gaps'
-import { buildInfo, iso, speakersOf, timeZone } from './info'
+import { buildInfo, infoFileOf, iso, speakersOf, timeZone } from './info'
 import { applySpeakersBatch } from '../shared/speakers'
 import { SPEAKERS_FILE } from '../shared/constants'
 import { host, hostStatus, keepHostWhile, pingHost, releaseHost, setHostIdleMs } from './sink-host'
@@ -109,6 +111,10 @@ interface Runtime {
 }
 
 const runtimes = new Map<string, Runtime>()
+/** A gravação da aba está sem nenhum áudio desde o início (o REC âmbar do AC11). */
+const silentTabs = new Map<number, boolean>()
+/** Emenda 25: abas em que a voz do usuário está sendo gravada agora (o badge diz). */
+const micTabs = new Set<number>()
 /** Emenda 20: o Port ocioso do helper fecha sozinho, menos com uma gravação em andamento. */
 export const hasRecording = () => [...runtimes.values()].some((r) => r.rec.status === 'gravando')
 keepHostWhile(hasRecording)
@@ -167,16 +173,21 @@ async function getRuntime(sessionId: string): Promise<Runtime | null> {
 // Port do relay
 // ---------------------------------------------------------------------------------------------
 
+/** De que tipo é a sessão que cada Port pode mandar (nenhum Port mexe na sessão de outro tipo). */
+const KIND_BY_PORT: Record<string, SessionKind> = { [PORT_SESSION]: 'pagina', [PORT_TAB]: 'aba', [PORT_MIC]: 'microfone' }
+
 /**
  * Ports aceitos:
  * - "gravador:sessao": relay de uma frame de call (tem sender.tab).
  * - "gravador:aba": offscreen do modo aba (página da própria extensão, sem aba). Ele só manda
  *   chunk/meta/diag/end/resume de sessões que o SW criou com createSession({ kind: 'aba' }).
+ * - "gravador:microfone": offscreen da gravação da própria voz (Emenda 25), do mesmo jeito, com as
+ *   sessões `kind: 'microfone'`.
  */
 export function registerSessionPorts(): void {
   registerTestHooks(testing)
   chrome.runtime.onConnect.addListener((port) => {
-    if (port.name !== PORT_SESSION && port.name !== PORT_TAB) return
+    if (!(port.name in KIND_BY_PORT)) return
     const fromExtension = !port.sender?.tab && (port.sender?.url ?? '').startsWith(chrome.runtime.getURL(''))
     if (port.name === PORT_SESSION ? port.sender?.tab?.id == null : !fromExtension) {
       port.disconnect()
@@ -205,8 +216,8 @@ export function registerSessionPorts(): void {
 }
 
 async function onUp(port: chrome.runtime.Port, msg: Up): Promise<void> {
-  // O offscreen não abre sessão nem recebe configurações: quem cria a sessão do modo aba é o SW.
-  if (port.name === PORT_TAB && (msg.t === 'hello' || msg.t === 'session:start')) return
+  // O offscreen não abre sessão nem recebe configurações: quem cria as sessões dele é o SW.
+  if (port.name !== PORT_SESSION && (msg.t === 'hello' || msg.t === 'session:start')) return
   switch (msg.t) {
     case 'hello': {
       send(port, await effectiveSettings())
@@ -217,8 +228,8 @@ async function onUp(port: chrome.runtime.Port, msg: Up): Promise<void> {
     case 'session:resume': {
       const rt = await getRuntime(msg.sessionId)
       if (!rt || rt.rec.status !== 'gravando') return
-      // Cada Port retoma só o seu tipo: o relay as de página, o offscreen as do modo aba.
-      if ((port.name === PORT_TAB) !== (rt.rec.kind === 'aba')) return
+      // Cada Port retoma só o seu tipo: o relay as de página, o offscreen as dele.
+      if (KIND_BY_PORT[port.name] !== rt.rec.kind) return
       rt.port = port
       cancelFinish(rt)
       // O índice por aba é só das sessões de página (o modo aba se liga ao Port no início, antes
@@ -268,13 +279,22 @@ async function onUp(port: chrome.runtime.Port, msg: Up): Promise<void> {
         await putSession(rt.rec)
         if (rt.rec.status === 'gravando') {
           const silent = !msg.diag.everHadSpeech && Date.now() - rt.rec.startedAt >= noAudioAlertMs
-          await setBadge(rt.rec.tabId, silent ? 'rec-sem-audio' : 'rec')
+          silentTabs.set(rt.rec.tabId, silent)
+          await setBadge(rt.rec.tabId, recordingBadge({ silent, mic: micTabs.has(rt.rec.tabId) }))
           if (silent && !rt.noAudioNotified) {
             rt.noAudioNotified = true
             await notifyNoAudio(rt.rec.tabId, rt.rec.sessionId)
           }
         }
       })
+    }
+    case 'session:mic': {
+      // Emenda 25: o estado observado das faixas de microfone daquela aba. Quem decide se a voz é
+      // gravada é ./mic.ts, com as regras puras; aqui só se confere de quem veio.
+      const rt = await getRuntime(msg.sessionId)
+      if (!rt || rt.rec.kind !== 'pagina' || rt.rec.status !== 'gravando') return
+      notifyMicReport({ tabId: rt.rec.tabId, tracks: msg.tracks, sinceMs: msg.sinceMs })
+      return
     }
     case 'session:end': {
       const rt = await getRuntime(msg.sessionId)
@@ -354,6 +374,7 @@ async function onStart(port: chrome.runtime.Port, msg: Extract<Up, { t: 'session
   const sessionId = rec.sessionId
   send(port, { t: 'session:accepted', localId: msg.localId, sessionId })
   log('sessão aceita', sessionId, 'destino', rec.sink)
+  notifyPageSessionStarted({ tabId: rec.tabId, sessionId, startedAt: rec.startedAt })
 }
 
 export interface NewSession {
@@ -409,7 +430,7 @@ export async function createSession(opts: NewSession): Promise<SessionRecord> {
     profileLabel: settings.profileLabel,
     autoLeave: null,
     hostFlushedSeq: 0,
-    file: opts.kind === 'aba' ? 'audio-aba.webm' : 'audio.webm',
+    file: opts.kind === 'aba' ? 'audio-aba.webm' : opts.kind === 'microfone' ? MIC_FILE : 'audio.webm',
     pairedSessionId: opts.pairedSessionId ?? null,
     savedPath: null,
     lastError: status.ok ? (status.writable ? null : t('errNoWritePermissionAt', status.root ?? '')) : status.error,
@@ -449,7 +470,7 @@ export async function createSession(opts: NewSession): Promise<SessionRecord> {
   }
   runtimes.set(sessionId, rt)
   if (opts.kind === 'pagina') activeByTab.set(opts.tabId, sessionId)
-  await setBadge(opts.tabId, 'rec')
+  await setBadge(opts.tabId, recordingBadge({ silent: silentTabs.get(opts.tabId) ?? false, mic: micTabs.has(opts.tabId) }))
   // A aba que grava não pode ser descartada pelo Chrome para economizar memória.
   Promise.resolve(chrome.tabs.update(opts.tabId, { autoDiscardable: false })).catch(() => {})
   return rec
@@ -733,13 +754,14 @@ function finalize(rt: Runtime, reason: EndReason): Promise<void> {
 
 /**
  * A sessão de página terminou a tentativa de finalizar, qualquer que seja o resultado (salva,
- * descartada por ser curta, ou falhou ao salvar). Acorda as sessões do modo aba pareadas que
- * esperavam por ela: com a página salva, o arquivo entra na pasta dela; descartada ou com falha,
- * o modo aba salva na pasta própria. Fica no `finally` para nenhum caminho esquecer.
+ * descartada por ser curta, ou falhou ao salvar). Acorda as sessões pareadas que esperavam por ela
+ * (modo aba e, desde a Emenda 25, microfone): com a página salva, o arquivo entra na pasta dela;
+ * descartada ou com falha, a pareada salva na pasta própria. Fica no `finally` para nenhum caminho
+ * esquecer.
  */
 function wakePairedTabSessions(pageSessionId: string): void {
   for (const other of runtimes.values()) {
-    if (other.rec.kind !== 'aba' || other.rec.pairedSessionId !== pageSessionId) continue
+    if (other.rec.kind === 'pagina' || other.rec.pairedSessionId !== pageSessionId) continue
     if (other.finalizing) other.pairedWake = true
     else if (other.rec.status === 'finalizando') void finalize(other, other.rec.endReason ?? 'call-encerrada')
   }
@@ -800,13 +822,27 @@ async function doFinalize(rt: Runtime, reasonIn: EndReason): Promise<void> {
     return cleanup(rt)
   }
 
-  // Modo aba com sessão de página na mesma aba: o arquivo vai para a pasta dela. Se a página
-  // ainda grava, espera (a finalização da página chama de novo esta sessão).
-  const pairedState = rec.kind === 'aba' && rec.pairedSessionId ? await pairedPageState(rec.pairedSessionId) : null
+  // Emenda 25: a gravação do microfone em que o portão NUNCA abriu não tem nada dentro além de
+  // silêncio. Ela é descartada, e nenhum audio-microfone.webm aparece na pasta: é o que prova, no
+  // caso da faixa processada (Emenda 24, seção F), que nada foi gravado.
+  if (rec.kind === 'microfone' && rec.micEverOpen !== true) {
+    if (rec.sink === 'host' || hostStatus().ok) await host.discard(rec.sessionId)
+    await deleteChunks(rec.sessionId)
+    rec.status = 'descartada'
+    rec.meta = {}
+    rec.diag = null
+    await putSession(rec)
+    log('microfone descartado (o portão nunca abriu)', rec.sessionId)
+    return cleanup(rt)
+  }
+
+  // Modo aba e microfone com sessão de página na mesma aba: o arquivo vai para a pasta dela. Se a
+  // página ainda grava, espera (a finalização da página chama de novo esta sessão).
+  const pairedState = rec.kind !== 'pagina' && rec.pairedSessionId ? await pairedPageState(rec.pairedSessionId) : null
   const paired = pairedState?.rec
   if (paired && pairedState.pending) {
     await putSession(rec)
-    log('modo aba aguardando a sessão de página', rec.sessionId, paired.sessionId)
+    log('sessão pareada aguardando a de página', rec.kind, rec.sessionId, paired.sessionId)
     return
   }
   const mergeInto = paired?.status === 'salva' && paired.sink === 'host' && paired.savedPath ? paired : null
@@ -822,7 +858,7 @@ async function doFinalize(rt: Runtime, reasonIn: EndReason): Promise<void> {
     profileLabel: rec.profileLabel,
   })
   if (mergeInto) {
-    // Pasta real da página (pode ter sufixo " (2)") e info.json dela com os dois arquivos.
+    // Pasta real da página (pode ter sufixo " (2)") e info.json dela com todos os arquivos.
     const levels = profileFolder(mergeInto.profileLabel) ? 3 : 2
     relDir = mergeInto.savedPath!.split('/').slice(-levels).join('/')
     const pageInfo = buildInfo(mergeInto, {
@@ -830,7 +866,10 @@ async function doFinalize(rt: Runtime, reasonIn: EndReason): Promise<void> {
       extensionVersion: extensionVersion(),
       helperVersion,
     })
-    info = { ...pageInfo, arquivos: [...pageInfo.arquivos, ...info.arquivos] }
+    // Emenda 25: uma aba pode ter mais de uma sessão pareada (modo aba e microfone). O info.json é
+    // reescrito a cada merge, então ele leva também as irmãs JÁ SALVAS; sem isto, a segunda a
+    // terminar apagaria o arquivo da primeira da lista.
+    info = { ...pageInfo, arquivos: [...pageInfo.arquivos, ...savedSiblingFiles(rec), ...info.arquivos] }
   }
   let savedPath: string | null = null
   let downloadId: number | undefined
@@ -922,6 +961,8 @@ function cleanup(rt: Runtime, forget = true) {
   // descarte automático até a última terminar.
   const tabStillRecording = [...runtimes.values()].some((r) => r !== rt && r.rec.tabId === rec.tabId && r.rec.status === 'gravando')
   if (!tabStillRecording) {
+    silentTabs.delete(rec.tabId)
+    micTabs.delete(rec.tabId)
     void clearRecordingBadge(rec.tabId)
     Promise.resolve(chrome.tabs.update(rec.tabId, { autoDiscardable: true })).catch(() => {})
   }
@@ -986,8 +1027,72 @@ function failedPageSessionOf(tabId: number): string | undefined {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Fim da sessão de página (para o modo aba parar junto, ARQUITETURA "Modo aba")
+// Começo e fim da sessão de página (o modo aba e o microfone acompanham)
 // ---------------------------------------------------------------------------------------------
+
+/**
+ * Emenda 25: a sessão de página desta aba começou a gravar (o SW já aceitou). Quem ouve é
+ * ./mic.ts, para abrir a gravação da própria voz; ninguém aqui sabe do microfone.
+ */
+export interface PageSessionStarted {
+  tabId: number
+  sessionId: string
+  /** `startedAt` da sessão de página: o `desvioMs` do arquivo do microfone sai da diferença. */
+  startedAt: number
+}
+
+const pageStartListeners = new Set<(e: PageSessionStarted) => void>()
+
+export function onPageSessionStarted(cb: (e: PageSessionStarted) => void): () => void {
+  pageStartListeners.add(cb)
+  return () => pageStartListeners.delete(cb)
+}
+
+function notifyPageSessionStarted(e: PageSessionStarted): void {
+  for (const cb of pageStartListeners) {
+    try {
+      cb(e)
+    } catch (err) {
+      log('onPageSessionStarted', err)
+    }
+  }
+}
+
+/** Emenda 25: um relato de estado das faixas de microfone de uma aba (session:mic). */
+export interface MicReport {
+  tabId: number
+  tracks: MicTrackState[]
+  sinceMs: number
+}
+
+const micReportListeners = new Set<(e: MicReport) => void>()
+
+export function onMicReport(cb: (e: MicReport) => void): () => void {
+  micReportListeners.add(cb)
+  return () => micReportListeners.delete(cb)
+}
+
+function notifyMicReport(e: MicReport): void {
+  for (const cb of micReportListeners) {
+    try {
+      cb(e)
+    } catch (err) {
+      log('onMicReport', err)
+    }
+  }
+}
+
+/**
+ * Emenda 25: a voz está sendo gravada nesta aba? Quem diz é ./mic.ts, e quem escreve o badge é
+ * daqui, que é o lugar que também sabe do "sem áudio" (as duas informações cabem num badge só).
+ */
+export function setMicRecordingBadge(tabId: number, on: boolean): Promise<void> {
+  if (on) micTabs.add(tabId)
+  else micTabs.delete(tabId)
+  const recording = [...runtimes.values()].some((rt) => rt.rec.tabId === tabId && rt.rec.status === 'gravando')
+  if (!recording) return Promise.resolve()
+  return setBadge(tabId, recordingBadge({ silent: silentTabs.get(tabId) ?? false, mic: on }))
+}
 
 export interface PageSessionEnded {
   tabId: number
@@ -1261,6 +1366,21 @@ async function finalizeOrphan(entry: HostStagingEntry, files: HostStagingEntry['
   }
   const r = await host.finalize(entry.sessionId, relDir, info)
   log('recuperação: staging órfão', entry.sessionId, r.ok ? `salvo em ${String(r.path)}` : r.error)
+}
+
+/**
+ * Arquivos das sessões pareadas (modo aba, microfone) da mesma sessão de página que JÁ foram
+ * salvas nesta vida do SW, para o info.json reescrito num merge não perder nenhuma (Emenda 25).
+ */
+function savedSiblingFiles(rec: SessionRecord): InfoFile[] {
+  const out: InfoFile[] = []
+  for (const other of runtimes.values()) {
+    const o = other.rec
+    if (o.sessionId === rec.sessionId || o.kind === 'pagina') continue
+    if (o.pairedSessionId !== rec.pairedSessionId || o.status !== 'salva') continue
+    out.push(infoFileOf(o))
+  }
+  return out
 }
 
 /** Fala no seam selecionado há no máximo isto: "chegando áudio agora" no popup (AC11). */

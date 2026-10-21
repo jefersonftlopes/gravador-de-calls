@@ -359,6 +359,9 @@
   "badgeRecording": {
     "message": "Gravador de Calls: gravando esta call"
   },
+  "badgeRecordingMic": {
+    "message": "Gravador de Calls: gravando esta call e a sua voz"
+  },
   "badgeNoAudio": {
     "message": "Gravador de Calls: gravando, mas sem nenhum áudio até agora (experimente o modo aba)"
   },
@@ -610,6 +613,9 @@
   },
   "optSectionAuto": {
     "message": "Gravação automática"
+  },
+  "optSectionMic": {
+    "message": "A sua voz"
   },
   "optSectionLeave": {
     "message": "Sair e fechar a call sozinho"
@@ -1066,6 +1072,27 @@
   },
   "optAutoTeams": {
     "message": "Gravar sozinho as calls do Microsoft Teams"
+  },
+  "optMicLabel": {
+    "message": "Gravar a minha voz, num arquivo separado"
+  },
+  "optMicWhat": {
+    "message": "Ligado, a sua voz é gravada em audio-microfone.webm, na pasta da call, só enquanto a página da call disser que o seu microfone está aberto ali: enquanto você estiver mudo, nada é gravado."
+  },
+  "optMicNote": {
+    "message": "O Chrome pede a permissão do microfone uma vez, no clique. Sem o sinal de mudo da página da call, o padrão é não gravar."
+  },
+  "optMicOn": {
+    "message": "Ligado neste perfil: a sua voz vai para um arquivo separado, e o ícone mostra MIC na aba enquanto ela está sendo gravada."
+  },
+  "optMicOff": {
+    "message": "Desligado: a sua voz não entra em nenhuma gravação."
+  },
+  "optMicPermissionDenied": {
+    "message": "Sem a permissão do microfone não dá para gravar a sua voz. Dá para permitir no ícone da barra de endereço e marcar de novo."
+  },
+  "optMicCannotSave": {
+    "message": "Não deu para salvar: $1"
   },
   "optMinSeconds": {
     "message": "Descartar gravações com menos de (segundos)"

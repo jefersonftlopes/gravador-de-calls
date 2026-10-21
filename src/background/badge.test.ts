@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { useLocale } from '../../tests/helpers/i18n-setup'
-import { globalBadge, installReasonMarksTabs, isCallHostUrl, isCallTabUrl, notificationId, parseNotificationId, shortcutText } from './badge'
+import { globalBadge, installReasonMarksTabs, isCallHostUrl, isCallTabUrl, notificationId, parseNotificationId, recordingBadge, shortcutText } from './badge'
 
 describe('badge: abas que precisam recarregar (AC16)', () => {
   it('Meet só com o código da reunião; Teams em qualquer página dos três hosts', () => {
@@ -95,6 +95,20 @@ describe('o fim de uma gravação e o ↻ na mesma aba (Emenda 10)', () => {
     const mod = await import('./badge')
     await mod.clearRecordingBadge(7)
     expect(badges.at(-1)).toEqual([7, ''])
+  })
+})
+
+describe('badge de quem está gravando (Emenda 25)', () => {
+  it('gravando, sem a voz: REC; sem nenhum áudio: o âmbar de sempre', () => {
+    expect(recordingBadge({ silent: false, mic: false })).toBe('rec')
+    expect(recordingBadge({ silent: true, mic: false })).toBe('rec-sem-audio')
+  })
+
+  it('com a voz entrando no arquivo, o badge diz isso, mesmo sem áudio da call', () => {
+    // A pessoa nunca pode estar sendo gravada sem sinal na tela: este sinal vence o aviso de
+    // "sem áudio", que continua saindo como notificação.
+    expect(recordingBadge({ silent: false, mic: true })).toBe('rec-microfone')
+    expect(recordingBadge({ silent: true, mic: true })).toBe('rec-microfone')
   })
 })
 

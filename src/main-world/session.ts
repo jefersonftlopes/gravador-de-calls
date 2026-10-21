@@ -13,7 +13,8 @@ import { createRecorder, type Recorder, type RecorderChunk } from './capture/rec
 import type { Registry } from './capture/registry'
 import type { SeamSet } from './capture/seams'
 import { criarRelogio, type Tarefa } from '../shared/relogio'
-import { initialMicGate, micGateDiagnostics, stepMicGate, type MicGateStats } from '../shared/mic-gate'
+import { initialMicGate, micGateDiagnostics, stepMicGate, type MicGateStats, type MicTrackState } from '../shared/mic-gate'
+import { MIC_REPORT_EVERY_MS } from '../shared/mic-route'
 import { createTimeline, type SpeakerReading, type Timeline } from './speakers/timeline'
 import { blobToBase64, type Bridge } from './bridge'
 import type { Originals } from './originals'
@@ -83,8 +84,14 @@ interface Active {
   aliasesJson: string
   /** O áudio dos outros (seam selecionado, ao vivo) tinha fala na última medida; null: não se sabe. */
   remoteSpeech: boolean | null
-  /** Emenda 24: o portão do microfone, só medido (nada do microfone entra na gravação). */
+  /** Emenda 24: o portão do microfone, medido (os números do diagnóstico do falantes.json). */
   micGate: MicGateStats
+  /** Emenda 25: o último `tracks` mandado ao SW (só manda de novo quando muda, ou de rotina). */
+  micJson: string
+  /** Instante da última leitura das faixas (o `sinceMs` do relato sai daqui). */
+  micReadAt: number
+  /** Instante do último relato mandado. */
+  micSentAt: number
 }
 
 function randomId(): string {
@@ -118,6 +125,8 @@ export function startSessionController(deps: SessionDeps): SessionController {
   let candidateSince = 0
   let active: Active | null = null
   let allowed = true
+  /** Emenda 25: gravar a própria voz, ligado neste perfil? Desligado até o SW dizer o contrário. */
+  let micRecording = false
   let helloSent = false
 
   const sendHello = () => {
@@ -148,6 +157,8 @@ export function startSessionController(deps: SessionDeps): SessionController {
       switch (msg.t) {
         case 'settings':
           allowed = adapter.id === 'meet' ? msg.autoMeet : msg.autoTeams
+          // Emenda 25: desligado (o padrão), nenhum session:mic sai desta frame.
+          micRecording = msg.micRecording
           break
         case 'session:accepted':
           if (active && active.localId === msg.localId && !active.sessionId) {
@@ -265,14 +276,33 @@ export function startSessionController(deps: SessionDeps): SessionController {
     } catch (e) {
       log('microfone', e)
     }
-    // Emenda 24: a regra do mudo, só MEDIDA. Ela não decide nada sobre a gravação nem sobre a
-    // linha do tempo nesta fatia: o diagnóstico do fim é que vai dizer, numa call real, como o
-    // Meet e o Teams mutam de verdade.
+    // Emenda 24: a regra do mudo, medida. Ela não toca na linha do tempo (a sua fala continua
+    // vindo do measureMic acima). Emenda 25: o mesmo estado observado vai para o SW, que decide se
+    // a sua voz é gravada naquela aba; a decisão nunca é tomada aqui.
     try {
-      a.micGate = stepMicGate(a.micGate, now, registry.micGateInputs())
+      const inputs = registry.micGateInputs()
+      a.micGate = stepMicGate(a.micGate, now, inputs)
+      reportMic(a, now, inputs)
     } catch (e) {
       log('portão do microfone', e)
     }
+  }
+
+  /**
+   * Emenda 25: manda ao SW o estado observado de cada faixa de microfone (nunca a decisão, nunca
+   * áudio). Na troca, na hora; sem troca, de rotina a cada MIC_REPORT_EVERY_MS, para o SW saber que
+   * a frame está viva (um relato que para de chegar fecha o portão lá, src/shared/mic-route.ts).
+   * Com o recurso desligado neste perfil, nada sai.
+   */
+  const reportMic = (a: Active, now: number, inputs: readonly MicTrackState[]) => {
+    const since = a.micReadAt === 0 ? 0 : Math.max(0, now - a.micReadAt)
+    a.micReadAt = now
+    if (!micRecording || !a.sessionId) return
+    const json = JSON.stringify(inputs)
+    if (json === a.micJson && now - a.micSentAt < MIC_REPORT_EVERY_MS) return
+    a.micJson = json
+    a.micSentAt = now
+    bridge.send({ t: 'session:mic', sessionId: a.sessionId, tracks: [...inputs], sinceMs: since })
   }
 
   const readAliases = (): Record<string, string> => {
@@ -350,6 +380,9 @@ export function startSessionController(deps: SessionDeps): SessionController {
       aliasesJson: '{}',
       remoteSpeech: null,
       micGate: initialMicGate(),
+      micJson: '',
+      micReadAt: 0,
+      micSentAt: 0,
     }
     active = a
     const recorder = createRecorder(orig, mixer.stream, onChunk, log)

@@ -359,6 +359,9 @@
   "badgeRecording": {
     "message": "Gravador de Calls: recording this call"
   },
+  "badgeRecordingMic": {
+    "message": "Gravador de Calls: recording this call and your voice"
+  },
   "badgeNoAudio": {
     "message": "Gravador de Calls: recording, but no audio so far (try tab mode)"
   },
@@ -610,6 +613,9 @@
   },
   "optSectionAuto": {
     "message": "Automatic recording"
+  },
+  "optSectionMic": {
+    "message": "Your voice"
   },
   "optSectionLeave": {
     "message": "Leave and close the call automatically"
@@ -1066,6 +1072,27 @@
   },
   "optAutoTeams": {
     "message": "Record Microsoft Teams calls automatically"
+  },
+  "optMicLabel": {
+    "message": "Record my voice, in a separate file"
+  },
+  "optMicWhat": {
+    "message": "When on, your voice is recorded to audio-microfone.webm, in the call folder, only while the call page says your microphone is open there: while you are muted, nothing is recorded."
+  },
+  "optMicNote": {
+    "message": "Chrome asks for microphone permission once, on the click. Without the mute signal from the call page, the default is not to record."
+  },
+  "optMicOn": {
+    "message": "On in this profile: your voice goes to a separate file, and the icon shows MIC on the tab while it is being recorded."
+  },
+  "optMicOff": {
+    "message": "Off: your voice is not in any recording."
+  },
+  "optMicPermissionDenied": {
+    "message": "Without microphone permission your voice cannot be recorded. You can allow it from the icon in the address bar and tick it again."
+  },
+  "optMicCannotSave": {
+    "message": "Could not save: $1"
   },
   "optMinSeconds": {
     "message": "Discard recordings shorter than (seconds)"

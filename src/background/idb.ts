@@ -78,8 +78,20 @@ export interface SessionRecord {
   hostFlushedSeq: number
   /** Arquivo final na pasta da call (`audio.webm` na página, `audio-aba.webm` no modo aba). */
   file: string
-  /** Modo aba: sessão de página da mesma aba cuja pasta deve receber este arquivo. */
+  /** Modo aba e microfone: sessão de página da mesma aba cuja pasta deve receber este arquivo. */
   pairedSessionId: string | null
+  /**
+   * Emenda 25 (só `kind: 'microfone'`): o portão do mudo já abriu alguma vez nesta gravação. Nunca
+   * aberto quer dizer que nada chegou ao gravador, então a sessão é DESCARTADA e nenhum
+   * audio-microfone.webm aparece na pasta: não se escreve um arquivo de silêncio.
+   */
+  micEverOpen?: boolean
+  /**
+   * Emenda 25 (só `kind: 'microfone'`): quantos ms esta gravação começou DEPOIS da sessão de
+   * página da mesma aba. Vai no `desvioMs` do info.json: os dois arquivos saem do mesmo atraso de
+   * MIXER_DELAY_MS, então é só este número que falta para casar os dois no tempo.
+   */
+  micSkewMs?: number
   /** Pasta final e erro do último salvamento. */
   savedPath: string | null
   lastError: string | null

@@ -794,6 +794,89 @@ function TranscriptionSection({ helper }: { helper: HelperStatus | null }) {
   )
 }
 
+/**
+ * A sua voz (Emenda 25): gravar o próprio microfone, por aba, num arquivo separado. DESLIGADO por
+ * padrão e por perfil do Chrome, como o motor por API.
+ *
+ * O clique que liga é o único lugar em que a permissão do microfone pode ser pedida: o documento
+ * offscreen, que é quem grava, não tem interface e por isso não consegue pedir (medido em
+ * tests/e2e/microfone-permissao.spec.ts: lá o getUserMedia falha com "Permission dismissed"). Então
+ * aqui, no gesto do usuário, a página pede o microfone e solta na hora: o que fica é a permissão da
+ * origem chrome-extension://, que o offscreen usa depois.
+ *
+ * Negada a permissão, nada é ligado e nada é salvo, e a linha diz o que falta. Precedente: o
+ * `enableApi` do motor por API, acima.
+ */
+function MicSection() {
+  const [on, setOn] = useState<boolean | null>(null)
+  const [message, setMessage] = useState<RootMessage>(null)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    void loadSettings().then((s) => setOn(s.micRecording))
+  }, [])
+
+  const save = async (next: boolean): Promise<boolean> => {
+    const { profileId: _id, ...current } = await loadSettings()
+    const r = await uiCall({ t: 'ui:save-settings', settings: { ...current, micRecording: next } }).catch(asFailure)
+    if (!r.ok) {
+      setMessage({ ok: false, text: () => t('optMicCannotSave', r.error ? helperReason(r.error) : t('errUnknown')) })
+      return false
+    }
+    setOn(next)
+    return true
+  }
+
+  const toggle = async (next: boolean) => {
+    setMessage(null)
+    setBusy(true)
+    try {
+      if (!next) {
+        if (await save(false)) setMessage({ ok: true, text: () => t('optMicOff') })
+        return
+      }
+      // A permissão, no clique. O áudio é soltado na hora: quem grava é o offscreen, não esta página.
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        for (const track of stream.getTracks()) track.stop()
+      } catch {
+        setMessage({ ok: false, text: () => t('optMicPermissionDenied') })
+        return
+      }
+      if (await save(true)) setMessage({ ok: true, text: () => t('optMicOn') })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="space-y-2" data-testid="microfone" data-ligado={on === null ? 'lendo' : on ? 'sim' : 'nao'}>
+      <label className="flex items-start gap-2">
+        <input
+          type="checkbox"
+          className="mt-1"
+          data-testid="microfone-ligar"
+          checked={on === true}
+          disabled={on === null || busy}
+          onChange={(e) => void toggle(e.target.checked)}
+        />
+        <span className="font-medium">{t('optMicLabel')}</span>
+      </label>
+      <p data-testid="microfone-o-que" className="pl-6 text-neutral-600 dark:text-neutral-400">
+        {t('optMicWhat')}
+      </p>
+      <p data-testid="microfone-aviso" className="pl-6 text-neutral-600 dark:text-neutral-400">
+        {t('optMicNote')}
+      </p>
+      {message && (
+        <p data-testid="microfone-mensagem" className={`pl-6 ${message.ok ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+          {message.text()}
+        </p>
+      )}
+    </div>
+  )
+}
+
 function ShortcutSection() {
   const [shortcut, setShortcut] = useState<string | null>(null)
   useEffect(() => {
@@ -1104,7 +1187,7 @@ export function Options() {
   const onSubmit = handleSubmit(async (values) => {
     const clean = cleanProfileForm(values)
     // O idioma (Emenda 19) e a transcrição por API (Emenda 21) não são do formulário: fica o guardado.
-    const r = (await saveStored((current) => ({ ...clean, language: current.language, apiTranscription: current.apiTranscription })))!
+    const r = (await saveStored((current) => ({ ...clean, language: current.language, apiTranscription: current.apiTranscription, micRecording: current.micRecording })))!
     if (r.ok) reset(clean)
     const error = r.ok ? '' : (r.error ?? '')
     setMessage(r.ok ? { ok: true, text: () => t('optSaved') } : { ok: false, text: () => t('optCannotSave', error ? helperReason(error) : t('errUnknown')) })
@@ -1204,6 +1287,11 @@ export function Options() {
           )}
         </div>
       </form>
+
+      {/* Emenda 25: por perfil, desligado por padrão, e com a permissão pedida no clique. */}
+      <Section title={t('optSectionMic')} testId="secao-microfone">
+        <MicSection />
+      </Section>
 
       {/* Emenda 21: a seção existe com e sem o helper, porque o motor por API funciona sem ele. */}
       <Section title={t('optSectionTranscription')} testId="secao-transcricao">

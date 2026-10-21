@@ -6,6 +6,7 @@ import { initLanguage } from '../shared/i18n'
 import { markTabsOpenedBeforeInstall, refreshConsentBadge, registerBadge, setUpdateBadge } from './badge'
 import { registerApiTranscriptionAlarms, runApiQueue } from './api-transcription'
 import { onAutoReloadState, registerAutoReload } from './auto-reload'
+import { registerMic } from './mic'
 import { onInstalledConsent } from './welcome'
 import { countChunks, listSessions } from './idb'
 import { ensureOffscreen, sendToOffscreen } from './offscreen-doc'
@@ -40,6 +41,8 @@ registerApiTranscriptionAlarms()
 registerVigiaPorts()
 registerUiApi()
 registerTabCapture()
+// Emenda 25: a gravação da própria voz, por aba. Desligada no perfil, nada acontece.
+registerMic()
 registerBadge()
 // Emenda 17: a cópia publicada recarrega sozinha quando nada está em uso; até lá, o badge avisa.
 onAutoReloadState((s) => void setUpdateBadge(s ? s.published.version : null))

@@ -178,6 +178,8 @@ vi.mock('./sink-downloads', () => ({
 
 vi.mock('./badge', () => ({
   setBadge: async (tabId: number, state: string) => void fake.badges.push([tabId, state]),
+  // A regra pura do badge é a de verdade (src/background/badge.ts, testada em badge.test.ts).
+  recordingBadge: (st: { silent: boolean; mic: boolean }) => (st.mic ? 'rec-microfone' : st.silent ? 'rec-sem-audio' : 'rec'),
   clearRecordingBadge: async (tabId: number) => void fake.badges.push([tabId, 'nenhum']),
   notifySaveFailed: async (pending: number) => void fake.saveFailedNotices.push(pending),
   setSaveWarning: async () => {},

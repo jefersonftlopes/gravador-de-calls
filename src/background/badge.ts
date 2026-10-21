@@ -16,21 +16,28 @@ import { isCallHost, isMeetHost } from '../shared/hosts'
 import { MESSAGE_LOCALES, languageReady, onLanguageChange, t, tIn, tp, type MessageKey } from '../shared/i18n'
 import { registerTestHooks } from './testing'
 
-export type BadgeState = 'rec' | 'rec-sem-audio' | 'recarregar' | 'nenhum'
+export type BadgeState = 'rec' | 'rec-microfone' | 'rec-sem-audio' | 'recarregar' | 'nenhum'
 
 const COLORS: Record<Exclude<BadgeState, 'nenhum'>, string> = {
   rec: '#d93025',
+  // Emenda 25: o MESMO vermelho da gravação, de propósito. Nenhuma cor nova: o estado continua
+  // sendo "gravando", e quem diz o que mudou é o texto, como o ↻ faz.
+  'rec-microfone': '#d93025',
   'rec-sem-audio': '#f29900',
   recarregar: '#1a73e8',
 }
 const TEXT: Record<Exclude<BadgeState, 'nenhum'>, string> = {
   rec: 'REC',
+  // "A sua voz está entrando no arquivo agora". Um tom de vermelho parecido passaria batido; o
+  // texto não passa, e a dica do ícone diz a frase inteira.
+  'rec-microfone': 'MIC',
   'rec-sem-audio': 'REC',
   recarregar: '↻',
 }
 // Títulos lidos na hora (Emenda 15), no idioma escolhido (Emenda 19).
 const TITLE_KEYS: Record<Exclude<BadgeState, 'nenhum'>, MessageKey> = {
   rec: 'badgeRecording',
+  'rec-microfone': 'badgeRecordingMic',
   'rec-sem-audio': 'badgeNoAudio',
   recarregar: 'badgeReload',
 }
@@ -60,6 +67,16 @@ const log = (...a: unknown[]) => console.debug('[gravador badge]', ...a)
 // ---------------------------------------------------------------------------------------------
 // Regras puras (testadas com vitest em badge.test.ts)
 // ---------------------------------------------------------------------------------------------
+
+/**
+ * O badge de uma aba que está gravando. Emenda 25: a voz do usuário entrando no arquivo vence o
+ * aviso de "sem áudio", porque é o sinal que ela NUNCA pode deixar de ver; o aviso de sem áudio
+ * continua saindo como notificação, então a informação não se perde.
+ */
+export function recordingBadge(state: { silent: boolean; mic: boolean }): Exclude<BadgeState, 'nenhum' | 'recarregar'> {
+  if (state.mic) return 'rec-microfone'
+  return state.silent ? 'rec-sem-audio' : 'rec'
+}
 
 export type NotificationKind = 'sem-audio' | 'recarregar' | 'vigia'
 

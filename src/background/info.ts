@@ -2,7 +2,7 @@
 import { formatISO } from 'date-fns'
 import { RECORDING_KBPS, RECORDING_MIME } from '../shared/constants'
 import { displayTitle } from '../shared/naming'
-import type { InfoJson, InfoLanguage, TitleSource } from '../shared/protocol'
+import type { InfoFile, InfoJson, InfoLanguage, TitleSource } from '../shared/protocol'
 import { messageLocale, t, uiLanguage } from '../shared/i18n'
 import { speakersOutput, type SpeakerLabels } from '../shared/speakers'
 import type { SessionRecord } from './idb'
@@ -35,6 +35,24 @@ export function speakerLabels(): SpeakerLabels {
 /** O falantes.json e o resumo do info.json desta sessão (null sem falante de participante). */
 export function speakersOf(rec: SessionRecord) {
   return rec.kind === 'pagina' ? speakersOutput(rec.speakers, speakerLabels(), rec.file) : null
+}
+
+/**
+ * Uma entrada de `arquivos` do info.json. Emenda 25: o `audio-microfone.webm` leva o `desvioMs`, o
+ * quanto ele começou depois do audio.webm da mesma pasta (os dois saem do mesmo atraso do mixer,
+ * então é só esse número que falta para casar os dois no tempo). Só quando ele entra na pasta da
+ * call, e só quando há desvio medido.
+ */
+export function infoFileOf(rec: SessionRecord): InfoFile {
+  const skew = rec.kind === 'microfone' && rec.pairedSessionId && typeof rec.micSkewMs === 'number' ? Math.round(rec.micSkewMs) : null
+  return {
+    nome: rec.file,
+    tipo: rec.kind,
+    bytes: rec.bytes,
+    formato: RECORDING_MIME,
+    kbps: RECORDING_KBPS,
+    ...(skew === null ? {} : { desvioMs: skew }),
+  }
 }
 
 export function buildInfo(
@@ -70,7 +88,7 @@ export function buildInfo(
     participantes: (meta.participants ?? []).filter((n) => !meta.selfName || n !== meta.selfName),
     voce: meta.selfName ?? '',
     ...(meta.selfSignals ? { voceSinais: { roster: meta.selfSignals.roster, espacos: meta.selfSignals.spaces, marcadorDom: meta.selfSignals.domMarker } } : {}),
-    arquivos: [{ nome: rec.file, tipo: rec.kind, bytes: rec.bytes, formato: RECORDING_MIME, kbps: RECORDING_KBPS }],
+    arquivos: [infoFileOf(rec)],
     captura: {
       fonteInicial: diag?.initial ?? null,
       fonteFinal: diag?.selected ?? null,
