@@ -1605,7 +1605,7 @@ Limite declarado da medida: no headless ninguém pode clicar em "Permitir", ent�
 
 - Seção "A sua voz" nas configurações, **por perfil do Chrome e desligada por padrão**, como o motor por API (Emenda 21). A tela diz em uma frase o que acontece e quando, e avisa que o Chrome pede a permissão no clique.
 - O clique que liga pede o microfone na página (gesto do usuário) e solta na hora; o que fica é a permissão da origem. Negada, nada é ligado e nada é salvo, e a linha diz o que falta. Precedente: o `enableApi` do motor por API.
-- Desligar no meio da call para a gravação da voz na hora, em todas as abas. O que já entrou no arquivo continua lá.
+- Mudar a escolha no meio da call vale na hora: desligar para a gravação da voz em todas as abas (o que já entrou no arquivo continua lá, porque foi gravado com o recurso ligado), e ligar passa a gravar nas calls que já estão gravando, em vez de só nas próximas (o arquivo começa ali, e o `desvioMs` diz o quanto depois).
 - Badge por aba: `MIC` no **mesmo vermelho** da gravação. Nenhuma cor nova, de propósito: o estado continua sendo "gravando", e quem diz o que mudou é o texto, como o `↻` faz. O sinal da voz vence o aviso de "sem áudio" (que continua saindo como notificação), porque é o sinal que a pessoa nunca pode deixar de ver.
 
 ### H. Os oito textos
@@ -1616,7 +1616,7 @@ As duas descrições da loja (`docs/loja/listagem-*.md`), as duas páginas do si
 
 Unidade (cada um conferido vermelho com a mutação indicada e verde de volta):
 - `src/shared/mic-route.test.ts` (novo, 16 testes): nenhuma aba, uma aba, duas ao mesmo tempo, a aba que fecha, a que deixou de relatar, o instante inválido; "sem faixa observável não grava" (`sem-faixa`, `sem-sender`, cada campo indeterminado); e quando a troca vale (abrir espera o atraso inteiro, fechar desconta a idade, idade maior que o atraso desliga na hora, idade inválida vira zero). Mutações: sem a obsolescência do relato (2 vermelhos), abrir descontando a idade (3), e sem a condição do sender em `mic-gate.ts` (5, contando os da Emenda 24).
-- `src/background/mic.test.ts` (novo, 13 testes): a máquina do gravador por aba. Desligado no perfil, nada acontece; ligado, a sessão nasce `microfone` pareada e o gravador é preparado **sem** abrir o microfone; o portão só é comandado quando muda, com o `waitMs` da regra; mutar fecha e desmutar abre; sem faixa observável nunca abre; duas abas são comandadas separadamente; a aba que para de relatar é fechada pelo vigia; a abertura que falha (sem permissão) não liga nada; o fim da sessão de página para o microfone; desligar no meio da call para na hora; e dois começos na mesma aba dão uma gravação só.
+- `src/background/mic.test.ts` (novo, 13 testes): a máquina do gravador por aba. Desligado no perfil, nada acontece; ligado, a sessão nasce `microfone` pareada e o gravador é preparado **sem** abrir o microfone; o portão só é comandado quando muda, com o `waitMs` da regra; mutar fecha e desmutar abre; sem faixa observável nunca abre; duas abas são comandadas separadamente; a aba que para de relatar é fechada pelo vigia; a abertura que falha (sem permissão) não liga nada; o fim da sessão de página para o microfone; desligar no meio da call para na hora e ligar começa nas calls em andamento; e dois começos na mesma aba dão uma gravação só.
 - `src/background/badge.test.ts`: a regra do badge (a voz vence o "sem áudio").
 
 Ponta a ponta:

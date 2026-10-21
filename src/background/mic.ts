@@ -26,7 +26,7 @@ import type { EndReason, MicOffscreenState, MicTrackState } from '../shared/prot
 import { loadSettings, onSettingsChanged } from '../shared/settings'
 import { getSession } from './idb'
 import { sendToOffscreen } from './offscreen-doc'
-import { createSession, markMicOpened, onMicReport, onPageSessionEnded, onPageSessionStarted, setMicRecordingBadge, stopSession } from './sessions'
+import { activeRecordings, createSession, markMicOpened, onMicReport, onPageSessionEnded, onPageSessionStarted, setMicRecordingBadge, stopSession } from './sessions'
 import { registerTestHooks } from './testing'
 
 const log = (...a: unknown[]) => console.debug('[gravador sw microfone]', ...a)
@@ -124,6 +124,17 @@ async function startMic(e: { tabId: number; sessionId: string; startedAt: number
   await reconcile()
 }
 
+/** Na fila da aba: dois começos ao mesmo tempo (ou um começo e uma troca de configuração) dão um. */
+function queueStart(e: { tabId: number; sessionId: string; startedAt: number }): void {
+  const p = (starting.get(e.tabId) ?? Promise.resolve())
+    .then(() => startMic(e))
+    .catch((err) => log('startMic', err))
+    .finally(() => {
+      if (starting.get(e.tabId) === p) starting.delete(e.tabId)
+    })
+  starting.set(e.tabId, p)
+}
+
 /** O relato de uma aba (session:mic). Nunca decide nada: só guarda e manda reconciliar. */
 function reportMicTracks(tabId: number, tracks: readonly MicTrackState[], sinceMs: number): void {
   reports.set(tabId, { tabId, tracks, at: Date.now(), sinceMs })
@@ -183,21 +194,22 @@ export async function micState(): Promise<MicOffscreenState | null> {
 export function registerMic(): void {
   registerTestHooks({ micState, micRecordingOn, micSessions: () => [...byTab.values()] })
   onMicReport((e) => reportMicTracks(e.tabId, e.tracks, e.sinceMs))
-  // Desligar o recurso no meio da call para a gravação da voz na hora, em todas as abas: o que já
-  // entrou no arquivo continua lá (foi gravado com o recurso ligado), e nada mais entra.
+  // A escolha mudou no meio da call:
+  // - desligada, a gravação da voz para na hora, em todas as abas (o que já entrou no arquivo
+  //   continua lá, porque foi gravado com o recurso ligado);
+  // - ligada, as calls que já estão gravando passam a gravar a voz também, em vez de só as
+  //   próximas. O arquivo começa agora, e o `desvioMs` do info.json diz o quanto depois.
   onSettingsChanged((s) => {
-    if (s.micRecording) return
-    for (const tabId of [...byTab.keys()]) void stopMic(tabId, 'parado-pelo-usuario')
+    if (!s.micRecording) {
+      for (const tabId of [...byTab.keys()]) void stopMic(tabId, 'parado-pelo-usuario')
+      return
+    }
+    for (const r of activeRecordings()) {
+      if (r.kind !== 'pagina' || byTab.has(r.tabId)) continue
+      queueStart({ tabId: r.tabId, sessionId: r.sessionId, startedAt: r.startedAt })
+    }
   })
-  onPageSessionStarted((e) => {
-    const p = (starting.get(e.tabId) ?? Promise.resolve())
-      .then(() => startMic(e))
-      .catch((err) => log('startMic', err))
-      .finally(() => {
-        if (starting.get(e.tabId) === p) starting.delete(e.tabId)
-      })
-    starting.set(e.tabId, p)
-  })
+  onPageSessionStarted((e) => queueStart(e))
   onPageSessionEnded((e) => {
     void stopMic(e.tabId, e.reason)
   })

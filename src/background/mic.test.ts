@@ -30,6 +30,8 @@ const fake = vi.hoisted(() => ({
   onEnded: [] as Array<(e: { tabId: number; sessionId: string; reason: string }) => void>,
   onReport: [] as Array<(e: { tabId: number; tracks: MicTrackState[]; sinceMs: number }) => void>,
   onSettings: [] as Array<(s: { micRecording: boolean }) => void>,
+  /** O que o SW diz estar gravando agora (activeRecordings). */
+  active: [] as Array<{ sessionId: string; tabId: number; kind: string; startedAt: number }>,
 }))
 
 vi.mock('../shared/settings', () => ({
@@ -49,6 +51,7 @@ vi.mock('./offscreen-doc', () => ({
   },
 }))
 vi.mock('./sessions', () => ({
+  activeRecordings: () => fake.active,
   createSession: async (opts: Record<string, unknown>) => {
     fake.created.push(opts)
     const rec = { ...opts, sessionId: `mic-${fake.created.length}`, platform: 'meet' }
@@ -113,6 +116,7 @@ beforeEach(async () => {
   fake.onEnded = []
   fake.onReport = []
   fake.onSettings = []
+  fake.active = []
   await carregar()
 })
 
@@ -259,6 +263,23 @@ describe('ligado no perfil', () => {
     await vi.waitFor(() => expect(fake.offscreen.some((r) => r.t === 'offscreen:mic-stop')).toBe(true))
     expect(mic.micRecordingOn(TAB)).toBe(false)
     await vi.waitFor(() => expect(fake.badges.at(-1)).toEqual([TAB, false]))
+  })
+
+  it('ligar no meio da call passa a gravar a voz nas calls que já estão gravando', async () => {
+    // A escolha estava desligada quando a call começou: nada foi criado.
+    fake.micRecording = false
+    await comecar(TAB, 'pagina-1', 1000)
+    expect(fake.created).toEqual([])
+    // Agora ele liga nas configurações.
+    fake.micRecording = true
+    fake.active = [{ sessionId: 'pagina-1', tabId: TAB, kind: 'pagina', startedAt: 1000 }]
+    for (const cb of fake.onSettings) cb({ micRecording: true })
+    await vi.waitFor(() => expect(fake.created).toHaveLength(1))
+    expect(fake.created[0]).toMatchObject({ tabId: TAB, kind: 'microfone', pairedSessionId: 'pagina-1' })
+    // O arquivo começa agora, e o desvio em relação à sessão de página diz o quanto depois.
+    expect((fake.stored.get('mic-1')?.micSkewMs as number) > 0).toBe(true)
+    await relatar(TAB, [aberta()])
+    await vi.waitFor(() => expect(portoes()).toHaveLength(1))
   })
 
   it('dois começos na mesma aba dão uma gravação só', async () => {
