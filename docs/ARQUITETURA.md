@@ -1514,3 +1514,124 @@ Ponta a ponta:
 - O diagnóstico não distingue `replaceTrack(null)` de `removeTrack(sender)`, nem diz quantos senders diferentes seguraram o microfone.
 
 O contrato que nenhuma parte muda sozinha passa a incluir `MicTrackState`, `MicGateReason` (os seis motivos), `micGateDecide`, `stepMicGate`, `micGateDiagnostics`, `MIC_GATE_MAX_STEP_MS`, o `micGateInputs()` do registry e o `diagnostico.microfone` do `session:speakers` e do `SpeakersFile`.
+
+## Emenda 25: gravar a própria voz, por aba, num arquivo separado (21/10/2026, 0.6.0)
+
+Pedido do usuário: gravar a própria voz, por aba, num arquivo separado, para a transcrição ter a fala dele em vez de "(sua fala não é gravada)". Ele usa três ou quatro calls ao mesmo tempo, em perfis diferentes do Chrome, e esse é o motivo de a extensão existir.
+
+Esta emenda é o passo que a Emenda 24 preparou. Ela **acrescenta**: com o recurso desligado (o padrão, e o de toda configuração guardada antes da 0.6.0), tudo sai exatamente como na 0.5.3, nenhum `getUserMedia` é chamado, nenhuma permissão é pedida e nenhum arquivo novo aparece. **O recurso sai pronto e DESLIGADO, e não deve ser ligado em produção antes da medida da seção F da Emenda 24.**
+
+De onde veio a ideia: a extensão scre.io (`hniebljpgcogalllopnjokppmgbhaden`, 3.3.1), analisada no código dela. Medido: MV3 com uma permissão só (`desktopCapture`), e o microfone pego por conta própria com `navigator.mediaDevices.getUserMedia({ audio: true })` numa página visível da extensão, sem `audioCapture` no manifesto. Capturar o microfone nós mesmos é independente de o Meet ou o Teams enviarem a faixa crua ou uma faixa processada, e é isso que resolve o risco da seção F. **O que não se copia da scre.io:** o microfone dela é o aparelho cru e ela grava sempre, então quem muta no Meet continua sendo gravado. Para um gravador de tela isso está certo; aqui é exatamente o defeito que a Emenda 24 existe para impedir, e agora fica pior: antes, um portão errado dava gravação vazia; com captura própria, um portão errado grava alguém que se achava mudo.
+
+### A. As regras de segurança, por extenso
+
+1. **Sem sinal de mudo, sem gravação.** O nosso `getUserMedia` é independente da página, então quem diz que ele está mudo é o portão da Emenda 24, que lê a faixa da **página**. Grava somente enquanto `micGateDecide` disser aberto para aquela aba.
+2. **Sem faixa observável, fechado.** Se não houver nenhuma faixa de microfone da página naquela aba (o caso da faixa processada da seção F), o portão fecha por `sem-faixa` ou `sem-sender` e **não se grava**, porque sem a faixa da página não existe sinal de mudo. Melhor não gravar do que gravar sem saber se a pessoa está muda.
+3. **Qualquer estado indeterminado conta como fechado**, como na Emenda 24.
+4. **O relato que para de chegar fecha o portão.** A frame manda o estado observado a cada troca e, de rotina, a cada `MIC_REPORT_EVERY_MS` (1 s); um relato mais velho que `MIC_REPORT_STALE_MS` (3 s) vale como fechado, e um vigia de 1 s no SW fecha mesmo sem relato novo. Sem isto, uma frame que morresse deixaria o gravador ligado.
+5. **Fechado é DESLIGADO, não ganho zero.** O nó é desconectado do destino de gravação, e **não existe nenhum `GainNode` no caminho**. Ganho zero depende de um número estar certo; desligar depende da topologia.
+6. **O portão nunca aberto descarta a gravação.** Nenhum arquivo de silêncio aparece na pasta, e é isso que prova, no caso da faixa processada, que nada foi gravado.
+7. **Visível enquanto grava.** O badge da aba mostra `MIC` enquanto a voz está entrando no arquivo. A pessoa nunca pode estar sendo gravada sem sinal na tela.
+
+### B. O roteamento entre as abas é uma função pura (`src/shared/mic-route.ts`)
+
+Precedente: `mic-gate.ts`, `vigia-rule.ts` e `speakers.ts` (funções puras em `src/shared/`, sem zod, rodando no SW e no vitest).
+
+Um `getUserMedia` nosso dá UM microfone para o navegador inteiro, não um por aba. Com várias calls ao mesmo tempo, a voz pertence à aba cujo envio está vivo:
+
+- uma aba com o portão aberto: só ela recebe a voz;
+- duas abas abertas ao mesmo tempo: as duas calls estão de fato ouvindo ele, e as duas recebem (não há como escolher uma, e esconder de uma delas seria mentir);
+- nenhuma aba aberta: ninguém recebe.
+
+`micRouteDecide(reports, now, delayMs)` recebe o estado observado de cada faixa por aba (não a decisão: quem decide é um só) e devolve, por aba, `{ open, reason, waitMs }`. `micRecordingOf(raw)` lê `settings.micRecording` do objeto cru, para o relay não carregar o zod (precedente: `autoAllowed`, `languageOf`).
+
+### C. Quando a troca vale no áudio (`micEdgeWaitMs`)
+
+O gravador do microfone fica depois de um `DelayNode` de `MIXER_DELAY_MS` (1,5 s), o **mesmo atraso do mixer da call**. Duas consequências, e as duas são o motivo da escolha:
+
+- os dois arquivos da pasta saem com o mesmo atraso, então a única diferença de tempo entre eles é o `desvioMs` (item E);
+- a troca do portão vale para o áudio de **trás**, como o seletor do mixer (que também fica depois do atraso e por isso uma troca de seam vale para o áudio de até 1,5 s atrás).
+
+O cálculo, puro e testado:
+
+- **fechar**: a pessoa mutou entre a leitura anterior e esta. O pior caso (o mais antigo) é a leitura anterior, `sinceMs` atrás, então desligar daqui a `delayMs - sinceMs` corta o áudio a partir dali. Nada do trecho mudo entra no arquivo, e o preço é perder até `delayMs` de fala legítima antes do mudo. Um relato velho (sem idade confiável) desliga na hora, que corta mais.
+- **abrir**: o contrário. Esperar `delayMs` inteiro liga o nó no áudio de agora, então nada de antes do desmudo entra, e o preço é perder o começo da primeira palavra (até uma leitura, mais `OPEN_MARGIN_MS`).
+
+Nos dois lados o erro cai para o lado de gravar menos, que é o lado seguro.
+
+### D. Onde cada parte roda
+
+```
+frame da call (MAIN world, session.ts)
+  session:mic { tracks, sinceMs }   na troca e de rotina (1 s); nada com o recurso desligado
+      -> relay -> SW
+SW  src/background/mic.ts    micRouteDecide; cria a sessão; manda ao offscreen só o que mudou
+      -> offscreen:mic-gate { open, waitMs }
+offscreen  src/offscreen/mic.ts
+  getUserMedia({ audio: true })  UMA vez para o navegador inteiro
+    -> MediaStreamAudioSourceNode -> DelayNode(1,5 s)
+         -> [ligado/desligado por aba] -> MediaStreamAudioDestinationNode mono -> MediaRecorder
+```
+
+- O service worker do MV3 não tem `MediaRecorder` nem `getUserMedia`: por isso o offscreen, que já existe com os motivos `USER_MEDIA` e `AUDIO_PLAYBACK` para o modo aba.
+- **Nunca ligado ao `ctx.destination`**: a voz dele não pode sair nos alto-falantes, porque voltaria para a call pelo microfone, em eco. O modo aba liga no destino de propósito (a captura de aba tira o som da aba); aqui é o contrário.
+- O `getUserMedia` acontece **só na primeira abertura do portão**, e o microfone é solto quando o último gravador para. Com o recurso ligado e o portão fechado a call toda, o microfone nem é pedido.
+- A primeira abertura de cada navegador perde o tempo do `getUserMedia` (uns 100 ms de fala); depois dela o atraso já está cheio e as aberturas seguintes não perdem nada.
+- Enquanto o microfone está aberto, 1,5 s de áudio ficam no `DelayNode`, em memória, mesmo com o portão fechado. É o que permite o corte retroativo, e é o mesmo que o mixer já faz com o áudio da call. Nada disso chega a um gravador com o portão fechado.
+- Port próprio (`gravador:microfone`), com a mesma lógica de seq/ack/reenvio do modo aba, **repetida** em `src/offscreen/mic.ts`. Divergência declarada: esta fatia preferiu não refatorar o `src/offscreen/tab.ts`, que é o caminho de chunks mais exercitado do repositório, no mesmo passo que acrescenta o microfone.
+
+### E. O arquivo, na pasta da call, nos dois destinos
+
+- Sessão própria, `kind: 'microfone'`, **pareada** com a sessão de página da aba (precedente: o modo aba). Arquivo `audio-microfone.webm`, mesmo formato e mesma taxa do áudio da call.
+- O nome começa com `audio` porque é assim que a fila da transcrição encontra os áudios de uma pasta (`AUDIO_RE` em `host/transcricao.mjs`), e o `transcriptStem` dele vira `transcricao-microfone`, como `audio-aba.webm` vira `transcricao-aba`. **`HOST_VERSION` fica em 0.5.0**: o helper não muda, e ninguém precisa rodar `npm run instalar` de novo. Divergência declarada do `microfone.webm` do pedido, pelo nome que o precedente do modo aba exige.
+- `info.json`: o arquivo entra em `arquivos` com `tipo: "microfone"` e `desvioMs`, quantos milissegundos ele começou depois do `audio.webm` (medido: 62 a 85 ms). Como os dois saem do mesmo atraso de 1,5 s, é só esse número que falta para casar os dois no tempo.
+- **Destino helper:** o merge já existia (a sessão pareada entra na pasta da página).
+- **Destino downloads:** passou a existir. A pasta que a sessão de página usou é reaproveitada, sem procurar nome livre, e o `info.json` de lá é reescrito com os dois arquivos (`conflictAction: 'overwrite'`). Sem isso o arquivo da voz ia para uma pasta ` (2)` ao lado.
+- O `info.json` de um merge leva também os arquivos das irmãs **já salvas**: uma aba pode ter modo aba e microfone ao mesmo tempo, e sem isso a segunda a terminar apagava a primeira da lista.
+- A linha do tempo dos falantes **não muda**: ela continua vindo do `measureMic` da Emenda 18, e o `falantes.json` continua sendo só da sessão de página.
+
+### F. A permissão do microfone, medida antes de escolher
+
+O documento offscreen não tem interface, então não há onde o Chrome mostrar o diálogo. Medido no Chrome for Testing em 21/10/2026 (`tests/e2e/microfone-permissao.spec.ts`), sem o `--use-fake-ui-for-media-stream`, que esconderia a medida:
+
+- **sem a permissão**, o `getUserMedia` do offscreen falha com `Permission dismissed` e o estado continua `prompt`. Ele não tem como contornar;
+- **com a permissão concedida para a origem `chrome-extension://<id>`** (a mesma exceção de conteúdo que o clique em "Permitir" grava no perfil), o offscreen responde `granted` e abre o microfone.
+
+Daí o caminho, que é o da scre.io: pedir **uma vez** na página de configurações, no clique em que o usuário liga o recurso, e deixar o offscreen usar depois. **`audioCapture` NÃO entra no manifesto**: ele concederia sem perguntar, e para um recurso de microfone o aviso visível vale mais que a conveniência.
+
+Limite declarado da medida: no headless ninguém pode clicar em "Permitir", então o teste grava no perfil a mesma exceção que o clique grava (o CDP recusa conceder permissão a uma origem de extensão: "Permission can't be granted to opaque origins").
+
+### G. A tela e o badge
+
+- Seção "A sua voz" nas configurações, **por perfil do Chrome e desligada por padrão**, como o motor por API (Emenda 21). A tela diz em uma frase o que acontece e quando, e avisa que o Chrome pede a permissão no clique.
+- O clique que liga pede o microfone na página (gesto do usuário) e solta na hora; o que fica é a permissão da origem. Negada, nada é ligado e nada é salvo, e a linha diz o que falta. Precedente: o `enableApi` do motor por API.
+- Desligar no meio da call para a gravação da voz na hora, em todas as abas. O que já entrou no arquivo continua lá.
+- Badge por aba: `MIC` no **mesmo vermelho** da gravação. Nenhuma cor nova, de propósito: o estado continua sendo "gravando", e quem diz o que mudou é o texto, como o `↻` faz. O sinal da voz vence o aviso de "sem áudio" (que continua saindo como notificação), porque é o sinal que a pessoa nunca pode deixar de ver.
+
+### H. Os oito textos
+
+As duas descrições da loja (`docs/loja/listagem-*.md`), as duas páginas do site (`site/index.html`, `site/en/index.html`), as duas políticas de privacidade (`site/privacidade.html`, `site/en/privacy.html`) e a chave `welcomeWhatNoMic` nas duas línguas passam da promessa absoluta para a condicional: "nunca o seu microfone, a menos que você ligue". As políticas de privacidade ganham um item próprio do recurso, dizendo que é desligado por padrão, que grava só enquanto a página da call disser que o microfone está aberto, que o arquivo é separado e fica na máquina, e que apagar esse arquivo tira a voz sem mexer no resto. **O site não foi publicado, e nada foi enviado para a loja.**
+
+### Testes
+
+Unidade (cada um conferido vermelho com a mutação indicada e verde de volta):
+- `src/shared/mic-route.test.ts` (novo, 16 testes): nenhuma aba, uma aba, duas ao mesmo tempo, a aba que fecha, a que deixou de relatar, o instante inválido; "sem faixa observável não grava" (`sem-faixa`, `sem-sender`, cada campo indeterminado); e quando a troca vale (abrir espera o atraso inteiro, fechar desconta a idade, idade maior que o atraso desliga na hora, idade inválida vira zero). Mutações: sem a obsolescência do relato (2 vermelhos), abrir descontando a idade (3), e sem a condição do sender em `mic-gate.ts` (5, contando os da Emenda 24).
+- `src/background/mic.test.ts` (novo, 13 testes): a máquina do gravador por aba. Desligado no perfil, nada acontece; ligado, a sessão nasce `microfone` pareada e o gravador é preparado **sem** abrir o microfone; o portão só é comandado quando muda, com o `waitMs` da regra; mutar fecha e desmutar abre; sem faixa observável nunca abre; duas abas são comandadas separadamente; a aba que para de relatar é fechada pelo vigia; a abertura que falha (sem permissão) não liga nada; o fim da sessão de página para o microfone; desligar no meio da call para na hora; e dois começos na mesma aba dão uma gravação só.
+- `src/background/badge.test.ts`: a regra do badge (a voz vence o "sem áudio").
+
+Ponta a ponta:
+- `tests/e2e/microfone-permissao.spec.ts` (novo, 2 testes): a medida do item F.
+- `tests/e2e/microfone.spec.ts` (novo, 7 testes): as quatro formas de mutar com o recurso LIGADO, medindo 1000 Hz por segundo no `audio-microfone.webm` gerado; o caso da faixa processada (variante nova `tests/fixtures/meet/variantes/mic-processado.js`, que envia uma faixa derivada do grafo em vez da do `getUserMedia`); o recurso desligado; e o destino downloads.
+- `tests/e2e/interface.spec.ts` (atualizado): a escolha nasce desligada, liga na tela, o badge passa a dizer `MIC` e desligar volta a `REC`.
+
+Números medidos (Chrome for Testing, 21/10/2026), 1000 Hz por segundo no `audio-microfone.webm`, nas quatro formas de mutar: trechos abertos em **-25 dBFS**, trechos fechados em **-200 dBFS** (silêncio absoluto, o piso do medidor), com uma janela de borda entre -41 e -91 dBFS onde a troca cai no meio do segundo. Diagnóstico do portão igual ao da Emenda 24 (`abriu: 2`, e o motivo de cada forma). Faixa processada: `abriu: 0`, `semSender: 51` em 51 leituras, nenhum arquivo na pasta e `capturando: false` (o `getUserMedia` nem foi chamado). Desligado: nenhuma aba com gravador, nenhuma captura, nenhum erro de `getUserMedia` e nenhuma linha de log das duas partes do microfone.
+
+### Não feito (de propósito)
+
+- **Ligar o recurso.** Ele sai pronto e desligado, e o que bloqueia ligá-lo em produção é a medida da seção F da Emenda 24 nas calls reais do Meet e do Teams. Nada foi enviado para a loja e o site não foi publicado.
+- **Juntar as duas transcrições num arquivo só.** Cada áudio da pasta continua com o `.md` dele (`transcricao.md` e `transcricao-microfone.md`), pelo caminho que o modo aba já usa. Juntar é trabalho próprio e depende de ver o resultado real das duas transcrições; a linha `[mm:ss] Você: (sua fala não é gravada)` do `transcricao.md` continua como está.
+- **Refatorar o caminho de chunks do modo aba.** O Port e a lógica de seq/ack do microfone são uma repetição declarada (item D).
+- **Escolher o aparelho de microfone.** O `getUserMedia` usa o padrão do sistema. Nenhum nome de dispositivo é lido, guardado ou escrito em lugar nenhum.
+- **Mostrar o portão na interface** além do badge, e dizer no popup qual aba está recebendo a voz.
+
+O contrato que nenhuma parte muda sozinha passa a incluir `MicTabReport`, `MicTabRoute`, `micRouteDecide`, `micEdgeWaitMs`, `micRecordingOf`, `MIC_REPORT_EVERY_MS`, `MIC_REPORT_STALE_MS`, `MIC_FILE`, o `session:mic` do protocolo, o `micRecording` da mensagem `settings` e de `Settings`, o `kind: 'microfone'`, o `desvioMs` do `InfoFile`, os `offscreen:mic-*` e o `MicOffscreenState`.

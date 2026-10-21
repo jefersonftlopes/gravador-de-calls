@@ -1290,7 +1290,7 @@
     "message": "Only the audio that comes from the other participants in Google Meet and Microsoft Teams calls, each tab in its own recording."
   },
   "welcomeWhatNoMic": {
-    "message": "Never your microphone: your voice is not in the recording."
+    "message": "Never your microphone, unless you turn on \"Record my voice\" in the settings: then your voice goes to a separate file, and only while your microphone is open in the call."
   },
   "welcomeWhatAuto": {
     "message": "Recording starts by itself when the call starts and ends when you leave. You can turn it off per platform in the settings, and the icon shows REC on the tab being recorded."

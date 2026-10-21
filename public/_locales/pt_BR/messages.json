@@ -1290,7 +1290,7 @@
     "message": "Só o áudio que chega dos outros participantes das calls do Google Meet e do Microsoft Teams, cada aba na sua gravação."
   },
   "welcomeWhatNoMic": {
-    "message": "Nunca o seu microfone: a sua voz não entra na gravação."
+    "message": "Nunca o seu microfone, a menos que você ligue \"Gravar a minha voz\" nas configurações: aí a sua voz vai para um arquivo separado, e só enquanto o seu microfone estiver aberto na call."
   },
   "welcomeWhatAuto": {
     "message": "A gravação começa sozinha quando a call começa e termina quando você sai. Dá para desligar por plataforma nas configurações, e o ícone mostra REC na aba que está gravando."

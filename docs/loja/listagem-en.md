@@ -30,7 +30,7 @@ Gravador de Calls automatically records, tab by tab, the audio of the other part
 HOW IT WORKS
 • When the call actually starts (past the join screen and the waiting room), recording of that tab begins without a click. The icon shows REC on the tab.
 • Several calls at the same time, in different tabs, become separate recordings: the audio of one never mixes with another.
-• It records only the audio the call page receives from the other participants. Your microphone is never recorded.
+• It records only the audio the call page receives from the other participants. Your microphone is never recorded, unless you turn on "Record my voice" in the settings: then your voice goes to a separate file, and only while the call page says your microphone is open there.
 • When the call ends (you leave, the call ends or the tab closes), the audio (audio.webm) and an info.json with the title, date, duration and the participants' display names are saved to Downloads/Call recordings (Downloads/Gravações de calls when Chrome is in Portuguese), one folder per call.
 • If the tab or Chrome crashes mid-call, what was already recorded is not lost: the recording is saved as interrupted.
 

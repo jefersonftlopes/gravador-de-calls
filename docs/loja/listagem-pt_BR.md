@@ -30,7 +30,7 @@ O Gravador de Calls grava sozinho, aba por aba, o áudio dos outros participante
 COMO FUNCIONA
 • Quando a call começa de fato (depois da tela de entrada e da sala de espera), a gravação daquela aba começa sem clique. O ícone mostra REC na aba.
 • Várias calls ao mesmo tempo, em abas diferentes, viram gravações separadas: o áudio de uma não se mistura com o da outra.
-• Grava só o áudio que a página da call recebe dos outros participantes. O seu microfone nunca entra na gravação.
+• Grava só o áudio que a página da call recebe dos outros participantes. O seu microfone nunca entra na gravação, a menos que você ligue "Gravar a minha voz" nas configurações: aí a sua voz vai para um arquivo separado, e só enquanto a página da call disser que o seu microfone está aberto ali.
 • No fim da call (ao sair, quando a call termina ou quando a aba fecha), o áudio (audio.webm) e um info.json com título, data, duração e os nomes de exibição dos participantes são salvos em Downloads/Gravações de calls (Downloads/Call recordings com o Chrome em inglês), numa pasta por call.
 • Se a aba ou o Chrome caírem no meio da call, o que já foi gravado não se perde: a gravação é salva como interrompida.
 
