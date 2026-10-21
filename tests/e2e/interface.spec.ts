@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { expect, test, type BrowserContext, type Page, type Worker } from '@playwright/test'
-import { EXTENSION_ID, currentServiceWorker, launchWithExtension, stopExtensionServiceWorker, swApi, type Harness, type LaunchOptions } from '../helpers/browser'
+import { EXTENSION_ID, currentServiceWorker, launchWithExtension, seedMicPermission, stopExtensionServiceWorker, swApi, type Harness, type LaunchOptions } from '../helpers/browser'
 import { findRecordings } from '../helpers/recordings'
 import { fulfillHtml } from '../fixtures/routes'
 import { peerPage } from '../fixtures/peer-page'
@@ -608,6 +608,38 @@ test('AC13: 60 s sem áudio deixa o REC âmbar e mostra UMA notificação sugeri
   expect(await sw.evaluate((id) => chrome.tabs.get(id).then((t) => t.active), mute.tabId)).toBe(true)
   expect(await notifications(sw)).toEqual([])
   console.log(`AC13: badge âmbar ${amberMs} ms depois do início com o limite em 1 s; 1 notificação antes e depois do reinício do SW`)
+})
+
+test('Emenda 25: a escolha de gravar a própria voz nasce desligada, liga na tela e o badge passa a dizer MIC', async () => {
+  const h = await launch({ beforeLaunch: ({ userDataDir }) => seedMicPermission(userDataDir) })
+  const options = await h.context.newPage()
+  await options.goto(OPTIONS)
+  // Desligada por padrão, e a tela diz em uma frase o que acontece e quando.
+  await expect(options.getByTestId('microfone')).toHaveAttribute('data-ligado', 'nao')
+  await expect(options.getByTestId('microfone-ligar')).not.toBeChecked()
+  await expect(options.getByTestId('microfone-o-que')).toContainText('audio-microfone.webm')
+  await expect(options.getByTestId('microfone-o-que')).toContainText('enquanto você estiver mudo, nada é gravado')
+  await expect(options.getByTestId('microfone-aviso')).toContainText('permissão do microfone')
+  expect(await h.sw.evaluate(() => (globalThis as any).__gravador.loadSettings().then((s: any) => s.micRecording))).toBe(false)
+
+  // O clique liga: é nele que a permissão do microfone é pedida.
+  await options.getByTestId('microfone-ligar').click()
+  await expect(options.getByTestId('microfone-mensagem')).toContainText('Ligado neste perfil')
+  await expect(options.getByTestId('microfone')).toHaveAttribute('data-ligado', 'sim')
+  expect(await h.sw.evaluate(() => (globalThis as any).__gravador.loadSettings().then((s: any) => s.micRecording))).toBe(true)
+
+  // E a gravação da call seguinte mostra na aba que a voz está entrando.
+  await startPeer(h.context, 'voz')
+  const { tabId } = await joinMeet(h, 'voz')
+  await expect.poll(async () => (await badgeOf(h.sw, tabId)).text, { timeout: 20_000, intervals: [250] }).toBe('MIC')
+  expect(await badgeOf(h.sw, tabId)).toEqual({ text: 'MIC', color: RED })
+  expect(await swApi(h.sw).testing('micRecordingOn', tabId)).toBe(true)
+
+  // Desligar volta a dizer REC.
+  await options.getByTestId('microfone-ligar').click()
+  await expect(options.getByTestId('microfone-mensagem')).toContainText('não entra em nenhuma gravação')
+  await expect.poll(async () => (await badgeOf(h.sw, tabId)).text, { timeout: 20_000, intervals: [250] }).toBe('REC')
+  expect(await swApi(h.sw).testing('micRecordingOn', tabId)).toBe(false)
 })
 
 /**

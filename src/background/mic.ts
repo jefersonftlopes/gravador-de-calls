@@ -23,7 +23,7 @@
 //    periódico daqui: sem relato nenhum não haveria quem fechasse.
 import { MIC_REPORT_STALE_MS, micRouteDecide, type MicTabReport } from '../shared/mic-route'
 import type { EndReason, MicOffscreenState, MicTrackState } from '../shared/protocol'
-import { loadSettings } from '../shared/settings'
+import { loadSettings, onSettingsChanged } from '../shared/settings'
 import { getSession } from './idb'
 import { sendToOffscreen } from './offscreen-doc'
 import { createSession, markMicOpened, onMicReport, onPageSessionEnded, onPageSessionStarted, setMicRecordingBadge, stopSession } from './sessions'
@@ -183,6 +183,12 @@ export async function micState(): Promise<MicOffscreenState | null> {
 export function registerMic(): void {
   registerTestHooks({ micState, micRecordingOn, micSessions: () => [...byTab.values()] })
   onMicReport((e) => reportMicTracks(e.tabId, e.tracks, e.sinceMs))
+  // Desligar o recurso no meio da call para a gravação da voz na hora, em todas as abas: o que já
+  // entrou no arquivo continua lá (foi gravado com o recurso ligado), e nada mais entra.
+  onSettingsChanged((s) => {
+    if (s.micRecording) return
+    for (const tabId of [...byTab.keys()]) void stopMic(tabId, 'parado-pelo-usuario')
+  })
   onPageSessionStarted((e) => {
     const p = (starting.get(e.tabId) ?? Promise.resolve())
       .then(() => startMic(e))

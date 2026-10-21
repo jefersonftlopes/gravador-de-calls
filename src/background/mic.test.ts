@@ -29,9 +29,13 @@ const fake = vi.hoisted(() => ({
   onStarted: [] as Array<(e: { tabId: number; sessionId: string; startedAt: number }) => void>,
   onEnded: [] as Array<(e: { tabId: number; sessionId: string; reason: string }) => void>,
   onReport: [] as Array<(e: { tabId: number; tracks: MicTrackState[]; sinceMs: number }) => void>,
+  onSettings: [] as Array<(s: { micRecording: boolean }) => void>,
 }))
 
-vi.mock('../shared/settings', () => ({ loadSettings: async () => ({ micRecording: fake.micRecording }) }))
+vi.mock('../shared/settings', () => ({
+  loadSettings: async () => ({ micRecording: fake.micRecording }),
+  onSettingsChanged: (cb: (s: { micRecording: boolean }) => void) => void fake.onSettings.push(cb),
+}))
 vi.mock('./idb', () => ({
   getSession: async (id: string) => fake.stored.get(id),
   putSession: async (rec: Record<string, unknown>) => void fake.stored.set(rec.sessionId as string, rec),
@@ -108,6 +112,7 @@ beforeEach(async () => {
   fake.onStarted = []
   fake.onEnded = []
   fake.onReport = []
+  fake.onSettings = []
   await carregar()
 })
 
@@ -243,6 +248,17 @@ describe('ligado no perfil', () => {
     expect(fake.offscreen.at(-1)).toMatchObject({ t: 'offscreen:mic-stop', tabId: TAB, reason: 'saiu-da-call' })
     await vi.waitFor(() => expect(fake.badges.at(-1)).toEqual([TAB, false]))
     expect(mic.micRecordingOn(TAB)).toBe(false)
+  })
+
+  it('desligar no meio da call para a gravação da voz na hora', async () => {
+    await comecar(TAB)
+    await relatar(TAB, [aberta()])
+    await vi.waitFor(() => expect(portoes()).toHaveLength(1))
+    fake.micRecording = false
+    for (const cb of fake.onSettings) cb({ micRecording: false })
+    await vi.waitFor(() => expect(fake.offscreen.some((r) => r.t === 'offscreen:mic-stop')).toBe(true))
+    expect(mic.micRecordingOn(TAB)).toBe(false)
+    await vi.waitFor(() => expect(fake.badges.at(-1)).toEqual([TAB, false]))
   })
 
   it('dois começos na mesma aba dão uma gravação só', async () => {
