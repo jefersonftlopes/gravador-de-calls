@@ -312,6 +312,27 @@ async function tabSession(mod: Sessions, pairedSessionId: string): Promise<{ por
   return { port, sessionId: rec.sessionId }
 }
 
+/** Sessão do microfone pareada com a página, com um chunk, como o offscreen faria (Emenda 25). */
+async function micSession(mod: Sessions, pairedSessionId: string, micEverOpen: boolean): Promise<{ port: FakePort; sessionId: string }> {
+  const rec = await mod.createSession({
+    tabId: TAB,
+    frameId: 0,
+    platform: 'meet',
+    kind: 'microfone',
+    localId: 'microfone-1',
+    startedAt: T0,
+    meta: { title: 'Daily', code: 'abc-defg-hij' },
+    port: null,
+    pairedSessionId,
+    micSkewMs: 70,
+  })
+  const port = connect('gravador:microfone', { url: `${EXT}src/offscreen/offscreen.html` })
+  port.emit({ t: 'session:chunk', sessionId: rec.sessionId, seq: 0, data: b64, bytes: 4, at: T0 + 1000 })
+  await vi.waitFor(() => expect(port.sent.some((x) => x.t === 'chunk:ack')).toBe(true))
+  if (micEverOpen) await mod.markMicOpened(rec.sessionId)
+  return { port, sessionId: rec.sessionId }
+}
+
 const end = (port: FakePort, sessionId: string, seconds: number, reason = 'saiu-da-call') =>
   port.emit({ t: 'session:end', sessionId, endedAt: T0 + seconds * 1000, reason, lastSeq: 0 })
 
@@ -349,6 +370,41 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
+})
+
+describe('microfone pareado com a página (Emenda 25)', () => {
+  it('o portão que nunca abriu descarta a gravação: nenhum arquivo do microfone na pasta', async () => {
+    // A gravação tem chunks (o gravador roda desde o começo, gravando silêncio), mas o portão
+    // nunca abriu: só havia silêncio, e um arquivo de silêncio não vai para a pasta.
+    const mod = await load()
+    const page = await pageSession()
+    const mic = await micSession(mod, page.sessionId, false)
+    end(mic.port, mic.sessionId, 60, 'parado-pelo-usuario')
+    end(page.port, page.sessionId, 60)
+    await vi.waitFor(() => expect(statusOf(mic.sessionId)).toBe('descartada'))
+    expect(statusOf(page.sessionId)).toBe('salva')
+    expect(savedOf('microfone')).toEqual([])
+    expect(fake.saved.map((s) => s.kind)).toEqual(['pagina'])
+  })
+
+  it('o portão que abriu salva o audio-microfone.webm na pasta da página, com o desvio no info.json', async () => {
+    const mod = await load()
+    const page = await pageSession()
+    const mic = await micSession(mod, page.sessionId, true)
+    end(mic.port, mic.sessionId, 60, 'parado-pelo-usuario')
+    await vi.waitFor(() => expect(statusOf(mic.sessionId)).toBe('finalizando'))
+    end(page.port, page.sessionId, 60)
+    await vi.waitFor(() => expect(statusOf(mic.sessionId)).toBe('salva'))
+    expect(fake.saved.map((s) => s.kind)).toEqual(['pagina', 'microfone'])
+    expect((fake.sessions.get(mic.sessionId) as SessionRecord).file).toBe('audio-microfone.webm')
+    const salvo = savedOf('microfone')[0]
+    // Mesma pasta da sessão de página (o merge vale nos dois destinos; aqui, na reserva).
+    expect(salvo.relDir).toBe(savedOf('pagina')[0].relDir)
+    // O info.json reescrito no merge lista os dois arquivos, e o do microfone leva o desvio.
+    const arquivos = (salvo.info as { arquivos: Array<{ nome: string; tipo: string; desvioMs?: number }> }).arquivos
+    expect(arquivos.map((a) => a.nome)).toEqual(['audio.webm', 'audio-microfone.webm'])
+    expect(arquivos[1]).toMatchObject({ tipo: 'microfone', desvioMs: 70 })
+  })
 })
 
 describe('modo aba pareado com a página', () => {

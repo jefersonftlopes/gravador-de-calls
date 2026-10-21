@@ -123,6 +123,21 @@ async function pastaDaCall(base = h!.root, aguardar?: string): Promise<{ dir: st
   }
 }
 
+/**
+ * Espera TODA sessão deste perfil terminar (salva ou descartada). Sem isto, um teste que afirma
+ * "nenhum arquivo do microfone" poderia ler a pasta antes de a sessão do microfone salvar, e
+ * passaria sem provar nada (a sessão pareada salva DEPOIS da de página).
+ */
+async function todasEncerradas(): Promise<Array<{ sessionId: string; status: string }>> {
+  await expect
+    .poll(async () => (await swApi(h!.sw).listSessions()).every((r) => r.status === 'salva' || r.status === 'descartada'), {
+      timeout: 30_000,
+      intervals: [250],
+    })
+    .toBe(true)
+  return swApi(h!.sw).listSessions()
+}
+
 /** Acima disto a janela TEM o tom do microfone; abaixo de SILENCIO_DBFS ela está em silêncio. */
 const TOM_DBFS = -40
 const SILENCIO_DBFS = -60
@@ -230,6 +245,10 @@ test('faixa processada: a do getUserMedia não está em sender nenhum, e nada é
   expect(estado.capturando, 'o getUserMedia do offscreen nem foi chamado').toBe(false)
   await call.click('button[jsname="CQylAd"]')
 
+  // Toda sessão encerrada: a do microfone foi DESCARTADA (o portão nunca abriu).
+  const sessoes = await todasEncerradas()
+  console.log(`faixa processada: sessões ${sessoes.map((r) => r.status).sort().join(' ')}`)
+  expect(sessoes.filter((r) => r.status === 'descartada').length, 'a sessão do microfone é descartada').toBe(1)
   const { files, info, falantes } = await pastaDaCall()
   // Nenhum arquivo do microfone: é a prova de que nada foi gravado.
   expect(files).toEqual(['audio.webm', 'falantes.json', 'info.json'])
@@ -256,6 +275,8 @@ test('com o recurso desligado (o padrão): nenhum arquivo, nenhum getUserMedia, 
   expect(estado.erro).toBeNull()
 
   await call.click('button[jsname="CQylAd"]')
+  // Uma sessão só (a da página): nenhuma de microfone foi criada.
+  expect((await todasEncerradas()).length).toBe(1)
   const { files, info } = await pastaDaCall()
   expect(files).toEqual(['audio.webm', 'falantes.json', 'info.json'])
   expect(info.arquivos.map((a) => a.nome)).toEqual(['audio.webm'])
