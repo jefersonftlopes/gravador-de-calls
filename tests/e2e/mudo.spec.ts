@@ -167,6 +167,7 @@ test('com o portão aberto a call toda, nada do microfone entra na gravação (A
 
   const { file, dir, files } = await falantesDaPasta()
   const mic = file.diagnostico?.microfone
+  expect(mic, 'o diagnóstico do microfone tem de estar no falantes.json').toBeDefined()
   // O portão abriu uma vez e ficou aberto até o fim da call (só o PC fechando no fim o fecha).
   expect(mic!.abriu).toBe(1)
   expect(mic!.fechou).toBeLessThanOrEqual(1)
@@ -187,4 +188,5 @@ test('com o portão aberto a call toda, nada do microfone entra na gravação (A
   expect(windows.length).toBeGreaterThanOrEqual(5)
   expect(median(db440)).toBeGreaterThan(-30)
   for (const w of windows) expect(w.db[1000], `segundo ${w.second}`).toBeLessThanOrEqual(w.db[440] - 30)
+  expect(h!.pageErrors).toEqual([])
 })
