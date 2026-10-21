@@ -4,6 +4,10 @@
 // (`audio/webm`), depois os arquivos de texto a mais (o falantes.json, Emenda 18) e o info.json
 // (`application/json`), por último, como no helper (AC7).
 //
+// Emenda 25: a sessão pareada (modo aba, microfone) cujo arquivo entra na pasta da call reaproveita
+// a pasta que a sessão de página já usou, sem procurar nome livre, e reescreve o info.json de lá com
+// os dois arquivos (`conflictAction: 'overwrite'`).
+//
 // Colisão de nome (AC7, " (2)"): o chrome.downloads só grava dentro da pasta de downloads e não
 // deixa ver o disco. A pasta conta como ocupada se o histórico de downloads já tem um arquivo
 // nela, ou se o Chrome renomeou o áudio (conflictAction 'uniquify' devolve `audio (1).webm`
@@ -72,8 +76,8 @@ async function undo(id: number): Promise<void> {
 }
 
 /** Baixa e espera terminar. Se falhar, o item sai do histórico para não ocupar a pasta. */
-async function download(url: string, filename: string): Promise<chrome.downloads.DownloadItem> {
-  const id = await chrome.downloads.download({ url, filename, conflictAction: 'uniquify', saveAs: false })
+async function download(url: string, filename: string, conflictAction: `${chrome.downloads.FilenameConflictAction}` = 'uniquify'): Promise<chrome.downloads.DownloadItem> {
+  const id = await chrome.downloads.download({ url, filename, conflictAction, saveAs: false })
   try {
     return await waitDone(id)
   } catch (e) {
@@ -97,12 +101,54 @@ async function revoke(url: string | null) {
  * Baixa um JSON pela mesma via do info.json: o offscreen monta o Blob de `rec.downloadInfo`.
  * Devolve o item baixado.
  */
-async function downloadJson(rec: SessionRecord, text: string, filename: string, urls: string[]): Promise<chrome.downloads.DownloadItem> {
+async function downloadJson(
+  rec: SessionRecord,
+  text: string,
+  filename: string,
+  urls: string[],
+  conflictAction: `${chrome.downloads.FilenameConflictAction}` = 'uniquify',
+): Promise<chrome.downloads.DownloadItem> {
   rec.downloadInfo = text
   await putSession(rec)
   const url = await blobUrl(rec.sessionId, INFO_BLOB_TYPE)
   urls.push(url)
-  return download(url, filename)
+  return download(url, filename, conflictAction)
+}
+
+/**
+ * Emenda 25: grava o áudio desta sessão NA pasta que a sessão de página já usou (`<pasta>/<relDir>`,
+ * sem procurar nome livre) e reescreve o info.json de lá, agora com os dois arquivos. É o que o
+ * merge do helper faz; aqui o `conflictAction: 'overwrite'` troca o info.json no lugar, e o áudio
+ * desce com `uniquify` porque o nome dele é novo naquela pasta.
+ */
+async function saveMerged(rec: SessionRecord, relDir: string, info: InfoJson): Promise<DownloadsResult> {
+  const folder = [downloadsFolder(), ...relDir.split('/')].join('/')
+  let audioUrl: string | null = null
+  const jsonUrls: string[] = []
+  try {
+    audioUrl = await blobUrl(rec.sessionId, AUDIO_BLOB_TYPE)
+    const audio = await download(audioUrl, `${folder}/${rec.file}`)
+    if (nfc(baseName(audio.filename)) !== nfc(rec.file)) {
+      // A pasta já tem um arquivo com este nome (uma tentativa anterior): desfaz e deixa a
+      // recuperação tentar de novo, em vez de deixar "audio-microfone (1).webm" para trás.
+      await undo(audio.id)
+      throw new Error(t('errNoFreeName', `${folder}/${rec.file}`))
+    }
+    try {
+      const item = await downloadJson(rec, JSON.stringify(info, null, 2) + '\n', `${folder}/info.json`, jsonUrls, 'overwrite')
+      return { path: folder, downloadId: item.id }
+    } catch (e) {
+      await undo(audio.id)
+      throw e
+    }
+  } finally {
+    await revoke(audioUrl)
+    for (const u of jsonUrls) await revoke(u)
+    if (rec.downloadInfo) {
+      rec.downloadInfo = null
+      await putSession(rec).catch(() => {})
+    }
+  }
 }
 
 async function save(rec: SessionRecord, relDir: string, info: InfoJson, extras: readonly HostExtraFile[] = []): Promise<DownloadsResult> {
@@ -155,8 +201,14 @@ let chain: Promise<unknown> = Promise.resolve()
  * traz o nível do perfil, Emenda 1). Lança se não conseguir; o chamador mantém os chunks no
  * IndexedDB para a recuperação tentar de novo.
  */
-export function saveViaDownloads(rec: SessionRecord, relDir: string, info: InfoJson, extras: readonly HostExtraFile[] = []): Promise<DownloadsResult> {
-  const run = chain.then(() => save(rec, relDir, info, extras))
+export function saveViaDownloads(
+  rec: SessionRecord,
+  relDir: string,
+  info: InfoJson,
+  extras: readonly HostExtraFile[] = [],
+  merge = false,
+): Promise<DownloadsResult> {
+  const run = chain.then(() => (merge ? saveMerged(rec, relDir, info) : save(rec, relDir, info, extras)))
   chain = run.catch(() => {})
   return run
 }

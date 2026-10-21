@@ -52,6 +52,10 @@ vi.mock('./sessions', () => ({
     return rec
   },
   stopSession: async (id: string) => void fake.stopped.push(id),
+  markMicOpened: async (id: string) => {
+    const rec = fake.stored.get(id)
+    if (rec) fake.stored.set(id, { ...rec, micEverOpen: true })
+  },
   onPageSessionStarted: (cb: (e: never) => void) => void fake.onStarted.push(cb as never),
   onPageSessionEnded: (cb: (e: never) => void) => void fake.onEnded.push(cb as never),
   onMicReport: (cb: (e: never) => void) => void fake.onReport.push(cb as never),

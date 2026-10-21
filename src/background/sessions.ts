@@ -388,8 +388,10 @@ export interface NewSession {
   meta: Partial<CallMeta>
   /** Port que vai mandar os chunks (null: o offscreen conecta depois pelo "gravador:aba"). */
   port: chrome.runtime.Port | null
-  /** Modo aba: sessão de página da mesma aba. */
+  /** Modo aba e microfone: sessão de página da mesma aba. */
   pairedSessionId?: string | null
+  /** Emenda 25 (microfone): quantos ms esta gravação começou depois da sessão de página. */
+  micSkewMs?: number
 }
 
 /**
@@ -432,6 +434,7 @@ export async function createSession(opts: NewSession): Promise<SessionRecord> {
     hostFlushedSeq: 0,
     file: opts.kind === 'aba' ? 'audio-aba.webm' : opts.kind === 'microfone' ? MIC_FILE : 'audio.webm',
     pairedSessionId: opts.pairedSessionId ?? null,
+    ...(opts.micSkewMs === undefined ? {} : { micSkewMs: opts.micSkewMs }),
     savedPath: null,
     lastError: status.ok ? (status.writable ? null : t('errNoWritePermissionAt', status.root ?? '')) : status.error,
     bootId,
@@ -845,7 +848,13 @@ async function doFinalize(rt: Runtime, reasonIn: EndReason): Promise<void> {
     log('sessão pareada aguardando a de página', rec.kind, rec.sessionId, paired.sessionId)
     return
   }
-  const mergeInto = paired?.status === 'salva' && paired.sink === 'host' && paired.savedPath ? paired : null
+  // A pasta da sessão de página já salva, para o arquivo desta entrar nela. Emenda 25: vale nos
+  // dois destinos. No helper o relDir são os últimos níveis do caminho absoluto; na reserva de
+  // downloads o savedPath já é relativo e começa com a pasta de downloads, que sai fora.
+  const pairedSaved = paired?.status === 'salva' && paired.savedPath ? paired : null
+  const mergeInto = pairedSaved?.sink === 'host' ? pairedSaved : null
+  const mergeDownloads = pairedSaved?.sink === 'downloads' ? pairedSaved : null
+  const mergeBase = mergeInto ?? mergeDownloads
 
   const helper = await pingHost(true)
   const helperVersion = helper.ok ? helper.version : null
@@ -857,12 +866,13 @@ async function doFinalize(rt: Runtime, reasonIn: EndReason): Promise<void> {
     platform: rec.platform,
     profileLabel: rec.profileLabel,
   })
-  if (mergeInto) {
+  if (mergeBase) {
     // Pasta real da página (pode ter sufixo " (2)") e info.json dela com todos os arquivos.
-    const levels = profileFolder(mergeInto.profileLabel) ? 3 : 2
-    relDir = mergeInto.savedPath!.split('/').slice(-levels).join('/')
-    const pageInfo = buildInfo(mergeInto, {
-      interrupted: mergeInto.endReason === 'interrompida',
+    const levels = profileFolder(mergeBase.profileLabel) ? 3 : 2
+    const parts = mergeBase.savedPath!.split('/')
+    relDir = mergeDownloads ? parts.slice(1).join('/') : parts.slice(-levels).join('/')
+    const pageInfo = buildInfo(mergeBase, {
+      interrupted: mergeBase.endReason === 'interrompida',
       extensionVersion: extensionVersion(),
       helperVersion,
     })
@@ -876,13 +886,15 @@ async function doFinalize(rt: Runtime, reasonIn: EndReason): Promise<void> {
   let sink: SinkKind = rec.sink ?? 'host'
   // Emenda 18: a linha do tempo dos falantes vai como falantes.json (o modo aba que entra na pasta
   // da página não tem linha própria; a da página já está lá).
-  const speakers = mergeInto ? null : speakersOf(rec)
+  const speakers = mergeBase ? null : speakersOf(rec)
   const extras = speakers ? [{ nome: SPEAKERS_FILE, texto: JSON.stringify(speakers.file, null, 2) + '\n' }] : []
   // Emenda 21: com o motor por API ligado neste perfil, o helper NÃO põe a pasta na fila do motor
   // local (senão os dois escreveriam o mesmo transcricao.md); quem transcreve é a extensão.
   const apiEngine = settings.apiTranscription.ativa
 
-  if (helper.ok) {
+  // Merge na reserva de downloads: a pasta da página está lá, não no helper. Mandar esta sessão
+  // para o helper a poria em outra pasta, então aqui o destino é o mesmo da página.
+  if (helper.ok && !mergeDownloads) {
     if (rt.hostDirty && rec.gaps.length > 0) {
       // Com lacuna o streaming parou no meio: recomeça o arquivo do zero a partir do IndexedDB.
       await host.discard(rec.sessionId)
@@ -902,7 +914,7 @@ async function doFinalize(rt: Runtime, reasonIn: EndReason): Promise<void> {
   }
   if (!savedPath) {
     try {
-      const r = await saveViaDownloads(rec, relDir, { ...info, helper: null }, extras)
+      const r = await saveViaDownloads(rec, relDir, { ...info, helper: null }, extras, mergeDownloads !== null)
       savedPath = r.path
       downloadId = r.downloadId
       sink = 'downloads'
@@ -1056,6 +1068,22 @@ function notifyPageSessionStarted(e: PageSessionStarted): void {
       log('onPageSessionStarted', err)
     }
   }
+}
+
+/**
+ * Emenda 25: o portão do mudo abriu nesta gravação de microfone. Fica no registro (e no
+ * IndexedDB) porque é ele que decide, no fim, se o arquivo é salvo: nunca aberto quer dizer que só
+ * havia silêncio, e aí a sessão é descartada. Passa pela fila da sessão, como todo o resto, para
+ * não correr com a finalização.
+ */
+export async function markMicOpened(sessionId: string): Promise<void> {
+  const rt = await getRuntime(sessionId)
+  if (!rt || rt.rec.kind !== 'microfone' || rt.rec.micEverOpen === true) return
+  return enqueue(rt, async () => {
+    if (rt.rec.status !== 'gravando') return
+    rt.rec.micEverOpen = true
+    await putSession(rt.rec)
+  })
 }
 
 /** Emenda 25: um relato de estado das faixas de microfone de uma aba (session:mic). */

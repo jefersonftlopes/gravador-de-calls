@@ -24,9 +24,9 @@
 import { MIC_REPORT_STALE_MS, micRouteDecide, type MicTabReport } from '../shared/mic-route'
 import type { EndReason, MicOffscreenState, MicTrackState } from '../shared/protocol'
 import { loadSettings } from '../shared/settings'
-import { getSession, putSession } from './idb'
+import { getSession } from './idb'
 import { sendToOffscreen } from './offscreen-doc'
-import { createSession, onMicReport, onPageSessionEnded, onPageSessionStarted, setMicRecordingBadge, stopSession } from './sessions'
+import { createSession, markMicOpened, onMicReport, onPageSessionEnded, onPageSessionStarted, setMicRecordingBadge, stopSession } from './sessions'
 import { registerTestHooks } from './testing'
 
 const log = (...a: unknown[]) => console.debug('[gravador sw microfone]', ...a)
@@ -81,29 +81,32 @@ async function startMic(e: { tabId: number; sessionId: string; startedAt: number
   if (!settings.micRecording) return
   if (byTab.has(e.tabId)) return
   const startedAt = Date.now()
+  // O desvio vai para o registro: é dele que o info.json tira o `desvioMs`, inclusive depois de o
+  // SW reiniciar (a memória daqui não sobrevive).
+  const skewMs = Math.max(0, startedAt - e.startedAt)
+  const page = await getSession(e.sessionId)
   const rec = await createSession({
     tabId: e.tabId,
     frameId: 0,
-    platform: (await getSession(e.sessionId))?.platform ?? 'outro',
+    platform: page?.platform ?? 'outro',
     kind: 'microfone',
     localId: `microfone-${e.tabId}-${startedAt}`,
     startedAt,
-    meta: {},
+    // O que a página já sabe da call. Serve só para a pasta PRÓPRIA, no caso raro de a sessão de
+    // página não ser salva: com ela salva, o arquivo entra na pasta dela.
+    meta: page?.meta ?? {},
     port: null,
     pairedSessionId: e.sessionId,
+    micSkewMs: skewMs,
   })
   const m: MicSession = {
     tabId: e.tabId,
     sessionId: rec.sessionId,
     pageSessionId: e.sessionId,
-    skewMs: Math.max(0, startedAt - e.startedAt),
+    skewMs,
     open: false,
     everOpen: false,
   }
-  // O desvio vai para o registro: é dele que o info.json tira o `desvioMs`, inclusive depois de o
-  // SW reiniciar (a memória daqui não sobrevive).
-  rec.micSkewMs = m.skewMs
-  await putSession(rec)
   const r = await sendToOffscreen({ target: 'offscreen', t: 'offscreen:mic-start', tabId: e.tabId, sessionId: rec.sessionId }).catch((err: unknown) => ({
     ok: false,
     error: String((err as Error)?.message ?? err),
@@ -151,11 +154,7 @@ async function reconcile(): Promise<void> {
     log('portão do microfone', m.tabId, t.open ? 'aberto' : `fechado (${t.reason})`, `em ${t.waitMs} ms`)
     if (t.open && !m.everOpen) {
       m.everOpen = true
-      const rec = await getSession(m.sessionId)
-      if (rec) {
-        rec.micEverOpen = true
-        await putSession(rec)
-      }
+      await markMicOpened(m.sessionId)
     }
     await setMicRecordingBadge(m.tabId, t.open)
   }
