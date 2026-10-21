@@ -23,7 +23,7 @@ describe('o portão do microfone: aberto só com as quatro condições', () => {
     expect(micGateDecide([aberta({ sender: 0 })])).toMatchObject({ open: true, sender: 0 })
   })
 
-  it('nenhuma faixa é fechado por sem-faixa (o padrão, antes do getUserMedia)', () => {
+  it('sem faixa nenhuma o portão fecha por sem-faixa (o padrão, antes do getUserMedia)', () => {
     expect(micGateDecide([])).toEqual({ open: false, reason: 'sem-faixa', sender: null })
   })
 
