@@ -98,7 +98,7 @@ const MOTIVOS: readonly Motivo[] = ['readyState', 'enabled', 'muted', 'semSender
  * Nenhum motivo fora dos `permitidos` apareceu. `semSender` é sempre permitido no fim: sair da call
  * fecha o RTCPeerConnection, e aí o microfone deixa de estar num sender de verdade. Esse
  * fechamento do fim é correto (o microfone não vai mais para a call) e acontece de uma a quatro
- * leituras antes de o controlador ver o fim, por isso as contagens do fim entram como faixa.
+ * leituras antes de o controlador ver o fim, por isso o teste aceita de 1 a 2 fechamentos.
  */
 function conferirMotivos(motivos: Record<Motivo, number>, permitidos: Motivo[]): void {
   for (const m of MOTIVOS) {

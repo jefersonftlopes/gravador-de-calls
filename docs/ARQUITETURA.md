@@ -1485,7 +1485,7 @@ O portão **não toca na linha do tempo**: a sua fala continua vindo do `measure
 
 As quatro fecharam e as quatro reabriram ao desmutar (`abriu: 2`), cada uma com o motivo certo e nenhum outro. Desmutar o `track.stop()` é o que um aplicativo de verdade faz: `getUserMedia` novo e `replaceTrack` da faixa nova no sender que já existe (aí `faixasMax` vira 2, a morta e a nova). **`replaceTrack(null)` e `removeTrack(sender)` são indistinguíveis pela observação**, de propósito: as duas deixam a faixa viva e ligada sem nenhum sender, e o que importa é fechar.
 
-O fim da call fecha o portão de novo: sair fecha o `RTCPeerConnection`, e aí o microfone deixa de estar num sender (3 leituras de `semSender` no fim, nos quatro testes). Esse fechamento é correto, e por isso as contagens do fim entram como faixa no teste.
+O fim da call fecha o portão de novo: sair fecha o `RTCPeerConnection`, e aí o microfone deixa de estar num sender (3 leituras de `semSender` no fim, nos quatro testes). Esse fechamento é correto, e por isso o teste aceita de 1 a 2 fechamentos e deixa o `semSender` do fim passar em todas as formas.
 
 Nada de microfone sai da sessão, e um teste prova: com o portão aberto a call toda, a pasta fica com exatamente `audio.webm`, `falantes.json` e `info.json` (nenhum arquivo novo), o `info.json` lista só o `audio.webm`, e na gravação o tom de 1000 Hz do microfone falso fica 91 dB abaixo do tom de 440 Hz do outro participante (mediana 440 Hz: -6,0 dBFS; máximo 1000 Hz: -97,0 dBFS), o mesmo critério do AC3.
 
