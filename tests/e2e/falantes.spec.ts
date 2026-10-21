@@ -249,7 +249,14 @@ test('Meet: roster pelo collections e pelo SyncMeetingSpaceCollections, quem fal
   expect(info.participantes).not.toContain('Alex Lima')
   const file = JSON.parse(readFileSync(join(dir, 'falantes.json'), 'utf8'))
   expect(file).not.toHaveProperty('descartadas')
-  expect(file).not.toHaveProperty('diagnostico')
+  expect(file.diagnostico).not.toHaveProperty('csrc')
+  // Emenda 24: o portão do microfone mede sem mudar nada. Aqui o microfone falso entra desligado e
+  // liga de 13 a 17 s, então o portão fechou por `enabled` e abriu no meio da call.
+  const mic = file.diagnostico.microfone
+  expect(mic.leituras).toBeGreaterThan(30)
+  expect(mic.abriu).toBeGreaterThanOrEqual(1)
+  expect(mic.motivos.enabled).toBeGreaterThan(8)
+  expect(mic.motivos).toMatchObject({ readyState: 0, muted: 0, semTrilha: 0, desconhecido: 0 })
   expect(await fx(call, 'errors')).toEqual([])
   expect(await fx(call, 'unhandled')).toEqual([])
   expect(h!.pageErrors).toEqual([])

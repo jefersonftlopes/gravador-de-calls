@@ -13,6 +13,7 @@ import { createRecorder, type Recorder, type RecorderChunk } from './capture/rec
 import type { Registry } from './capture/registry'
 import type { SeamSet } from './capture/seams'
 import { criarRelogio, type Tarefa } from '../shared/relogio'
+import { initialMicGate, micGateDiagnostics, stepMicGate, type MicGateStats } from '../shared/mic-gate'
 import { createTimeline, type SpeakerReading, type Timeline } from './speakers/timeline'
 import { blobToBase64, type Bridge } from './bridge'
 import type { Originals } from './originals'
@@ -82,6 +83,8 @@ interface Active {
   aliasesJson: string
   /** O áudio dos outros (seam selecionado, ao vivo) tinha fala na última medida; null: não se sabe. */
   remoteSpeech: boolean | null
+  /** Emenda 24: o portão do microfone, só medido (nada do microfone entra na gravação). */
+  micGate: MicGateStats
 }
 
 function randomId(): string {
@@ -262,6 +265,14 @@ export function startSessionController(deps: SessionDeps): SessionController {
     } catch (e) {
       log('microfone', e)
     }
+    // Emenda 24: a regra do mudo, só MEDIDA. Ela não decide nada sobre a gravação nem sobre a
+    // linha do tempo nesta fatia: o diagnóstico do fim é que vai dizer, numa call real, como o
+    // Meet e o Teams mutam de verdade.
+    try {
+      a.micGate = stepMicGate(a.micGate, now, registry.micGateInputs())
+    } catch (e) {
+      log('portão do microfone', e)
+    }
   }
 
   const readAliases = (): Record<string, string> => {
@@ -273,13 +284,15 @@ export function startSessionController(deps: SessionDeps): SessionController {
     }
   }
 
-  const readDiagnostics = (): SpeakerDiagnostics | null => {
+  /** O diagnóstico do adaptador (Emenda 20) mais o do portão do microfone (Emenda 24). */
+  const readDiagnostics = (a: Active): SpeakerDiagnostics => {
+    let adapterDiag: SpeakerDiagnostics | null = null
     try {
-      return adapter.speakerDiagnostics?.() ?? null
+      adapterDiag = adapter.speakerDiagnostics?.() ?? null
     } catch (e) {
       log('diagnóstico dos falantes', e)
-      return null
     }
+    return { ...(adapterDiag ?? {}), microfone: micGateDiagnostics(a.micGate) }
   }
 
   /** Manda os intervalos que mudaram (ou, com `full`, todos a partir do 0, no fim). */
@@ -296,7 +309,7 @@ export function startSessionController(deps: SessionDeps): SessionController {
     if (!b && !aliasesChanged) return
     a.aliasesJson = aliasesJson
     // Emenda 20: o diagnóstico só no lote final (a linha inteira), que é o que chega ao arquivo.
-    const diagnostico = full ? readDiagnostics() : null
+    const diagnostico = full ? readDiagnostics(a) : null
     bridge.send({
       t: 'session:speakers',
       sessionId: a.sessionId,
@@ -336,6 +349,7 @@ export function startSessionController(deps: SessionDeps): SessionController {
       lastSpeakersAt: 0,
       aliasesJson: '{}',
       remoteSpeech: null,
+      micGate: initialMicGate(),
     }
     active = a
     const recorder = createRecorder(orig, mixer.stream, onChunk, log)

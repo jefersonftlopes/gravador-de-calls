@@ -9,6 +9,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MIXER_DELAY_MS } from '../shared/constants'
 import type { Down, SpeakerInterval, Up } from '../shared/protocol'
+import type { MicTrackState } from '../shared/mic-gate'
 import { applySpeakersBatch, type SpeakerTimelineRecord } from '../shared/speakers'
 import type { Bridge } from './bridge'
 import type { Registry } from './capture/registry'
@@ -25,6 +26,8 @@ const recorder = {
   stop: vi.fn(async () => 0),
 }
 let micDb = () => -100
+/** Emenda 24: o estado das faixas de microfone que o registry "observa" em cada leitura. */
+let micInputs: () => MicTrackState[] = () => []
 
 vi.mock('./capture/recorder', () => ({ createRecorder: () => recorder }))
 vi.mock('./capture/mixer', async (importOriginal) => ({
@@ -114,6 +117,7 @@ async function harness(who: (rel: number) => string[], dropBatch: number): Promi
     probe: () => ({ now: Date.now(), pcsOpen: 1, pcsConnected: 1, connectedWithLiveAudio: true, reconnectingWithAudio: false, liveRemoteAudioTracks: 1, audioPcClosedAt: null }),
     contributingSources: () => [],
     localMicTracks: () => [],
+    micGateInputs: () => micInputs(),
   } as unknown as Registry
   const seams = { all: [], onChange: () => () => {}, primedCount: () => 0 } as unknown as SeamSet
   startSessionController({ orig, log: () => {}, adapter, registry, seams, bridge })
@@ -141,6 +145,7 @@ beforeEach(() => {
   vi.stubGlobal('window', {})
   vi.stubGlobal('document', { readyState: 'complete' })
   micDb = () => -100
+  micInputs = () => []
   recorder.requestData.mockClear()
 })
 
@@ -187,6 +192,43 @@ describe('falantes no fim da gravação (Emenda 18)', () => {
     // O adaptador sabe que o áudio dos outros tem fala (o dsh do Teams depende disso).
     expect(h.remote.length).toBeGreaterThan(50)
     expect(h.remote.every((r) => r === true)).toBe(true)
+  })
+
+  // Emenda 24: a regra do mudo só MEDE nesta fatia. O portão fecha no meio da call (o aplicativo
+  // parou de enviar e manteve a faixa viva) e a linha do tempo não muda por isso: a sua fala
+  // continua vindo do medidor do microfone, como na Emenda 18.
+  it('o portão do microfone vai nos números do lote final e não mexe na linha do tempo', async () => {
+    // O estado é montado antes do controlador subir: assim a primeira leitura já pega o portão
+    // aberto, como numa call em que a pessoa entra com o microfone ligado.
+    let hh: Harness | undefined
+    micDb = () => -20
+    micInputs = () => {
+      const rel = hh ? Date.now() - hh.startedAt() : 0
+      return [{ readyState: 'live', enabled: true, muted: false, sender: rel < 6000 ? 3 : null }]
+    }
+    const h = (hh = await harness(script, 0))
+    await h.until(12_000)
+    h.end()
+    await h.until(17_000)
+    const batches = h.sent.filter((m) => m.t === 'session:speakers')
+    const last = batches.at(-1) as { diagnostico?: { microfone?: Record<string, unknown> } }
+    const mic = last.diagnostico?.microfone as
+      | { leituras: number; abriu: number; fechou: number; segundosAberto: number; segundosFechado: number; trilhasMax: number; motivos: Record<string, number> }
+      | undefined
+    expect(mic).toBeDefined()
+    expect(mic).toMatchObject({ abriu: 1, fechou: 1, trilhasMax: 1 })
+    expect(mic!.leituras).toBeGreaterThan(40)
+    expect(mic!.segundosAberto).toBeGreaterThanOrEqual(5)
+    expect(mic!.segundosAberto).toBeLessThanOrEqual(6.5)
+    expect(mic!.segundosFechado).toBeGreaterThanOrEqual(5)
+    expect(mic!.motivos).toMatchObject({ readyState: 0, enabled: 0, muted: 0, semTrilha: 0, desconhecido: 0 })
+    expect(mic!.motivos.semSender).toBeGreaterThan(20)
+    // Só no lote final, como o diagnóstico de CSRC.
+    expect(batches.slice(0, -1).filter((m) => 'diagnostico' in m)).toEqual([])
+    // A linha do tempo não sentiu o portão: você continua falando depois de o portão fechar.
+    const voce = rows(h.stored()).filter((r) => r[0] === 'Você')
+    expect(voce).toHaveLength(1)
+    expect(Number(voce[0][2])).toBeGreaterThan(10_000 + D)
   })
 
   it('o pagehide manda a linha inteira, cortada no fim do áudio, antes do session:end', async () => {

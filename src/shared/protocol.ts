@@ -380,6 +380,22 @@ export interface SpeakerDiagnostics {
     receptores: number
     fontes: Array<{ csrc: number; leiturasAtiva: number; receptores: number; resolvida: boolean; mesmoPacoteComNomeada: number; ignorada?: 'mais-alto' | 'roster' }>
   }
+  /**
+   * Emenda 24: o portão do microfone (`src/shared/mic-gate.ts`), só com números, para uma call real
+   * dizer como o Meet e o Teams mutam de verdade. Quantas leituras houve, quantas vezes o portão
+   * abriu e fechou, quantos segundos em cada estado, quantas trilhas de microfone apareceram ao
+   * mesmo tempo e quantas leituras cada motivo fechou. Nunca áudio, texto do usuário nem nome de
+   * dispositivo. O microfone continua fora da gravação: isto é medida, não captura.
+   */
+  microfone?: {
+    leituras: number
+    abriu: number
+    fechou: number
+    segundosAberto: number
+    segundosFechado: number
+    trilhasMax: number
+    motivos: { readyState: number; enabled: number; muted: number; semSender: number; semTrilha: number; desconhecido: number }
+  }
 }
 
 /** Uma fonte sem nome que saiu da linha do tempo (Emenda 20, `UNNAMED_SHADOW` em speakers.ts). */
@@ -963,6 +979,8 @@ const seamSchema = z.enum(['receivers', 'elements', 'sources', 'output'])
 const endReasonSchema = z.enum(END_REASONS)
 const nonNegInt = z.number().int().nonnegative()
 const time = z.number().finite().nonnegative()
+/** Segundos de um diagnóstico (Emenda 24): um número de verdade, com teto folgado (uma semana). */
+const seconds = z.number().finite().nonnegative().max(604_800)
 
 export const callMetaSchema = z
   .object({
@@ -1036,6 +1054,26 @@ const speakerDiagnosticsSchema = z.object({
           }),
         )
         .max(32),
+    })
+    .optional(),
+  // Emenda 24: o portão do microfone, só números. Como no `csrc`, uma chave a mais sai calada (o
+  // z.object descarta o que não conhece) em vez de recusar o lote, que leva a linha do tempo.
+  microfone: z
+    .object({
+      leituras: nonNegInt,
+      abriu: nonNegInt,
+      fechou: nonNegInt,
+      segundosAberto: seconds,
+      segundosFechado: seconds,
+      trilhasMax: nonNegInt.max(1000),
+      motivos: z.object({
+        readyState: nonNegInt,
+        enabled: nonNegInt,
+        muted: nonNegInt,
+        semSender: nonNegInt,
+        semTrilha: nonNegInt,
+        desconhecido: nonNegInt,
+      }),
     })
     .optional(),
 })
