@@ -1320,7 +1320,7 @@ export function pendingSaves(): PendingSave[] {
  */
 async function effectiveSettings(): Promise<Extract<Down, { t: 'settings' }>> {
   const [s, consent] = await Promise.all([loadSettings(), loadConsent().catch(() => null)])
-  return { t: 'settings', autoMeet: autoAllowed('meet', s, consent), autoTeams: autoAllowed('teams', s, consent) }
+  return { t: 'settings', autoMeet: autoAllowed('meet', s, consent), autoTeams: autoAllowed('teams', s, consent), micRecording: s.micRecording }
 }
 
 /** Avisa todas as frames conectadas que as configurações (ou a confirmação do aviso) mudaram. */

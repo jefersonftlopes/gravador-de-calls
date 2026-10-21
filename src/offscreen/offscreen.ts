@@ -5,6 +5,7 @@ import type { OffscreenReq } from '../shared/protocol'
 import { BAKED } from '../shared/baked'
 import { blobHandlers } from './blob'
 import type { OffscreenHandlers, OffscreenType } from './handlers'
+import { micHandlers } from './mic'
 import { tabHandlers } from './tab'
 
 /**
@@ -16,7 +17,7 @@ import { tabHandlers } from './tab'
 const versionHandlers: OffscreenHandlers<'offscreen:version'> = { 'offscreen:version': async () => BAKED }
 console.debug('[gravador offscreen] versão', BAKED.version, BAKED.build)
 
-const handlers: OffscreenHandlers<OffscreenType> = { ...blobHandlers, ...tabHandlers, ...versionHandlers }
+const handlers: OffscreenHandlers<OffscreenType> = { ...blobHandlers, ...tabHandlers, ...micHandlers, ...versionHandlers }
 
 chrome.runtime.onMessage.addListener((msg: OffscreenReq, _sender, sendResponse) => {
   if (!msg || msg.target !== 'offscreen' || !(msg.t in handlers)) return false

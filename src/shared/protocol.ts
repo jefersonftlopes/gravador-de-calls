@@ -17,11 +17,14 @@ import { END_REASONS, MAX_SPEAKER_INTERVALS, SPEAKER_SOURCES, UI_LANGUAGES, VIGI
 import { isAllowedEndpoint, type ApiTranscriptionConfig } from './api-transcription'
 import type { Platform } from './hosts'
 import type { TabAudioMode } from './volume'
+// Emenda 25: só o tipo (o ciclo é apagado no build; ./mic-gate.ts importa SpeakerDiagnostics daqui).
+import type { MicTrackState } from './mic-gate'
 
 export * from './constants'
 export type { ApiTranscriptionConfig } from './api-transcription'
 export type { Platform } from './hosts'
 export type { TabAudioMode } from './volume'
+export type { MicGateReason, MicTrackState } from './mic-gate'
 
 // ---------------------------------------------------------------------------------------------
 // Tipos de domínio
@@ -232,6 +235,14 @@ export interface Settings {
    * aqui: ela tem armazenamento próprio (src/shared/api-key.ts).
    */
   apiTranscription: ApiTranscriptionConfig
+  /**
+   * Emenda 25: gravar a própria voz, por aba, num arquivo separado (audio-microfone.webm), para a
+   * transcrição ter a fala dele em vez de "(sua fala não é gravada)". POR PERFIL do Chrome, como o
+   * motor por API, e DESLIGADO por padrão: ligar é escolha explícita, e as configurações pedem a
+   * permissão do microfone no mesmo clique. Ligado, a gravação só acontece enquanto o portão do
+   * mudo (Emenda 24) disser que o microfone está aberto naquela aba.
+   */
+  micRecording: boolean
 }
 
 /** Saída automática registrada no info.json (Emenda 2). */
@@ -260,7 +271,12 @@ export interface RecentRecording {
   status: 'concluida' | 'interrompida'
 }
 
-export type SessionKind = 'pagina' | 'aba'
+/**
+ * O que a gravação é. `pagina` é a automática da call (audio.webm), `aba` é o modo aba
+ * (audio-aba.webm) e `microfone` é a voz do próprio usuário (Emenda 25, audio-microfone.webm),
+ * numa sessão própria pareada com a da página, para o arquivo ser separado de verdade.
+ */
+export type SessionKind = 'pagina' | 'aba' | 'microfone'
 export type SinkKind = 'host' | 'downloads'
 export type SessionStatus = 'gravando' | 'finalizando' | 'salva' | 'descartada' | 'interrompida'
 
@@ -271,6 +287,13 @@ export interface InfoFile {
   bytes: number
   formato: string
   kbps: number
+  /**
+   * Emenda 25: quantos milissegundos este arquivo começou DEPOIS do audio.webm da mesma pasta.
+   * Só no `audio-microfone.webm`, e só quando ele entra na pasta da call: os dois arquivos saem
+   * do mesmo atraso de MIXER_DELAY_MS, então este número é tudo o que falta para casar os dois no
+   * tempo. Sem ele a transcrição de cada arquivo continua valendo por si (é o que a 0.6.0 faz).
+   */
+  desvioMs?: number
 }
 
 /** Conteúdo do info.json (escrito por último na pasta da call). */
@@ -512,6 +535,14 @@ export type Up =
    * de `from` em diante por estes). `aliases`: nome de cada chave provisória já resolvida.
    */
   | { t: 'session:speakers'; sessionId: string; from: number; intervals: SpeakerInterval[]; aliases?: Record<string, string>; diagnostico?: SpeakerDiagnostics }
+  /**
+   * Emenda 25: o estado observado de cada faixa de microfone desta aba (`registry.micGateInputs()`),
+   * e NÃO a decisão: quem decide se a voz é gravada é o SW, com a regra pura de ./mic-gate.ts e o
+   * roteamento de ./mic-route.ts. A frame manda na troca e, de rotina, a cada MIC_REPORT_EVERY_MS.
+   * `sinceMs` é o tempo desde a leitura anterior, que deixa um fechamento valer para o áudio de trás.
+   * Só sai com `micRecording` ligado neste perfil (a mensagem `settings` diz).
+   */
+  | { t: 'session:mic'; sessionId: string; tracks: MicTrackState[]; sinceMs: number }
   | { t: 'session:end'; sessionId: string; endedAt: number; reason: EndReason; lastSeq: number }
 
 export type UpType = Up['t']
@@ -528,7 +559,8 @@ export type Down =
   | { t: 'session:rejected'; localId: string; reason: RejectReason }
   | { t: 'chunk:ack'; sessionId: string; seq: number }
   | { t: 'session:stop'; sessionId: string; reason: 'user' }
-  | { t: 'settings'; autoMeet: boolean; autoTeams: boolean }
+  /** `micRecording` (Emenda 25): desligado, a frame não manda `session:mic` nenhum. */
+  | { t: 'settings'; autoMeet: boolean; autoTeams: boolean; micRecording: boolean }
 
 export type DownType = Down['t']
 
@@ -933,6 +965,20 @@ export type OffscreenReq =
   | { target: 'offscreen'; t: 'offscreen:tab-volume-stop'; tabId: number }
   /** Estado da captura da aba no offscreen (o SW reinicia e perde a memória; o offscreen não). */
   | { target: 'offscreen'; t: 'offscreen:tab-audio'; tabId: number }
+  /**
+   * Emenda 25: prepara o gravador do microfone desta aba (nenhum getUserMedia ainda, nenhuma
+   * permissão pedida). O gravador já roda, gravando silêncio, para o arquivo ter a mesma base de
+   * tempo da call desde o começo.
+   */
+  | { target: 'offscreen'; t: 'offscreen:mic-start'; tabId: number; sessionId: string }
+  /**
+   * Liga ou desliga o nó do microfone desta aba, `waitMs` depois (src/shared/mic-route.ts). É aqui,
+   * e só na PRIMEIRA abertura, que o getUserMedia do microfone acontece.
+   */
+  | { target: 'offscreen'; t: 'offscreen:mic-gate'; tabId: number; open: boolean; waitMs: number }
+  | { target: 'offscreen'; t: 'offscreen:mic-stop'; tabId: number; reason?: EndReason }
+  /** Estado do microfone no offscreen (diagnóstico e testes; nunca áudio). */
+  | { target: 'offscreen'; t: 'offscreen:mic-state'; tabId?: number }
   /** Versão e build embutidos no documento offscreen (Emenda 17): ele é lido do disco ao abrir. */
   | { target: 'offscreen'; t: 'offscreen:version' }
 
@@ -947,7 +993,33 @@ export interface OffscreenResMap {
   'offscreen:tab-volume': { ok: boolean }
   'offscreen:tab-volume-stop': { ok: boolean }
   'offscreen:tab-audio': TabAudioState
+  'offscreen:mic-start': { ok: boolean; error?: string }
+  'offscreen:mic-gate': { ok: boolean; error?: string; permission?: MicPermissionState }
+  'offscreen:mic-stop': { ok: boolean }
+  'offscreen:mic-state': MicOffscreenState
   'offscreen:version': BuildInfo
+}
+
+/**
+ * O que o `navigator.permissions.query({ name: 'microphone' })` do documento offscreen respondeu.
+ * `indisponivel`: o navegador não respondeu a consulta (a permissão é da origem
+ * chrome-extension://, concedida uma vez na página de configurações; ver a Emenda 25).
+ */
+export type MicPermissionState = 'granted' | 'denied' | 'prompt' | 'indisponivel'
+
+/** Estado do microfone no offscreen (Emenda 25). Só números e estados, nunca áudio. */
+export interface MicOffscreenState {
+  /** O getUserMedia já aconteceu e a faixa está viva. */
+  capturando: boolean
+  permissao: MicPermissionState
+  /** O último erro do getUserMedia, se houve. */
+  erro: string | null
+  /** Abas com gravador preparado. */
+  abas: number[]
+  /** Abas com o nó ligado agora (as que recebem a voz). */
+  ligadas: number[]
+  /** Abas em que o nó já esteve ligado alguma vez (as que vão gerar arquivo). */
+  jaLigadas: number[]
 }
 
 /** Captura de uma aba no offscreen (Emenda 14). `gain` é o ganho que se ouve agora. */
@@ -1123,6 +1195,25 @@ export const upSchema = z.discriminatedUnion('t', [
     diagnostico: speakerDiagnosticsSchema.optional(),
   }),
   z.object({
+    t: z.literal('session:mic'),
+    sessionId: sessionIdSchema,
+    // Emenda 25: só os quatro campos observados por faixa, e nada mais. `strict` de propósito: o
+    // que decide se a voz dele é gravada não aceita campo desconhecido.
+    tracks: z
+      .array(
+        z
+          .object({
+            readyState: z.string().max(20).optional(),
+            enabled: z.boolean().optional(),
+            muted: z.boolean().optional(),
+            sender: nonNegInt.max(100_000).nullable().optional(),
+          })
+          .strict(),
+      )
+      .max(100),
+    sinceMs: z.number().finite().nonnegative().max(3_600_000),
+  }),
+  z.object({
     t: z.literal('session:end'),
     sessionId: sessionIdSchema,
     endedAt: time,
@@ -1183,6 +1274,8 @@ export const settingsSchema = z.object({
   vigia: vigiaCfgSchema,
   language: z.enum(UI_LANGUAGES),
   apiTranscription: apiTranscriptionSchema,
+  /** Emenda 25: gravar a própria voz, por aba, num arquivo separado. Nasce DESLIGADO. */
+  micRecording: z.boolean(),
 })
 
 /** Caminho absoluto ou começando com ~; vazio vale (o helper descobre sozinho). */

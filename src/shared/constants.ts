@@ -21,6 +21,13 @@ export const BRIDGE_CONFIRM = 'bridge:confirm'
 export const PORT_SESSION = 'gravador:sessao'
 /** Port do offscreen (gravações do modo aba). */
 export const PORT_TAB = 'gravador:aba'
+/**
+ * Port do offscreen para as gravações do microfone (Emenda 25). Port próprio, e não o do modo aba,
+ * de propósito: a fatia do microfone não mexe no caminho de chunks do modo aba, que é o mais
+ * exercitado do repositório. A lógica de seq/ack/reenvio é a mesma, repetida em
+ * src/offscreen/mic.ts (divergência declarada; a 0.6.0 preferiu não refatorar src/offscreen/tab.ts).
+ */
+export const PORT_MIC = 'gravador:microfone'
 /** Port do vigia (sair e fechar a call sozinho, Emendas 2 e 3). */
 export const PORT_VIGIA = 'gravador:vigia'
 /** Nome do helper de native messaging. */
@@ -42,6 +49,15 @@ export const RECENT_KEY = 'recent'
 export const API_KEY_STORAGE_KEY = 'apiTranscriptionKey'
 /** Emenda 21: o estado da transcrição por API de cada gravação recente (o que o popup mostra). */
 export const API_TRANSCRIPTION_STATE_KEY = 'apiTranscriptionState'
+
+/**
+ * Emenda 25: o arquivo da voz do próprio usuário, na pasta da call. O nome começa com `audio`
+ * porque é assim que a fila da transcrição encontra os áudios de uma pasta
+ * (host/transcricao.mjs, `AUDIO_RE`), e o `transcriptStem` dele vira `transcricao-microfone.md`,
+ * como `audio-aba.webm` vira `transcricao-aba.md`. Assim o helper não muda (HOST_VERSION fica em
+ * 0.5.0) e a transcrição do microfone sai pelo mesmo caminho do modo aba.
+ */
+export const MIC_FILE = 'audio-microfone.webm'
 
 /** Formato e parâmetros fixos da gravação. */
 export const RECORDING_MIME = 'audio/webm;codecs=opus'
@@ -96,6 +112,7 @@ export const UP_TYPES = [
   'session:meta',
   'session:diag',
   'session:speakers',
+  'session:mic',
   'session:end',
 ] as const satisfies readonly UpType[]
 

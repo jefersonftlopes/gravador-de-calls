@@ -162,6 +162,13 @@ export interface LaunchOptions {
    */
   tabCapture?: boolean
   /**
+   * `false` tira o `--use-fake-ui-for-media-stream` (que aceita todo pedido de mídia sem
+   * perguntar), SEM ligar as outras flags do modo aba. Serve para medir o que acontece quando a
+   * permissão do microfone NÃO está concedida (Emenda 25): no headless não há ninguém para clicar,
+   * então o pedido fica pendente, e com `--deny-permission-prompts` ele é negado. Vale no relaunch.
+   */
+  fakeMediaUi?: boolean
+  /**
    * Pasta da extensão carregada (padrão: dist/). A recarga sozinha (Emenda 17) é testada com uma
    * cópia publicada pelo scripts/publicar.mjs numa pasta temporária, que tem o publicado.json.
    */
@@ -202,6 +209,31 @@ function seedDownloadPrefs(userDataDir: string, dir: string): void {
   prefs.download = download
   prefs.savefile = { ...((prefs.savefile as object | undefined) ?? {}), default_directory: dir }
   writeFileSync(prefsFile, JSON.stringify(prefs))
+}
+
+/**
+ * Emenda 25: escreve no perfil a permissão do microfone CONCEDIDA para a origem
+ * `chrome-extension://<id>`, que é exatamente o que o clique em "Permitir" no diálogo do Chrome
+ * grava (`profile.content_settings.exceptions.media_stream_mic`). No headless não há ninguém para
+ * clicar, e o CDP recusa conceder permissão a uma origem de extensão ("opaque origins"), então é
+ * assim que o teste faz o papel do clique que a página de configurações provoca. Mesma técnica do
+ * `seedDownloadPrefs` acima: o Chrome lê o Preferences na abertura.
+ */
+export function seedMicPermission(userDataDir: string): void {
+  const file = join(userDataDir, 'Default', 'Preferences')
+  mkdirSync(join(userDataDir, 'Default'), { recursive: true })
+  const prefs: Record<string, unknown> = existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>) : {}
+  const profile = { ...((prefs.profile as Record<string, unknown> | undefined) ?? {}) }
+  const content = { ...((profile.content_settings as Record<string, unknown> | undefined) ?? {}) }
+  const exceptions = { ...((content.exceptions as Record<string, unknown> | undefined) ?? {}) }
+  exceptions.media_stream_mic = {
+    // 1 = ALLOW. O `last_modified` é em microssegundos desde a época do Windows, como o Chrome grava.
+    [`chrome-extension://${EXTENSION_ID}/,*`]: { last_modified: String((Date.now() + 11_644_473_600_000) * 1000), setting: 1 },
+  }
+  content.exceptions = exceptions
+  profile.content_settings = content
+  prefs.profile = profile
+  writeFileSync(file, JSON.stringify(prefs))
 }
 
 /** PID do processo principal do Chrome deste perfil (filho deste processo Node). */
@@ -309,7 +341,11 @@ async function launchInternal(opts: LaunchOptions, state: LaunchState): Promise<
     seedDownloadPrefs(userDataDir, downloadsDir)
   }
   if (opts.beforeLaunch) await opts.beforeLaunch({ base, userDataDir })
-  const baseArgs = opts.tabCapture ? [...BASE_ARGS.filter((a) => a !== FAKE_UI_ARG), ...TAB_CAPTURE_ARGS] : BASE_ARGS
+  const baseArgs = opts.tabCapture
+    ? [...BASE_ARGS.filter((a) => a !== FAKE_UI_ARG), ...TAB_CAPTURE_ARGS]
+    : opts.fakeMediaUi === false
+      ? BASE_ARGS.filter((a) => a !== FAKE_UI_ARG)
+      : BASE_ARGS
   const locale = opts.locale ?? 'pt-BR'
   const context = await chromium.launchPersistentContext(userDataDir, {
     ...opts.contextOptions,
@@ -408,6 +444,7 @@ async function launchInternal(opts: LaunchOptions, state: LaunchState): Promise<
         contextOptions: opts.contextOptions,
         downloads: opts.downloads,
         tabCapture: opts.tabCapture,
+        fakeMediaUi: opts.fakeMediaUi,
         locale: opts.locale,
         consent: opts.consent,
         extensionDir: opts.extensionDir,

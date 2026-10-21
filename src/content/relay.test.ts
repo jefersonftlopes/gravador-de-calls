@@ -74,22 +74,22 @@ async function change(key: string, value: unknown) {
 
 describe('relay: configuração lida do storage e o aviso', () => {
   it('ligar as plataformas sem o aviso confirmado: o MAIN recebe as duas desligadas', async () => {
-    expect(await change(SETTINGS_KEY, { autoMeet: true, autoTeams: true })).toEqual({ t: 'settings', autoMeet: false, autoTeams: false })
+    expect(await change(SETTINGS_KEY, { autoMeet: true, autoTeams: true })).toEqual({ t: 'settings', autoMeet: false, autoTeams: false, micRecording: false })
   })
 
   it('um aviso de versão antiga também não vale', async () => {
     stored[CONSENT_KEY] = { ...confirmed, version: CONSENT_VERSION - 1 }
-    expect(await change(SETTINGS_KEY, { autoMeet: true, autoTeams: true })).toEqual({ t: 'settings', autoMeet: false, autoTeams: false })
+    expect(await change(SETTINGS_KEY, { autoMeet: true, autoTeams: true })).toEqual({ t: 'settings', autoMeet: false, autoTeams: false, micRecording: false })
   })
 
   it('com o aviso confirmado no storage, vale a configuração de cada plataforma', async () => {
     stored[CONSENT_KEY] = confirmed
-    expect(await change(SETTINGS_KEY, { autoMeet: false, autoTeams: true })).toEqual({ t: 'settings', autoMeet: false, autoTeams: true })
+    expect(await change(SETTINGS_KEY, { autoMeet: false, autoTeams: true })).toEqual({ t: 'settings', autoMeet: false, autoTeams: true, micRecording: false })
   })
 
   it('confirmar o aviso com a configuração já gravada libera a gravação automática', async () => {
     stored[SETTINGS_KEY] = { autoMeet: true, autoTeams: false }
-    expect(await change(CONSENT_KEY, confirmed)).toEqual({ t: 'settings', autoMeet: true, autoTeams: false })
+    expect(await change(CONSENT_KEY, confirmed)).toEqual({ t: 'settings', autoMeet: true, autoTeams: false, micRecording: false })
   })
 
   it('mudança em outra área ou em outra chave não manda nada', async () => {

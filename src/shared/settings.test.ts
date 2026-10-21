@@ -74,7 +74,7 @@ describe('idioma da interface guardado (Emenda 19)', () => {
   it('padrão auto; configuração de antes da 0.4.1, sem o campo, é auto e o resto fica', () => {
     expect(DEFAULT_SETTINGS.language).toBe('auto')
     const antiga = { profileLabel: 'Trabalho', autoMeet: false, autoTeams: true, minSeconds: 45, autoLeave: true, vigiaIndicador: false, vigia: DEFAULT_VIGIA }
-    expect(normalizeSettings(antiga)).toEqual({ ...antiga, profileId: '', language: 'auto', apiTranscription: DEFAULT_SETTINGS.apiTranscription })
+    expect(normalizeSettings(antiga)).toEqual({ ...antiga, profileId: '', language: 'auto', apiTranscription: DEFAULT_SETTINGS.apiTranscription, micRecording: false })
   })
 
   it('pt_BR e en ficam como vieram', () => {

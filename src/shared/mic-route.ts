@@ -108,3 +108,13 @@ export function micRouteDecide(reports: readonly MicTabReport[], now: number, de
   }
   return { tabs, open: tabs.filter((t) => t.open).map((t) => t.tabId) }
 }
+
+/**
+ * `settings.micRecording` lido do objeto cru, sem zod: o relay (src/content/relay.ts) não carrega
+ * os schemas, e o padrão de um perfil que nunca ligou o recurso (ou de qualquer configuração
+ * guardada antes da 0.6.0) é DESLIGADO. Precedente: `autoAllowed` em ./consent.ts e `languageOf`
+ * em ./i18n.ts, que leem as mesmas configurações do mesmo jeito.
+ */
+export function micRecordingOf(raw: unknown): boolean {
+  return !!raw && typeof raw === 'object' && (raw as { micRecording?: unknown }).micRecording === true
+}

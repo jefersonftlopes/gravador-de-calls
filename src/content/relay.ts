@@ -24,6 +24,7 @@ import {
   isUpType,
 } from '../shared/constants'
 import { CONSENT_KEY, autoAllowed } from '../shared/consent'
+import { micRecordingOf } from '../shared/mic-route'
 import type { Down, PageOutputAnswer, Up } from '../shared/protocol'
 import { pageUsesSpecificOutput } from './saida'
 
@@ -273,7 +274,12 @@ try {
       .then((got) => {
         const settings = SETTINGS_KEY in changes ? changes[SETTINGS_KEY].newValue : got[SETTINGS_KEY]
         const consent = CONSENT_KEY in changes ? changes[CONSENT_KEY].newValue : got[CONSENT_KEY]
-        toMain({ t: 'settings', autoMeet: autoAllowed('meet', settings, consent), autoTeams: autoAllowed('teams', settings, consent) })
+        toMain({
+          t: 'settings',
+          autoMeet: autoAllowed('meet', settings, consent),
+          autoTeams: autoAllowed('teams', settings, consent),
+          micRecording: micRecordingOf(settings),
+        })
       })
       .catch((e) => log('storage.local', e))
   })

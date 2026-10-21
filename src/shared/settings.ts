@@ -51,6 +51,10 @@ export const DEFAULT_SETTINGS: Settings = {
   language: 'auto',
   // Emenda 21: motor por API desligado, como em toda configuração guardada antes da 0.5.0.
   apiTranscription: DEFAULT_API_TRANSCRIPTION,
+  // Emenda 25: gravar a própria voz nasce DESLIGADO, como em toda configuração guardada antes da
+  // 0.6.0. Ligar é escolha explícita do usuário, por perfil do Chrome, e pede a permissão do
+  // microfone na hora (as configurações).
+  micRecording: false,
 }
 
 /** Mescla o que estiver salvo com os padrões; campos inválidos voltam ao padrão. */
