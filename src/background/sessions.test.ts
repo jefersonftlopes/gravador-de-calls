@@ -1171,6 +1171,36 @@ describe('o próprio nome e os diagnósticos no info.json (Emenda 20)', () => {
     expect(JSON.stringify(file.diagnostico)).not.toContain('Ana')
   })
 
+  it('o portão do microfone (Emenda 24) chega ao falantes.json só com os números, e um motivo a mais sai', async () => {
+    fake.helper.up = true
+    await load()
+    const { port, sessionId } = await pageSession()
+    const microfone = {
+      leituras: 51,
+      abriu: 2,
+      fechou: 1,
+      segundosAberto: 8,
+      segundosFechado: 4.5,
+      trilhasMax: 1,
+      motivos: { readyState: 0, enabled: 16, muted: 0, semSender: 3, semTrilha: 0, desconhecido: 0 },
+    }
+    const iv = { nome: 'Ana Souza', de: 1000, ate: 5000, fonte: 'dsh' }
+    port.emit({
+      t: 'session:speakers',
+      sessionId,
+      from: 0,
+      intervals: [iv],
+      diagnostico: { microfone: { ...microfone, motivos: { ...microfone.motivos, dispositivo: 'MacBook Pro Microphone' }, aparelho: 'x' } },
+    })
+    await vi.waitFor(() => expect((fake.sessions.get(sessionId) as SessionRecord).speakers?.diagnostico).toBeTruthy())
+    end(port, sessionId, 40)
+    await vi.waitFor(() => expect(statusOf(sessionId)).toBe('salva'))
+    const [f] = fake.helper.finalized.filter((x) => x.sessionId === sessionId)
+    const file = JSON.parse(f.extras![0].texto)
+    expect(file.diagnostico).toEqual({ microfone })
+    expect(JSON.stringify(file.diagnostico)).not.toContain('MacBook')
+  })
+
   it('sem os sinais (Teams, versão anterior), o info.json não ganha o campo', async () => {
     fake.helper.up = true
     await load()
