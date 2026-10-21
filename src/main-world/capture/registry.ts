@@ -12,6 +12,7 @@
 // (única exceção, Emenda 5: getUserMedia/getDisplayMedia devolvem a promise derivada que resolve
 // com o mesmo stream ou rejeita com o mesmo motivo, para não marcar a promise da página como
 // tratada).
+import type { MicTrackState } from '../../shared/mic-gate'
 import type { Originals } from '../originals'
 import type { Probe } from '../platforms/types'
 import { replaceMethod, wrapSetter, type AnyFn } from '../wrap'
@@ -59,6 +60,13 @@ export interface Registry {
    * medir se você fala; nunca entram na gravação.
    */
   localMicTracks(): MediaStreamTrack[]
+  /**
+   * Emenda 24: o estado observado de cada faixa de microfone, para a regra do mudo
+   * (src/shared/mic-gate.ts) decidir se o microfone está aberto. Este método só OBSERVA, nunca
+   * decide. Diferente do `localMicTracks`, inclui a faixa que já terminou: é ela que diz que o mudo
+   * foi um `track.stop()`.
+   */
+  micGateInputs(): MicTrackState[]
   /** Emenda 18: CSRCs de todos os receptores de áudio vivos dos PCs registrados (só leitura). */
   contributingSources(): ContributingSource[]
   /**
@@ -95,6 +103,9 @@ export function installRegistry(orig: Originals, log: (...a: unknown[]) => void)
   /** Emenda 20: número de cada receptor nas entradas de CSRC (diagnóstico). */
   const receiverIds = new WeakMap<RTCRtpReceiver, number>()
   let nextReceiverId = 0
+  /** Emenda 24: número de cada sender no estado das faixas de microfone (nunca o objeto). */
+  const senderIds = new WeakMap<RTCRtpSender, number>()
+  let nextSenderId = 0
   let filter: TrackFilter | undefined
   let audioPcClosedAt: number | null = null
 
@@ -454,11 +465,59 @@ export function installRegistry(orig: Originals, log: (...a: unknown[]) => void)
       const out: MediaStreamTrack[] = []
       for (const ref of micTracks) {
         const t = ref.deref()
-        if (!t || t.readyState === 'ended') {
+        if (!t) {
           micTracks.delete(ref)
           continue
         }
+        // Emenda 24: a faixa que terminou fica no registro (o micGateInputs precisa dela para dizer
+        // que o mudo foi um track.stop()); ela só não serve mais para medir. O registro não cresce:
+        // a entrada é um WeakRef e sai quando a página larga a faixa.
+        if (t.readyState === 'ended') continue
         out.push(t)
+      }
+      return out
+    },
+    micGateInputs() {
+      // Quem está mandando cada faixa AGORA: os senders de todos os PCs registrados, pelo mesmo
+      // getSenders que o scan() já usa (e, como lá, o que a página manda fica marcado como local,
+      // para nunca entrar na gravação). Sem como ler os senders, o estado fica indeterminado
+      // (`undefined`), e a regra fecha o portão por `desconhecido`: o padrão é fechado.
+      const read = orig.pcGetSenders
+      const bySender = new Map<MediaStreamTrack, number>()
+      let sendersRead = Boolean(read)
+      if (read) {
+        for (const ref of pcs) {
+          const pc = ref.deref()
+          const i = pc && info.get(pc)
+          if (!pc || !i || i.closed) continue
+          try {
+            for (const s of read.call(pc) ?? []) {
+              const t = s.track
+              if (!t) continue
+              markLocal(t)
+              let n = senderIds.get(s)
+              if (n === undefined) senderIds.set(s, (n = ++nextSenderId))
+              bySender.set(t, n)
+            }
+          } catch (e) {
+            sendersRead = false
+            log('getSenders (portão do microfone)', e)
+          }
+        }
+      }
+      const out: MicTrackState[] = []
+      for (const ref of micTracks) {
+        const t = ref.deref()
+        if (!t) {
+          micTracks.delete(ref)
+          continue
+        }
+        out.push({
+          readyState: typeof t.readyState === 'string' ? t.readyState : undefined,
+          enabled: typeof t.enabled === 'boolean' ? t.enabled : undefined,
+          muted: typeof t.muted === 'boolean' ? t.muted : undefined,
+          sender: sendersRead ? (bySender.get(t) ?? null) : undefined,
+        })
       }
       return out
     },
