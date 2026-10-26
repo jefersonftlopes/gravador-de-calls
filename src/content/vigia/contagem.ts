@@ -16,6 +16,7 @@
 //   recurso, a interface antiga;
 // - `abrirPainel` nunca clica (o painel divide espaço com o chat) e devolve false;
 // - blocos de vídeo ([data-participant-id] fora da lista) nunca disparam saída: só diagnóstico.
+import { meetCodeOfPath } from '../../shared/hosts'
 import type { Platform } from '../../shared/protocol'
 import { FONTE_BOTAO_PESSOAS, FONTE_BOTAO_PESSOAS_ANTIGO, FONTE_PAINEL_PEOPLE, FONTE_PAINEL_PESSOAS, FONTE_TEXTO_DA_PAGINA } from '../../shared/vigia-source'
 
@@ -88,7 +89,6 @@ export const teams: ContagemPlataforma = {
 // Meet
 // ---------------------------------------------------------------------------------------------
 
-const MEET_CODE_RE = /^\/([a-z]{3}-[a-z]{4}-[a-z]{3})(?:\/|$)/
 const MEET_LEAVE = 'button[jsname="CQylAd"]'
 const MEET_EXIT_HEADING = 'h1[jsname="r4nke"]'
 const MEET_CAPTION_OR_CHAT = new Set(['closed_caption', 'closed_caption_off', 'chat'])
@@ -195,7 +195,7 @@ function botaoSairMeet(): HTMLElement | null {
 export const meet: ContagemPlataforma = {
   botaoSair: botaoSairMeet,
   emCall(jaNaCall = false) {
-    if (!MEET_CODE_RE.test(location.pathname)) return false
+    if (!meetCodeOfPath(location.pathname)) return false
     for (const h of Array.from(document.querySelectorAll(MEET_EXIT_HEADING))) if (visivel(h)) return false
     if (!botaoSairMeet()) return false
     if (jaNaCall) return true

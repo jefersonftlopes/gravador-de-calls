@@ -56,6 +56,27 @@ export function platformOfCallUrl(url: string | null | undefined): Platform | nu
   }
 }
 
+/**
+ * Código da reunião no caminho do Meet, com o prefixo /meet/ opcional.
+ *
+ * Medido numa call real em 23/10/2026: o Google passou a servir a mesma reunião em
+ * /meet/<código>, e a detecção parou de reconhecer a call (o código no caminho é o primeiro dos
+ * cinco sinais de "em call"). A forma antiga, /<código>, continua valendo, porque os links de
+ * convite de antes abrem assim: por isso o prefixo é opcional, e não trocado.
+ *
+ * Mora aqui, junto dos hosts, pelo mesmo motivo da Emenda 17: três partes leem este caminho (o
+ * adaptador do MAIN world, o badge do service worker e a contagem do vigia), e uma forma nova não
+ * pode ficar de fora de nenhuma delas. Antes desta correção eram três cópias da mesma expressão.
+ *
+ * Sem a marca `g`: a expressão é compartilhada, e `lastIndex` tornaria `test` dependente da ordem.
+ */
+export const MEET_CODE_RE = /^\/(?:meet\/)?([a-z]{3}-[a-z]{4}-[a-z]{3})(?:\/|$)/
+
+/** O código da reunião do Meet no caminho da URL, ou null quando o caminho não é de uma reunião. */
+export function meetCodeOfPath(pathname: string | null | undefined): string | null {
+  return (pathname && MEET_CODE_RE.exec(pathname)?.[1]) || null
+}
+
 export const isMeetHost = (hostname: string | null | undefined): boolean => platformOfHost(hostname) === 'meet'
 export const isTeamsHost = (hostname: string | null | undefined): boolean => platformOfHost(hostname) === 'teams'
 export const isCallHost = (hostname: string | null | undefined): boolean => platformOfHost(hostname) !== null

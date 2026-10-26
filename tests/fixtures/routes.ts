@@ -22,7 +22,12 @@ import { meetPage } from './meet/page'
 import { peerPage } from './peer-page'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
-const CODE_RE = /^\/([a-z]{3}-[a-z]{4}-[a-z]{3})$/
+/**
+ * As duas formas de caminho que o Meet serve: /<código> e, desde 23/10/2026, /meet/<código>.
+ * Escrita aqui de propósito, em vez de importar a do código: o duplo serve a página dos dois
+ * jeitos, e quem está sendo medido é a detecção da extensão, não esta expressão.
+ */
+const CODE_RE = /^\/(?:meet\/)?([a-z]{3}-[a-z]{4}-[a-z]{3})$/
 const VARIANT_RE = /^[a-z0-9-]{1,40}$/
 
 /** Hosts de call do manifesto, também pelo proxy do Defender for Cloud Apps (src/shared/hosts.ts, Emenda 17). */

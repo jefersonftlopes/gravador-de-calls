@@ -14,12 +14,10 @@
 // O próprio nome (Emenda 20): o registro da roster com o campo 7 verdadeiro, no space da call (o
 // dos blocos), com o nome completo (2), senão o exibido (29); reserva no [data-self-name] do DOM.
 import type { CallMeta, EndReason } from '../../shared/protocol'
-import { isMeetHost } from '../../shared/hosts'
+import { isMeetHost, meetCodeOfPath } from '../../shared/hosts'
 import { createMeetSpeakers } from './meet-speakers'
 import { spaceOf } from '../speakers/meet-signals'
 import type { PlatformAdapter, Probe } from './types'
-
-export const MEET_CODE_RE = /^\/([a-z]{3}-[a-z]{4}-[a-z]{3})(?:\/|$)/
 
 const LEAVE_BUTTON = 'button[jsname="CQylAd"]'
 const EXIT_HEADING = 'h1[jsname="r4nke"]'
@@ -47,7 +45,7 @@ const JUNK_NAMES = [/visual_effects|backgrounds and effects|planos de fundo e ef
 /** Código da reunião na URL do Meet (também pelo proxy do Defender for Cloud Apps, Emenda 17). */
 export function meetCode(loc: Pick<Location, 'hostname' | 'pathname'>): string | null {
   if (!isMeetHost(loc.hostname)) return null
-  return MEET_CODE_RE.exec(loc.pathname)?.[1] ?? null
+  return meetCodeOfPath(loc.pathname)
 }
 
 /** O elemento está na tela? (um cabeçalho de saída montado mas escondido não conta). */

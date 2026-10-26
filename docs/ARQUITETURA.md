@@ -1635,3 +1635,48 @@ Números medidos (Chrome for Testing, 21/10/2026), 1000 Hz por segundo no `audio
 - **Mostrar o portão na interface** além do badge, e dizer no popup qual aba está recebendo a voz.
 
 O contrato que nenhuma parte muda sozinha passa a incluir `MicTabReport`, `MicTabRoute`, `micRouteDecide`, `micEdgeWaitMs`, `micRecordingOf`, `MIC_REPORT_EVERY_MS`, `MIC_REPORT_STALE_MS`, `MIC_FILE`, o `session:mic` do protocolo, o `micRecording` da mensagem `settings` e de `Settings`, o `kind: 'microfone'`, o `desvioMs` do `InfoFile`, os `offscreen:mic-*` e o `MicOffscreenState`.
+
+## Emenda 26: o caminho novo do Meet, /meet/&lt;código&gt; (26/10/2026, 0.6.1)
+
+**O que aconteceu.** De 13 a 20/10/2026 o Meet gravou sozinho todo dia. Em 21/10 parou, e o Teams
+continuou normal. Nada tinha mudado do nosso lado: a extensão instalada era a 0.5.2, publicada em
+13/10, e as versões 0.5.3 e 0.6.0 nunca chegaram àquela máquina. A mudança foi do Google.
+
+**A medida.** Numa call real, com oito pessoas e o popup dizendo "fora da call", os cinco sinais de
+"em call" do adaptador foram lidos no console da própria página:
+
+| Sinal | Valor |
+|---|---|
+| `pathname` | `/meet/rqc-yueo-pso` |
+| código casa com a expressão | **não** |
+| elementos `.google-symbols` | 42 |
+| ícone `call_end` | sim |
+| ícone de legenda ou chat | sim |
+| `button[jsname="CQylAd"]` | sim |
+| `h1[jsname="r4nke"]` (tela de saída) | não |
+
+Ou seja: o DOM estava inteiro e só o caminho da URL tinha mudado. O Meet passou a servir a reunião
+em `/meet/<código>` em vez de `/<código>`. Como o código no caminho é o **primeiro** dos cinco
+sinais, e o primeiro a sair com `return false`, nada mais era avaliado: a detecção nunca disparava,
+e o vigia dizia "fora da call" com a pessoa dentro.
+
+**A correção.** O prefixo `/meet/` é opcional, não trocado: os links de convite antigos continuam
+abrindo em `/<código>`, e as duas formas valem.
+
+**Fonte única.** A mesma expressão existia copiada em três lugares (o adaptador do MAIN world, o
+badge do service worker e a contagem do vigia). Agora ela mora em `src/shared/hosts.ts`, como
+`MEET_CODE_RE` e `meetCodeOfPath`, pelo mesmo motivo da Emenda 17: uma forma nova de caminho não
+pode voltar a ficar de fora de uma das partes. A expressão não leva a marca `g`, porque é
+compartilhada e `lastIndex` tornaria `test` dependente da ordem das chamadas.
+
+**O duplo de teste tem a expressão dele.** `tests/fixtures/routes.ts` serve a página nas duas
+formas com uma expressão escrita separadamente, de propósito: quem está sendo medido é a detecção
+da extensão, não a expressão do duplo.
+
+**O que ficou provado.** Com a expressão antiga, três testes de unidade e o de ponta a ponta
+(`a URL nova do Meet (/meet/<código>) grava sozinha`) ficam vermelhos. Com a correção, a gravação
+começa sozinha na URL nova e o `info.json` sai com o código certo.
+
+**A lição.** Dos cinco sinais de "em call", quatro leem o DOM e um lê a URL. A suspeita natural
+era o DOM, que o Google muda sempre, e a medida mostrou o contrário. Medir os cinco de uma vez,
+numa call real, custou trinta segundos e evitou mexer no que estava certo.
