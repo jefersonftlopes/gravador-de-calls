@@ -29,9 +29,9 @@ async function startPeer(harness: Harness, room: string): Promise<Page> {
   return peer
 }
 
-async function openCall(harness: Harness, variant: string, room: string, code = 'abc-defg-hij'): Promise<Page> {
+async function openCall(harness: Harness, variant: string, room: string, code = 'abc-defg-hij', prefixo = ''): Promise<Page> {
   const call = await harness.context.newPage()
-  await call.goto(`https://meet.google.com/${code}?variante=${variant}&sala=${room}`)
+  await call.goto(`https://meet.google.com${prefixo}/${code}?variante=${variant}&sala=${room}`)
   await expect.poll(() => fx(call, 'micLive')).toBe(true)
   return call
 }
@@ -121,6 +121,33 @@ test('pedindo para participar: botão de sair, PC conectado e áudio tocando nã
   expect(rec.info!.duracaoSegundos).toBeLessThan(8 + 6)
   console.log(`Meet admitido: início em ${active.startMs} ms; salvo em ${saveMs} ms`)
   expect(audio440(rec.dir, 'Meet admitido')).toBeGreaterThan(-20)
+  await noErrors(call)
+})
+
+// Regressão medida numa call real em 23/10/2026: o Meet passou a servir a reunião em
+// /meet/<código>. O código no caminho é o primeiro dos cinco sinais de "em call", então a
+// gravação parou de começar sozinha, com a pessoa dentro da call. A forma antiga continua
+// valendo, e este teste cobra as duas.
+test('a URL nova do Meet (/meet/<código>) grava sozinha, e a pasta sai com o código certo', async () => {
+  h = await launchWithExtension()
+  await startPeer(h, 'url-nova')
+  const call = await openCall(h, 'normal', 'url-nova', 'abc-defg-hij', '/meet')
+  expect(new URL(call.url()).pathname).toBe('/meet/abc-defg-hij')
+  await call.click('#participar')
+
+  const active = await waitRecording(h, Date.now())
+  expect(active.startMs, `início em ${active.startMs} ms`).toBeLessThanOrEqual(10_000)
+  // Tempo suficiente para o áudio passar pelo atraso de 1,5 s do mixer e render janelas medíveis.
+  await call.waitForTimeout(10_000)
+
+  const saved = savedPromise(h, active.tabId)
+  await call.click('button[jsname="CQylAd"]')
+  const r = await saved
+  expect(r.ok).toBe(true)
+  const [rec] = findRecordings(h.root)
+  expect(rec.info).toMatchObject({ plataforma: 'meet', codigo: 'abc-defg-hij' })
+  expect(rec.info!.url).toContain('/meet/abc-defg-hij')
+  expect(audio440(rec.dir, 'Meet URL nova')).toBeGreaterThan(-20)
   await noErrors(call)
 })
 

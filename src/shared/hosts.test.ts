@@ -7,7 +7,7 @@ import { isCallHostUrl, isCallTabUrl } from '../background/badge'
 import { pickAdapter } from '../main-world/install'
 import { meetAdapter, meetCode } from '../main-world/platforms/meet'
 import { teamsAdapter, teamsIds } from '../main-world/platforms/teams'
-import { CALL_HOSTS, CALL_MATCHES, PROXY_SUFFIXES, hostsOf, platformOfCallUrl, platformOfHost } from './hosts'
+import { CALL_HOSTS, CALL_MATCHES, MEET_CODE_RE, PROXY_SUFFIXES, hostsOf, meetCodeOfPath, platformOfCallUrl, platformOfHost } from './hosts'
 
 const PLAIN_TEAMS = ['teams.microsoft.com', 'teams.cloud.microsoft', 'teams.live.com']
 const PROXIED_TEAMS = PLAIN_TEAMS.flatMap((h) => [`${h}.mcas.ms`, `${h}.mcas-gov.us`, `${h}.mcas-gov.ms`])
@@ -72,5 +72,37 @@ describe('fonte única dos hosts das calls', () => {
       expect(isCallTabUrl(`https://${h}/`), h).toBe(false)
     }
     expect(isCallHostUrl('https://teams.cloud.microsoft.mcas.ms.evil.com/')).toBe(false)
+  })
+
+  // Regressão medida numa call real em 23/10/2026: o Meet passou a servir a reunião em
+  // /meet/<código>, o código no caminho deixou de casar, e como ele é o primeiro dos cinco sinais
+  // de "em call" nada mais era avaliado: a gravação parou de começar sozinha, com a pessoa na call.
+  describe('o código da reunião do Meet no caminho (as duas formas)', () => {
+    const CODE = 'rqc-yueo-pso'
+
+    it('as duas formas valem, e as três partes concordam', () => {
+      for (const pathname of [`/${CODE}`, `/meet/${CODE}`]) {
+        expect(meetCodeOfPath(pathname), pathname).toBe(CODE)
+        // O adaptador do MAIN world (quem decide gravar).
+        expect(meetCode({ hostname: 'meet.google.com', pathname } as Location), pathname).toBe(CODE)
+        // O badge do service worker (quem marca a aba como aba de call).
+        expect(isCallTabUrl(`https://meet.google.com${pathname}`), pathname).toBe(true)
+        // Pelo proxy do Defender a forma nova também vale.
+        expect(meetCode({ hostname: 'meet.google.com.mcas.ms', pathname } as Location), pathname).toBe(CODE)
+      }
+    })
+
+    it('o que não é reunião continua de fora', () => {
+      for (const pathname of ['/', '/meet', '/meet/', '/landing', '/meet/rqc-yueo', '/meet/meet/' + CODE, `/x/${CODE}`, `/${CODE}x`]) {
+        expect(meetCodeOfPath(pathname), pathname).toBe(null)
+      }
+      // Um segmento depois do código continua valendo (o Meet acrescenta sufixos de rota).
+      expect(meetCodeOfPath(`/meet/${CODE}/`)).toBe(CODE)
+    })
+
+    it('a expressão é compartilhada, então não pode guardar posição entre chamadas', () => {
+      expect(MEET_CODE_RE.flags).not.toContain('g')
+      for (let i = 0; i < 3; i++) expect(MEET_CODE_RE.test(`/meet/${CODE}`), `chamada ${i}`).toBe(true)
+    })
   })
 })

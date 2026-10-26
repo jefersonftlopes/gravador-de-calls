@@ -12,7 +12,7 @@
 //   o de cada aba são reaplicados na hora (refreshActionTitles). Notificação já mostrada fica como
 //   saiu.
 import { hasConsent } from '../shared/consent'
-import { isCallHost, isMeetHost } from '../shared/hosts'
+import { MEET_CODE_RE, isCallHost, isMeetHost } from '../shared/hosts'
 import { MESSAGE_LOCALES, languageReady, onLanguageChange, t, tIn, tp, type MessageKey } from '../shared/i18n'
 import { registerTestHooks } from './testing'
 
@@ -76,8 +76,6 @@ export function parseNotificationId(id: string): { kind: NotificationKind; tabId
   if (!m) return null
   return { kind: m[1] as NotificationKind, tabId: Number(m[2]), sessionId: m[3] ?? null }
 }
-
-const MEET_CODE_RE = /^\/[a-z]{3}-[a-z]{4}-[a-z]{3}(?:\/|$)/
 
 function parseHttps(url: string | undefined): URL | null {
   if (!url) return null
